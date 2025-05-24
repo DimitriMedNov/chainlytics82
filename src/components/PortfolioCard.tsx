@@ -38,19 +38,22 @@ const PortfolioCard = () => {
 
   if (isLoading) {
     return (
-      <div className="glass-card p-6 rounded-lg mb-8 animate-fade-in">
+      <div className="glass-card p-6 rounded-lg mb-8 animate-fade-in hover:shadow-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer">
         <h2 className="text-xl font-semibold mb-6">Bitcoin Performance</h2>
         <div className="w-full h-[200px] flex items-center justify-center">
-          <span className="text-muted-foreground">Loading...</span>
+          <div className="animate-pulse">
+            <div className="h-4 bg-muted rounded w-20 mb-2"></div>
+            <div className="h-32 bg-muted rounded"></div>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="glass-card p-6 rounded-lg mb-8 animate-fade-in">
-      <h2 className="text-xl font-semibold mb-6">Bitcoin Performance</h2>
-      <div className="w-full h-[200px]">
+    <div className="glass-card p-6 rounded-lg mb-8 animate-fade-in hover:shadow-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer group border border-border/20 hover:border-border/40">
+      <h2 className="text-xl font-semibold mb-6 group-hover:text-primary transition-colors duration-300">Bitcoin Performance</h2>
+      <div className="w-full h-[200px] rounded-lg overflow-hidden">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={priceData}>
             <XAxis 
@@ -67,8 +70,9 @@ const PortfolioCard = () => {
               contentStyle={{ 
                 background: chartColors.tooltipBg,
                 border: `1px solid ${chartColors.tooltipBorder}`,
-                borderRadius: '8px',
-                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                borderRadius: '12px',
+                boxShadow: '0 10px 40px rgba(0, 0, 0, 0.1)',
+                backdropFilter: 'blur(10px)'
               }}
               labelStyle={{ color: chartColors.tooltipLabel }}
               itemStyle={{ color: chartColors.tooltipValue }}
@@ -77,8 +81,9 @@ const PortfolioCard = () => {
               type="monotone" 
               dataKey="price" 
               stroke={chartColors.line} 
-              strokeWidth={2}
+              strokeWidth={3}
               dot={false}
+              activeDot={{ r: 6, fill: chartColors.line, strokeWidth: 2, stroke: '#ffffff' }}
             />
           </LineChart>
         </ResponsiveContainer>
