@@ -7,22 +7,27 @@ import { Badge } from "@/components/ui/badge"
 import { Star, StarOff, Search, TrendingUp, TrendingDown, Eye, ArrowUpDown, Trash2, ExternalLink } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useNavigate } from "react-router-dom"
+import CryptoDetailsModal from "@/components/CryptoDetailsModal"
 
 const Watchlist = () => {
   const [searchTerm, setSearchTerm] = useState("")
   const [watchlistItems, setWatchlistItems] = useState<any[]>([])
   const [sortBy, setSortBy] = useState<'name' | 'price' | 'change'>('name')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
+  const [selectedCoin, setSelectedCoin] = useState<any>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const { toast } = useToast()
   const navigate = useNavigate()
 
   useEffect(() => {
     // Load watchlist from localStorage
     const savedWatchlist = JSON.parse(localStorage.getItem('crypto-watchlist') || '[]')
+    console.log('Loaded watchlist:', savedWatchlist)
     setWatchlistItems(savedWatchlist)
   }, [])
 
   const toggleFavorite = (id: number) => {
+    console.log('Toggling favorite for id:', id)
     const updatedItems = watchlistItems.map(item =>
       item.id === id ? { ...item, isFavorite: !item.isFavorite } : item
     )
@@ -37,6 +42,7 @@ const Watchlist = () => {
   }
 
   const removeFromWatchlist = (id: number) => {
+    console.log('Removing from watchlist id:', id)
     const item = watchlistItems.find(item => item.id === id)
     const updatedItems = watchlistItems.filter(item => item.id !== id)
     setWatchlistItems(updatedItems)
@@ -58,14 +64,24 @@ const Watchlist = () => {
   }
 
   const handleViewDetails = (item: any) => {
-    // In a real app, this would open the crypto details modal
-    toast({
-      title: "Ver Detalles",
-      description: `Mostrando detalles de ${item.name}`,
-    })
+    console.log('Viewing details for:', item)
+    // Convert watchlist item to coin format expected by modal
+    const coinForModal = {
+      rank: item.rank || 1,
+      name: item.name,
+      symbol: item.symbol,
+      price: item.price,
+      change: item.change,
+      marketCap: item.marketCap || item.price * 21000000, // Mock market cap
+      volume: item.volume || item.price * 1000000, // Mock volume
+      category: item.category || 'cryptocurrency'
+    }
+    setSelectedCoin(coinForModal)
+    setIsModalOpen(true)
   }
 
   const handleTrade = (item: any) => {
+    console.log('Trading:', item)
     navigate('/converter')
     toast({
       title: "Redirigiendo al Convertidor",
@@ -212,7 +228,10 @@ const Watchlist = () => {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => toggleFavorite(item.id)}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              toggleFavorite(item.id)
+                            }}
                             className="text-yellow-500 hover:text-yellow-600 h-8 w-8 sm:h-9 sm:w-9"
                           >
                             <Star className="h-3 w-3 sm:h-4 sm:w-4 fill-current" />
@@ -220,7 +239,10 @@ const Watchlist = () => {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => handleViewDetails(item)}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleViewDetails(item)
+                            }}
                             className="text-blue-500 hover:text-blue-600 h-8 w-8 sm:h-9 sm:w-9"
                           >
                             <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -228,7 +250,10 @@ const Watchlist = () => {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => handleTrade(item)}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleTrade(item)
+                            }}
                             className="text-green-500 hover:text-green-600 h-8 w-8 sm:h-9 sm:w-9"
                           >
                             <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -236,7 +261,10 @@ const Watchlist = () => {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => removeFromWatchlist(item.id)}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              removeFromWatchlist(item.id)
+                            }}
                             className="text-red-500 hover:text-red-600 h-8 w-8 sm:h-9 sm:w-9"
                           >
                             <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -306,7 +334,10 @@ const Watchlist = () => {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => toggleFavorite(item.id)}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              toggleFavorite(item.id)
+                            }}
                             className="text-muted-foreground hover:text-yellow-500 h-8 w-8 sm:h-9 sm:w-9"
                           >
                             <StarOff className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -314,7 +345,10 @@ const Watchlist = () => {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => handleViewDetails(item)}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleViewDetails(item)
+                            }}
                             className="text-blue-500 hover:text-blue-600 h-8 w-8 sm:h-9 sm:w-9"
                           >
                             <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -322,7 +356,10 @@ const Watchlist = () => {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => handleTrade(item)}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleTrade(item)
+                            }}
                             className="text-green-500 hover:text-green-600 h-8 w-8 sm:h-9 sm:w-9"
                           >
                             <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -330,7 +367,10 @@ const Watchlist = () => {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => removeFromWatchlist(item.id)}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              removeFromWatchlist(item.id)
+                            }}
                             className="text-red-500 hover:text-red-600 h-8 w-8 sm:h-9 sm:w-9"
                           >
                             <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -345,6 +385,12 @@ const Watchlist = () => {
           )}
         </>
       )}
+
+      <CryptoDetailsModal
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        coin={selectedCoin}
+      />
     </div>
   )
 }
