@@ -6,11 +6,14 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Search, TrendingUp, TrendingDown, BarChart3 } from "lucide-react"
+import CryptoDetailsModal from "@/components/CryptoDetailsModal"
 
 const Markets = () => {
   const [searchTerm, setSearchTerm] = useState("")
   const [sortBy, setSortBy] = useState("marketcap")
   const [category, setCategory] = useState("all")
+  const [selectedCoin, setSelectedCoin] = useState<any>(null)
+  const [modalOpen, setModalOpen] = useState(false)
 
   const marketsData = [
     { rank: 1, name: "Bitcoin", symbol: "BTC", price: 45000, change: 2.5, marketCap: 875000000000, volume: 28500000000, category: "currency" },
@@ -52,6 +55,11 @@ const Markets = () => {
     if (num >= 1e9) return `$${(num / 1e9).toFixed(2)}B`
     if (num >= 1e6) return `$${(num / 1e6).toFixed(2)}M`
     return `$${num.toLocaleString()}`
+  }
+
+  const handleViewDetails = (coin: any) => {
+    setSelectedCoin(coin)
+    setModalOpen(true)
   }
 
   return (
@@ -151,7 +159,11 @@ const Markets = () => {
                   <p className="text-sm text-muted-foreground">Vol 24h</p>
                 </div>
 
-                <Button variant="outline" size="sm">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleViewDetails(coin)}
+                >
                   Ver Detalles
                 </Button>
               </div>
@@ -159,6 +171,12 @@ const Markets = () => {
           </div>
         </CardContent>
       </Card>
+
+      <CryptoDetailsModal
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        coin={selectedCoin}
+      />
     </div>
   )
 }
