@@ -1,5 +1,4 @@
-
-import { BarChart3, Bitcoin, Eye, Calculator, TrendingUp, Home } from "lucide-react"
+import { BarChart3, Eye, Calculator, TrendingUp, Home } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 import {
   Sidebar,
@@ -15,7 +14,6 @@ import {
 
 const items = [
   { title: "Dashboard", url: "/", icon: Home },
-  { title: "Portfolio", url: "/portfolio", icon: BarChart3 },
   { title: "Watchlist", url: "/watchlist", icon: Eye },
   { title: "Converter", url: "/converter", icon: Calculator },
   { title: "Markets", url: "/markets", icon: TrendingUp },

@@ -9,7 +9,6 @@ import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/s
 import { AppSidebar } from "@/components/AppSidebar";
 import ThemeToggle from "@/components/ThemeToggle";
 import Index from "./pages/Index";
-import Portfolio from "./pages/Portfolio";
 import Watchlist from "./pages/Watchlist";
 import Converter from "./pages/Converter";
 import Markets from "./pages/Markets";
@@ -35,7 +34,6 @@ const App = () => (
                 <main className="flex-1 overflow-auto">
                   <Routes>
                     <Route path="/" element={<Index />} />
-                    <Route path="/portfolio" element={<Portfolio />} />
                     <Route path="/watchlist" element={<Watchlist />} />
                     <Route path="/converter" element={<Converter />} />
                     <Route path="/markets" element={<Markets />} />
