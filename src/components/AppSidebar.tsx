@@ -32,16 +32,18 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r">
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="flex items-center gap-2">
-            <Bitcoin className="h-4 w-4" />
-            {state === "expanded" && "Crypto Dashboard"}
+          <SidebarGroupLabel className="flex items-center gap-2 px-2 py-2">
+            <Bitcoin className="h-5 w-5 text-primary" />
+            {state === "expanded" && (
+              <span className="font-semibold text-foreground">Crypto Dashboard</span>
+            )}
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={isActive(item.url)}>
-                    <NavLink to={item.url} end>
+                    <NavLink to={item.url} end className="flex items-center gap-3">
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
                     </NavLink>

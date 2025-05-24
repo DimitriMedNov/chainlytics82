@@ -27,18 +27,20 @@ const App = () => (
             <div className="min-h-screen flex w-full">
               <AppSidebar />
               <SidebarInset>
-                <header className="flex h-16 items-center gap-2 px-4 border-b">
+                <header className="flex h-16 shrink-0 items-center gap-2 px-4 border-b">
                   <SidebarTrigger className="-ml-1" />
                   <div className="flex-1" />
                   <ThemeToggle />
                 </header>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/portfolio" element={<Portfolio />} />
-                  <Route path="/watchlist" element={<Watchlist />} />
-                  <Route path="/converter" element={<Converter />} />
-                  <Route path="/markets" element={<Markets />} />
-                </Routes>
+                <main className="flex-1 overflow-auto">
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/portfolio" element={<Portfolio />} />
+                    <Route path="/watchlist" element={<Watchlist />} />
+                    <Route path="/converter" element={<Converter />} />
+                    <Route path="/markets" element={<Markets />} />
+                  </Routes>
+                </main>
               </SidebarInset>
             </div>
           </SidebarProvider>
