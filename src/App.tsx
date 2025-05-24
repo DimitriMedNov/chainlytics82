@@ -5,9 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSidebar";
-import ThemeToggle from "@/components/ThemeToggle";
+import { Navbar } from "@/components/Navbar";
 import Index from "./pages/Index";
 import Watchlist from "./pages/Watchlist";
 import Converter from "./pages/Converter";
@@ -22,26 +20,17 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <SidebarProvider>
-            <div className="min-h-screen flex w-full">
-              <AppSidebar />
-              <SidebarInset>
-                <header className="flex h-16 shrink-0 items-center gap-2 px-4 border-b">
-                  <SidebarTrigger className="-ml-1" />
-                  <div className="flex-1" />
-                  <ThemeToggle />
-                </header>
-                <main className="flex-1 overflow-auto">
-                  <Routes>
-                    <Route path="/" element={<Index />} />
-                    <Route path="/watchlist" element={<Watchlist />} />
-                    <Route path="/converter" element={<Converter />} />
-                    <Route path="/markets" element={<Markets />} />
-                  </Routes>
-                </main>
-              </SidebarInset>
-            </div>
-          </SidebarProvider>
+          <div className="min-h-screen flex flex-col w-full">
+            <Navbar />
+            <main className="flex-1 overflow-auto">
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/watchlist" element={<Watchlist />} />
+                <Route path="/converter" element={<Converter />} />
+                <Route path="/markets" element={<Markets />} />
+              </Routes>
+            </main>
+          </div>
         </BrowserRouter>
       </TooltipProvider>
     </ThemeProvider>
