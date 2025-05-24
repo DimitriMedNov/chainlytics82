@@ -1,12 +1,13 @@
+
 import { ArrowUpIcon, ArrowDownIcon, TrendingUpIcon } from "lucide-react";
 
 const MarketStats = () => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-fade-in">
-      <div className="glass-card p-6 rounded-lg">
+      <div className="glass-card p-6 rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-[1.02] cursor-pointer">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-medium text-muted-foreground">Market Cap</h3>
-          <TrendingUpIcon className="w-4 h-4 text-success" />
+          <TrendingUpIcon className="w-4 h-4 text-success transition-transform duration-200 hover:scale-110" />
         </div>
         <p className="text-2xl font-semibold mt-2">$2.1T</p>
         <span className="text-sm text-success flex items-center gap-1">
@@ -15,10 +16,10 @@ const MarketStats = () => {
         </span>
       </div>
       
-      <div className="glass-card p-6 rounded-lg">
+      <div className="glass-card p-6 rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-[1.02] cursor-pointer">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-medium text-muted-foreground">24h Volume</h3>
-          <TrendingUpIcon className="w-4 h-4 text-success" />
+          <TrendingUpIcon className="w-4 h-4 text-success transition-transform duration-200 hover:scale-110" />
         </div>
         <p className="text-2xl font-semibold mt-2">$84.2B</p>
         <span className="text-sm text-success flex items-center gap-1">
@@ -27,10 +28,10 @@ const MarketStats = () => {
         </span>
       </div>
       
-      <div className="glass-card p-6 rounded-lg">
+      <div className="glass-card p-6 rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-[1.02] cursor-pointer">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-medium text-muted-foreground">BTC Dominance</h3>
-          <TrendingUpIcon className="w-4 h-4 text-warning" />
+          <TrendingUpIcon className="w-4 h-4 text-warning transition-transform duration-200 hover:scale-110" />
         </div>
         <p className="text-2xl font-semibold mt-2">42.1%</p>
         <span className="text-sm text-warning flex items-center gap-1">
