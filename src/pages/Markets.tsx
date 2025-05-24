@@ -63,7 +63,7 @@ const Markets = () => {
   }
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 max-w-7xl mx-auto">
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold mb-2">Mercados</h1>
         <p className="text-muted-foreground text-sm sm:text-base">Explora todas las criptomonedas del mercado</p>
@@ -123,23 +123,23 @@ const Markets = () => {
         <CardContent>
           <div className="space-y-3 sm:space-y-4">
             {filteredData.map((coin) => (
-              <div key={coin.symbol} className="flex items-center justify-between p-3 sm:p-4 border rounded-lg hover:bg-muted/50 transition-colors">
-                <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-                  <div className="w-6 h-6 sm:w-8 sm:h-8 bg-muted rounded-full flex items-center justify-center text-xs sm:text-sm font-bold flex-shrink-0">
+              <div key={coin.symbol} className="flex items-center justify-between p-3 sm:p-4 lg:p-6 border rounded-lg hover:bg-muted/50 transition-colors">
+                <div className="flex items-center gap-3 sm:gap-4 lg:gap-6 min-w-0 flex-1">
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 bg-muted rounded-full flex items-center justify-center text-xs sm:text-sm lg:text-base font-bold flex-shrink-0">
                     #{coin.rank}
                   </div>
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-base flex-shrink-0">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-base lg:text-lg flex-shrink-0">
                     {coin.symbol.charAt(0)}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h3 className="font-semibold text-sm sm:text-base truncate">{coin.name}</h3>
-                    <p className="text-xs sm:text-sm text-muted-foreground">{coin.symbol}</p>
+                    <h3 className="font-semibold text-sm sm:text-base lg:text-lg truncate">{coin.name}</h3>
+                    <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">{coin.symbol}</p>
                   </div>
                 </div>
                 
-                <div className="flex flex-col items-end gap-2 sm:gap-3 min-w-0">
+                <div className="flex items-center gap-4 sm:gap-6 lg:gap-8">
                   <div className="text-right">
-                    <p className="font-semibold text-sm sm:text-base">${coin.price.toLocaleString()}</p>
+                    <p className="font-semibold text-sm sm:text-base lg:text-lg">${coin.price.toLocaleString()}</p>
                     <div className="flex items-center gap-1 justify-end">
                       {coin.change > 0 ? (
                         <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />
@@ -153,20 +153,20 @@ const Markets = () => {
                   </div>
 
                   <div className="hidden sm:block text-right">
-                    <p className="font-semibold text-sm">{formatNumber(coin.marketCap)}</p>
-                    <p className="text-xs text-muted-foreground">Market Cap</p>
+                    <p className="font-semibold text-sm lg:text-base">{formatNumber(coin.marketCap)}</p>
+                    <p className="text-xs lg:text-sm text-muted-foreground">Market Cap</p>
                   </div>
 
                   <div className="hidden lg:block text-right">
-                    <p className="font-semibold text-sm">{formatNumber(coin.volume)}</p>
-                    <p className="text-xs text-muted-foreground">Vol 24h</p>
+                    <p className="font-semibold text-sm lg:text-base">{formatNumber(coin.volume)}</p>
+                    <p className="text-xs lg:text-sm text-muted-foreground">Vol 24h</p>
                   </div>
 
                   <Button 
                     variant="outline" 
                     size="sm"
                     onClick={() => handleViewDetails(coin)}
-                    className="text-xs px-2 py-1 h-7 sm:h-8 sm:px-3 sm:py-2"
+                    className="text-xs px-2 py-1 h-7 sm:h-8 sm:px-3 sm:py-2 lg:h-9 lg:px-4 lg:py-2 lg:text-sm flex-shrink-0"
                   >
                     Ver Detalles
                   </Button>
