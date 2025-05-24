@@ -159,13 +159,13 @@ const Converter = () => {
             </CardHeader>
             <CardContent className="space-y-4 sm:space-y-6">
               <div className="space-y-4">
-                <div className="flex flex-col sm:flex-row gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-[1fr_200px] gap-3">
                   <Input
                     type="number"
                     placeholder="0.00"
                     value={fromAmount}
                     onChange={(e) => setFromAmount(e.target.value)}
-                    className="flex-1 h-10 sm:h-12 text-base sm:text-lg font-medium border-2 focus:border-blue-500"
+                    className="h-12 text-lg font-medium border-2 focus:border-blue-500"
                     min="0"
                     step="any"
                   />
@@ -179,19 +179,19 @@ const Converter = () => {
                   />
                 </div>
 
-                <div className="flex justify-center py-1 sm:py-2">
+                <div className="flex justify-center py-2">
                   <Button 
                     variant="outline" 
                     size="icon" 
                     onClick={swapCurrencies}
-                    className="h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 hover:bg-blue-50 hover:border-blue-300 transition-all duration-200"
+                    className="h-12 w-12 rounded-full border-2 hover:bg-blue-50 hover:border-blue-300 transition-all duration-200"
                     disabled={isLoading}
                   >
-                    <ArrowUpDown className="h-4 w-4 sm:h-5 sm:w-5" />
+                    <ArrowUpDown className="h-5 w-5" />
                   </Button>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-[1fr_200px] gap-3">
                   <ConversionResult
                     result={result}
                     isLoading={isLoading}
@@ -210,7 +210,7 @@ const Converter = () => {
 
                 <Button 
                   onClick={convertCurrency} 
-                  className="w-full h-10 sm:h-12 text-base sm:text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
+                  className="w-full h-12 text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
                   disabled={isLoading}
                 >
                   {isLoading ? "Convirtiendo..." : "Convertir"}
