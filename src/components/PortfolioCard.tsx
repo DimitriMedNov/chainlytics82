@@ -11,8 +11,13 @@ const fetchBitcoinPrices = async () => {
   
   // Format data for the chart - take last 6 months
   return data.prices.slice(-180).map(([timestamp, price]: [number, number]) => ({
-    date: new Date(timestamp).toLocaleDateString('en-US', { month: 'short' }),
-    price: Math.round(price)
+    date: new Date(timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    price: Math.round(price),
+    fullDate: new Date(timestamp).toLocaleDateString('en-US', { 
+      month: 'long', 
+      day: 'numeric', 
+      year: 'numeric' 
+    })
   }));
 };
 
@@ -30,10 +35,42 @@ const PortfolioCard = () => {
   const chartColors = {
     axis: isDark ? "#E6E4DD" : "#6B7280",
     line: "#8989DE",
-    tooltipBg: isDark ? "#3A3935" : "#FFFFFF",
+    tooltipBg: isDark ? "#2A2A2A" : "#FFFFFF",
     tooltipBorder: isDark ? "#605F5B" : "#E5E7EB",
     tooltipLabel: isDark ? "#E6E4DD" : "#374151",
     tooltipValue: "#8989DE"
+  };
+
+  const formatPrice = (value: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(value);
+  };
+
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div 
+          className="bg-background/95 backdrop-blur-md border border-border/50 rounded-xl p-4 shadow-2xl"
+          style={{
+            background: `linear-gradient(135deg, ${chartColors.tooltipBg}f0, ${chartColors.tooltipBg}f8)`,
+            border: `1px solid ${chartColors.tooltipBorder}`,
+          }}
+        >
+          <p className="text-sm font-medium mb-2" style={{ color: chartColors.tooltipLabel }}>
+            {data.fullDate}
+          </p>
+          <p className="text-lg font-bold" style={{ color: chartColors.tooltipValue }}>
+            {formatPrice(payload[0].value)}
+          </p>
+        </div>
+      );
+    }
+    return null;
   };
 
   if (isLoading) {
@@ -59,23 +96,26 @@ const PortfolioCard = () => {
             <XAxis 
               dataKey="date" 
               stroke={chartColors.axis}
-              fontSize={12}
+              fontSize={13}
+              fontWeight={500}
+              tick={{ fontSize: 13, fontWeight: 500 }}
             />
             <YAxis 
               stroke={chartColors.axis}
-              fontSize={12}
-              tickFormatter={(value) => `$${value}`}
+              fontSize={13}
+              fontWeight={500}
+              tick={{ fontSize: 13, fontWeight: 500 }}
+              tickFormatter={formatPrice}
+              width={80}
             />
             <Tooltip 
-              contentStyle={{ 
-                background: chartColors.tooltipBg,
-                border: `1px solid ${chartColors.tooltipBorder}`,
-                borderRadius: '12px',
-                boxShadow: '0 10px 40px rgba(0, 0, 0, 0.1)',
-                backdropFilter: 'blur(10px)'
+              content={<CustomTooltip />}
+              cursor={{ 
+                stroke: chartColors.line, 
+                strokeWidth: 2, 
+                strokeDasharray: '4 4',
+                strokeOpacity: 0.5 
               }}
-              labelStyle={{ color: chartColors.tooltipLabel }}
-              itemStyle={{ color: chartColors.tooltipValue }}
             />
             <Line 
               type="monotone" 
@@ -83,7 +123,13 @@ const PortfolioCard = () => {
               stroke={chartColors.line} 
               strokeWidth={3}
               dot={false}
-              activeDot={{ r: 6, fill: chartColors.line, strokeWidth: 2, stroke: '#ffffff' }}
+              activeDot={{ 
+                r: 8, 
+                fill: chartColors.line, 
+                strokeWidth: 3, 
+                stroke: '#ffffff',
+                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))'
+              }}
             />
           </LineChart>
         </ResponsiveContainer>
