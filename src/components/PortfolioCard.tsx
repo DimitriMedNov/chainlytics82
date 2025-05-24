@@ -1,5 +1,7 @@
+
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
 import { useQuery } from "@tanstack/react-query";
+import { useTheme } from "./ThemeProvider";
 
 const fetchBitcoinPrices = async () => {
   const response = await fetch(
@@ -15,11 +17,24 @@ const fetchBitcoinPrices = async () => {
 };
 
 const PortfolioCard = () => {
+  const { theme } = useTheme();
   const { data: priceData, isLoading } = useQuery({
     queryKey: ['bitcoinPrices'],
     queryFn: fetchBitcoinPrices,
     refetchInterval: 60000, // Refetch every minute
   });
+
+  // Dynamic colors based on theme
+  const isDark = theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  
+  const chartColors = {
+    axis: isDark ? "#E6E4DD" : "#6B7280",
+    line: "#8989DE",
+    tooltipBg: isDark ? "#3A3935" : "#FFFFFF",
+    tooltipBorder: isDark ? "#605F5B" : "#E5E7EB",
+    tooltipLabel: isDark ? "#E6E4DD" : "#374151",
+    tooltipValue: "#8989DE"
+  };
 
   if (isLoading) {
     return (
@@ -40,27 +55,28 @@ const PortfolioCard = () => {
           <LineChart data={priceData}>
             <XAxis 
               dataKey="date" 
-              stroke="#E6E4DD"
+              stroke={chartColors.axis}
               fontSize={12}
             />
             <YAxis 
-              stroke="#E6E4DD"
+              stroke={chartColors.axis}
               fontSize={12}
               tickFormatter={(value) => `$${value}`}
             />
             <Tooltip 
               contentStyle={{ 
-                background: '#3A3935',
-                border: '1px solid #605F5B',
-                borderRadius: '8px'
+                background: chartColors.tooltipBg,
+                border: `1px solid ${chartColors.tooltipBorder}`,
+                borderRadius: '8px',
+                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
               }}
-              labelStyle={{ color: '#E6E4DD' }}
-              itemStyle={{ color: '#8989DE' }}
+              labelStyle={{ color: chartColors.tooltipLabel }}
+              itemStyle={{ color: chartColors.tooltipValue }}
             />
             <Line 
               type="monotone" 
               dataKey="price" 
-              stroke="#8989DE" 
+              stroke={chartColors.line} 
               strokeWidth={2}
               dot={false}
             />
