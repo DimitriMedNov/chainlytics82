@@ -1,3 +1,4 @@
+
 import { BarChart3, Eye, Calculator, TrendingUp, Home } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 import {
@@ -31,7 +32,7 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel className="flex items-center gap-2 px-2 py-2">
-            <Bitcoin className="h-5 w-5 text-primary" />
+            <BarChart3 className="h-5 w-5 text-primary" />
             {state === "expanded" && (
               <span className="font-semibold text-foreground">Crypto Dashboard</span>
             )}
