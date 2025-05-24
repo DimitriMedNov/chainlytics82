@@ -69,7 +69,7 @@ const Markets = () => {
         <p className="text-muted-foreground text-sm sm:text-base">Explora todas las criptomonedas del mercado</p>
       </div>
 
-      <Card>
+      <Card className="hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
             <Search className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -113,7 +113,7 @@ const Markets = () => {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="hover:shadow-lg transition-all duration-300 hover:scale-[1.01]">
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
             <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -123,12 +123,12 @@ const Markets = () => {
         <CardContent>
           <div className="space-y-3 sm:space-y-4">
             {filteredData.map((coin) => (
-              <div key={coin.symbol} className="flex items-center justify-between p-3 sm:p-4 lg:p-6 border rounded-lg hover:bg-muted/50 transition-colors">
+              <div key={coin.symbol} className="flex items-center justify-between p-3 sm:p-4 lg:p-6 border rounded-lg hover:bg-muted/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-md cursor-pointer">
                 <div className="flex items-center gap-3 sm:gap-4 lg:gap-6 min-w-0 flex-1">
-                  <div className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 bg-muted rounded-full flex items-center justify-center text-xs sm:text-sm lg:text-base font-bold flex-shrink-0">
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 bg-muted rounded-full flex items-center justify-center text-xs sm:text-sm lg:text-base font-bold flex-shrink-0 transition-transform duration-200 hover:scale-110">
                     #{coin.rank}
                   </div>
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-base lg:text-lg flex-shrink-0">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-base lg:text-lg flex-shrink-0 transition-transform duration-200 hover:scale-110">
                     {coin.symbol.charAt(0)}
                   </div>
                   <div className="min-w-0 flex-1">
@@ -166,7 +166,7 @@ const Markets = () => {
                     variant="outline" 
                     size="sm"
                     onClick={() => handleViewDetails(coin)}
-                    className="text-xs px-2 py-1 h-7 sm:h-8 sm:px-3 sm:py-2 lg:h-9 lg:px-4 lg:py-2 lg:text-sm flex-shrink-0"
+                    className="text-xs px-2 py-1 h-7 sm:h-8 sm:px-3 sm:py-2 lg:h-9 lg:px-4 lg:py-2 lg:text-sm flex-shrink-0 transition-all duration-200 hover:scale-105 hover:shadow-md"
                   >
                     Ver Detalles
                   </Button>
