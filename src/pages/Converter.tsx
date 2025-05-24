@@ -1,120 +1,101 @@
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowUpDown, Calculator, TrendingUp, TrendingDown, Star, Copy, Check } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
-import { useToast } from "@/hooks/use-toast"
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { ArrowUpDown, Calculator } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { currencies } from "@/data/currencies";
+import { getCurrencyInfo, formatConversionResult } from "@/utils/currencyUtils";
+import CurrencySelector from "@/components/converter/CurrencySelector";
+import ConversionResult from "@/components/converter/ConversionResult";
+import QuickRates from "@/components/converter/QuickRates";
+import QuickConversions from "@/components/converter/QuickConversions";
 
 const Converter = () => {
-  const [fromAmount, setFromAmount] = useState("")
-  const [fromCurrency, setFromCurrency] = useState("BTC")
-  const [toCurrency, setToCurrency] = useState("USD")
-  const [result, setResult] = useState("")
-  const [copied, setCopied] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const { toast } = useToast()
-
-  // Datos de ejemplo con precios más realistas (en un proyecto real, esto vendría de una API)
-  const currencies = [
-    { symbol: "BTC", name: "Bitcoin", price: 43500, change: 2.4, category: "Major", icon: "₿" },
-    { symbol: "ETH", name: "Ethereum", price: 2650, change: 1.8, category: "Major", icon: "Ξ" },
-    { symbol: "ADA", name: "Cardano", price: 0.38, change: -0.5, category: "Alt", icon: "₳" },
-    { symbol: "SOL", name: "Solana", price: 98, change: 5.2, category: "Alt", icon: "◎" },
-    { symbol: "USDT", name: "Tether", price: 1, change: 0, category: "Stable", icon: "₮" },
-    { symbol: "USD", name: "US Dollar", price: 1, change: 0, category: "Fiat", icon: "$" },
-    { symbol: "EUR", name: "Euro", price: 0.92, change: 0, category: "Fiat", icon: "€" },
-  ]
+  const [fromAmount, setFromAmount] = useState("");
+  const [fromCurrency, setFromCurrency] = useState("BTC");
+  const [toCurrency, setToCurrency] = useState("USD");
+  const [result, setResult] = useState("");
+  const [copied, setCopied] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   const convertCurrency = () => {
-    console.log("Converting:", fromAmount, fromCurrency, "to", toCurrency)
+    console.log("Converting:", fromAmount, fromCurrency, "to", toCurrency);
     
     if (!fromAmount || fromAmount === "0") {
-      setResult("")
+      setResult("");
       toast({
         title: "Error",
         description: "Por favor ingresa una cantidad válida",
         variant: "destructive"
-      })
-      return
+      });
+      return;
     }
 
-    const amount = parseFloat(fromAmount)
+    const amount = parseFloat(fromAmount);
     if (isNaN(amount) || amount <= 0) {
-      setResult("Ingresa un número válido")
+      setResult("Ingresa un número válido");
       toast({
         title: "Error", 
         description: "La cantidad debe ser un número positivo",
         variant: "destructive"
-      })
-      return
+      });
+      return;
     }
 
-    setIsLoading(true)
+    setIsLoading(true);
 
-    // Simular un pequeño delay para mostrar loading
     setTimeout(() => {
       try {
-        const fromPrice = currencies.find(c => c.symbol === fromCurrency)?.price || 1
-        const toPrice = currencies.find(c => c.symbol === toCurrency)?.price || 1
+        const fromPrice = getCurrencyInfo(fromCurrency, currencies)?.price || 1;
+        const toPrice = getCurrencyInfo(toCurrency, currencies)?.price || 1;
         
-        console.log("From price:", fromPrice, "To price:", toPrice)
+        console.log("From price:", fromPrice, "To price:", toPrice);
         
-        // Convertir todo a USD primero, luego a la moneda destino
-        const amountInUSD = amount * fromPrice
-        const convertedValue = amountInUSD / toPrice
+        const amountInUSD = amount * fromPrice;
+        const convertedValue = amountInUSD / toPrice;
         
-        console.log("Amount in USD:", amountInUSD, "Converted value:", convertedValue)
+        console.log("Amount in USD:", amountInUSD, "Converted value:", convertedValue);
         
-        // Formatear el resultado según el tipo de moneda
-        let formattedResult
-        if (convertedValue >= 1) {
-          formattedResult = convertedValue.toFixed(2)
-        } else if (convertedValue >= 0.01) {
-          formattedResult = convertedValue.toFixed(4)
-        } else {
-          formattedResult = convertedValue.toFixed(8)
-        }
-        
-        setResult(formattedResult)
+        const formattedResult = formatConversionResult(convertedValue);
+        setResult(formattedResult);
         
         toast({
           title: "Conversión exitosa",
           description: `${amount} ${fromCurrency} = ${formattedResult} ${toCurrency}`,
-        })
+        });
       } catch (error) {
-        console.error("Error en conversión:", error)
-        setResult("Error en la conversión")
+        console.error("Error en conversión:", error);
+        setResult("Error en la conversión");
         toast({
           title: "Error",
           description: "No se pudo realizar la conversión",
           variant: "destructive"
-        })
+        });
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }, 500)
-  }
+    }, 500);
+  };
 
   const swapCurrencies = () => {
-    console.log("Swapping currencies")
-    const tempCurrency = fromCurrency
-    setFromCurrency(toCurrency)
-    setToCurrency(tempCurrency)
+    console.log("Swapping currencies");
+    const tempCurrency = fromCurrency;
+    setFromCurrency(toCurrency);
+    setToCurrency(tempCurrency);
     
-    // Si hay un resultado, lo ponemos como nueva cantidad
     if (result && result !== "Ingresa un número válido" && result !== "Error en la conversión") {
-      setFromAmount(result)
-      setResult("")
+      setFromAmount(result);
+      setResult("");
     }
     
     toast({
       title: "Monedas intercambiadas",
       description: `Ahora convirtiendo de ${toCurrency} a ${tempCurrency}`,
-    })
-  }
+    });
+  };
 
   const copyResult = async () => {
     if (!result || result === "Ingresa un número válido" || result === "Error en la conversión") {
@@ -122,48 +103,39 @@ const Converter = () => {
         title: "Error",
         description: "No hay resultado válido para copiar",
         variant: "destructive"
-      })
-      return
+      });
+      return;
     }
 
     try {
-      await navigator.clipboard.writeText(result)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+      await navigator.clipboard.writeText(result);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
       
       toast({
         title: "Copiado",
         description: "Resultado copiado al portapapeles",
-      })
+      });
     } catch (error) {
-      console.error("Error al copiar:", error)
+      console.error("Error al copiar:", error);
       toast({
         title: "Error",
         description: "No se pudo copiar al portapapeles",
         variant: "destructive"
-      })
+      });
     }
-  }
+  };
 
-  const getCurrencyInfo = (symbol: string) => {
-    return currencies.find(c => c.symbol === symbol)
-  }
-
-  const formatPrice = (price: number) => {
-    if (price >= 1000) {
-      return `$${price.toLocaleString()}`
-    }
-    return `$${price}`
-  }
-
-  // Auto-convert cuando cambian los valores
   useEffect(() => {
     if (fromAmount && parseFloat(fromAmount) > 0) {
-      convertCurrency()
+      convertCurrency();
     } else {
-      setResult("")
+      setResult("");
     }
-  }, [fromCurrency, toCurrency])
+  }, [fromCurrency, toCurrency]);
+
+  const fromCurrencyInfo = getCurrencyInfo(fromCurrency, currencies);
+  const toCurrencyInfo = getCurrencyInfo(toCurrency, currencies);
 
   return (
     <div className="p-8 space-y-8 max-w-6xl mx-auto">
@@ -177,7 +149,6 @@ const Converter = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Main Converter */}
         <div className="lg:col-span-2">
           <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800">
             <CardHeader>
@@ -188,58 +159,24 @@ const Converter = () => {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Desde</label>
-                    {getCurrencyInfo(fromCurrency) && (
-                      <Badge variant="outline" className="text-xs">
-                        {getCurrencyInfo(fromCurrency)?.category}
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="flex gap-3">
-                    <Input
-                      type="number"
-                      placeholder="0.00"
-                      value={fromAmount}
-                      onChange={(e) => setFromAmount(e.target.value)}
-                      className="flex-1 h-12 text-lg font-medium border-2 focus:border-blue-500"
-                      min="0"
-                      step="any"
-                    />
-                    <Select value={fromCurrency} onValueChange={setFromCurrency}>
-                      <SelectTrigger className="w-[160px] h-12 border-2">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {currencies.map((currency) => (
-                          <SelectItem key={currency.symbol} value={currency.symbol}>
-                            <div className="flex items-center gap-3 w-full">
-                              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-xs">
-                                {currency.icon}
-                              </div>
-                              <div className="flex flex-col">
-                                <span className="font-semibold">{currency.symbol}</span>
-                                <span className="text-xs text-muted-foreground">{currency.name}</span>
-                              </div>
-                              <div className="ml-auto text-right">
-                                <div className="text-xs font-medium">{formatPrice(currency.price)}</div>
-                                <div className={`text-xs flex items-center gap-1 ${currency.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                  {currency.change >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                                  {Math.abs(currency.change)}%
-                                </div>
-                              </div>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  {getCurrencyInfo(fromCurrency) && (
-                    <div className="text-sm text-muted-foreground">
-                      1 {fromCurrency} = {formatPrice(getCurrencyInfo(fromCurrency)!.price)}
-                    </div>
-                  )}
+                <div className="flex gap-3">
+                  <Input
+                    type="number"
+                    placeholder="0.00"
+                    value={fromAmount}
+                    onChange={(e) => setFromAmount(e.target.value)}
+                    className="flex-1 h-12 text-lg font-medium border-2 focus:border-blue-500"
+                    min="0"
+                    step="any"
+                  />
+                  <CurrencySelector
+                    value={fromCurrency}
+                    onValueChange={setFromCurrency}
+                    currencies={currencies}
+                    label="Desde"
+                    currentPrice={fromCurrencyInfo?.price}
+                    category={fromCurrencyInfo?.category}
+                  />
                 </div>
 
                 <div className="flex justify-center py-2">
@@ -254,68 +191,21 @@ const Converter = () => {
                   </Button>
                 </div>
 
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Hacia</label>
-                    {getCurrencyInfo(toCurrency) && (
-                      <Badge variant="outline" className="text-xs">
-                        {getCurrencyInfo(toCurrency)?.category}
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="flex gap-3">
-                    <div className="flex-1 relative">
-                      <Input
-                        type="text"
-                        placeholder={isLoading ? "Calculando..." : "Resultado"}
-                        value={isLoading ? "Calculando..." : result}
-                        readOnly
-                        className="h-12 text-lg font-medium bg-gray-50 dark:bg-gray-800 border-2 pr-12"
-                      />
-                      {result && result !== "Ingresa un número válido" && result !== "Error en la conversión" && !isLoading && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={copyResult}
-                          className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8"
-                        >
-                          {copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
-                        </Button>
-                      )}
-                    </div>
-                    <Select value={toCurrency} onValueChange={setToCurrency}>
-                      <SelectTrigger className="w-[160px] h-12 border-2">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {currencies.map((currency) => (
-                          <SelectItem key={currency.symbol} value={currency.symbol}>
-                            <div className="flex items-center gap-3 w-full">
-                              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-xs">
-                                {currency.icon}
-                              </div>
-                              <div className="flex flex-col">
-                                <span className="font-semibold">{currency.symbol}</span>
-                                <span className="text-xs text-muted-foreground">{currency.name}</span>
-                              </div>
-                              <div className="ml-auto text-right">
-                                <div className="text-xs font-medium">{formatPrice(currency.price)}</div>
-                                <div className={`text-xs flex items-center gap-1 ${currency.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                  {currency.change >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                                  {Math.abs(currency.change)}%
-                                </div>
-                              </div>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  {getCurrencyInfo(toCurrency) && (
-                    <div className="text-sm text-muted-foreground">
-                      1 {toCurrency} = {formatPrice(getCurrencyInfo(toCurrency)!.price)}
-                    </div>
-                  )}
+                <div className="flex gap-3">
+                  <ConversionResult
+                    result={result}
+                    isLoading={isLoading}
+                    copied={copied}
+                    onCopy={copyResult}
+                  />
+                  <CurrencySelector
+                    value={toCurrency}
+                    onValueChange={setToCurrency}
+                    currencies={currencies}
+                    label="Hacia"
+                    currentPrice={toCurrencyInfo?.price}
+                    category={toCurrencyInfo?.category}
+                  />
                 </div>
 
                 <Button 
@@ -330,75 +220,13 @@ const Converter = () => {
           </Card>
         </div>
 
-        {/* Side Panel */}
         <div className="space-y-6">
-          {/* Current Rates */}
-          <Card className="shadow-lg border-0">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <TrendingUp className="h-5 w-5 text-green-600" />
-                Tasas Actuales
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {currencies.slice(0, 4).map((currency) => (
-                  <div key={currency.symbol} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold">
-                        {currency.icon}
-                      </div>
-                      <div>
-                        <div className="font-semibold">{currency.symbol}</div>
-                        <div className="text-xs text-muted-foreground">{currency.name}</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-semibold">{formatPrice(currency.price)}</div>
-                      <div className={`text-xs flex items-center gap-1 justify-end ${currency.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {currency.change >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                        {Math.abs(currency.change)}%
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Quick Convert */}
-          <Card className="shadow-lg border-0">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Star className="h-5 w-5 text-yellow-500" />
-                Conversiones Rápidas
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {[
-                  { from: "1 BTC", to: "$43,500", desc: "Bitcoin a USD" },
-                  { from: "1 ETH", to: "$2,650", desc: "Ethereum a USD" },
-                  { from: "1000 ADA", to: "$380", desc: "Cardano a USD" },
-                  { from: "10 SOL", to: "$980", desc: "Solana a USD" },
-                ].map((conversion, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 rounded-lg border hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
-                    <div>
-                      <div className="font-medium">{conversion.from}</div>
-                      <div className="text-xs text-muted-foreground">{conversion.desc}</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-semibold text-green-600">{conversion.to}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          <QuickRates currencies={currencies} />
+          <QuickConversions />
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Converter
+export default Converter;
