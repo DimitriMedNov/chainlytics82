@@ -43,7 +43,7 @@ const Watchlist = () => {
 
   if (watchlistItems.length === 0) {
     return (
-      <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 max-w-7xl mx-auto">
+      <div className="p-3 sm:p-4 lg:p-6 xl:p-8 space-y-4 sm:space-y-6 lg:space-y-8 max-w-7xl mx-auto">
         <WatchlistHeader itemCount={0} onSort={() => handleSort('name')} />
         <WatchlistEmptyState onNavigateToMarkets={() => navigate('/markets')} />
       </div>
@@ -51,7 +51,7 @@ const Watchlist = () => {
   }
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 max-w-7xl mx-auto">
+    <div className="p-3 sm:p-4 lg:p-6 xl:p-8 space-y-4 sm:space-y-6 lg:space-y-8 max-w-7xl mx-auto">
       <WatchlistHeader itemCount={watchlistItems.length} onSort={() => handleSort('name')} />
       <WatchlistSearch searchTerm={searchTerm} onSearchChange={setSearchTerm} />
 
