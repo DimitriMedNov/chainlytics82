@@ -63,109 +63,114 @@ const Markets = () => {
   }
 
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8">
       <div>
-        <h1 className="text-3xl font-bold mb-2">Mercados</h1>
-        <p className="text-muted-foreground">Explora todas las criptomonedas del mercado</p>
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2">Mercados</h1>
+        <p className="text-muted-foreground text-sm sm:text-base">Explora todas las criptomonedas del mercado</p>
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Search className="h-5 w-5" />
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+            <Search className="h-4 w-4 sm:h-5 sm:w-5" />
             Filtros y Búsqueda
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex flex-col gap-3 sm:gap-4">
             <Input
               placeholder="Buscar criptomoneda..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-1"
+              className="w-full h-10 sm:h-11"
             />
-            <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger className="w-[200px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((cat) => (
-                  <SelectItem key={cat.value} value={cat.value}>
-                    {cat.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-[200px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="marketcap">Market Cap</SelectItem>
-                <SelectItem value="volume">Volumen 24h</SelectItem>
-                <SelectItem value="change">Cambio 24h</SelectItem>
-                <SelectItem value="price">Precio</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+              <Select value={category} onValueChange={setCategory}>
+                <SelectTrigger className="w-full sm:w-[200px] h-10 sm:h-11">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat.value} value={cat.value}>
+                      {cat.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-full sm:w-[200px] h-10 sm:h-11">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="marketcap">Market Cap</SelectItem>
+                  <SelectItem value="volume">Volumen 24h</SelectItem>
+                  <SelectItem value="change">Cambio 24h</SelectItem>
+                  <SelectItem value="price">Precio</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </CardContent>
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5" />
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+            <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5" />
             Top Criptomonedas
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {filteredData.map((coin) => (
-              <div key={coin.symbol} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
-                <div className="flex items-center gap-4">
-                  <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center text-sm font-bold">
+              <div key={coin.symbol} className="flex items-center justify-between p-3 sm:p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 bg-muted rounded-full flex items-center justify-center text-xs sm:text-sm font-bold flex-shrink-0">
                     #{coin.rank}
                   </div>
-                  <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-base flex-shrink-0">
                     {coin.symbol.charAt(0)}
                   </div>
-                  <div>
-                    <h3 className="font-semibold">{coin.name}</h3>
-                    <p className="text-sm text-muted-foreground">{coin.symbol}</p>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-semibold text-sm sm:text-base truncate">{coin.name}</h3>
+                    <p className="text-xs sm:text-sm text-muted-foreground">{coin.symbol}</p>
                   </div>
                 </div>
                 
-                <div className="hidden md:block text-right">
-                  <p className="font-semibold">${coin.price.toLocaleString()}</p>
-                  <div className="flex items-center gap-1">
-                    {coin.change > 0 ? (
-                      <TrendingUp className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <TrendingDown className="h-4 w-4 text-red-500" />
-                    )}
-                    <Badge variant={coin.change > 0 ? "default" : "destructive"}>
-                      {coin.change > 0 ? '+' : ''}{coin.change}%
-                    </Badge>
+                <div className="flex flex-col items-end gap-2 sm:gap-3 min-w-0">
+                  <div className="text-right">
+                    <p className="font-semibold text-sm sm:text-base">${coin.price.toLocaleString()}</p>
+                    <div className="flex items-center gap-1 justify-end">
+                      {coin.change > 0 ? (
+                        <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />
+                      ) : (
+                        <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-red-500" />
+                      )}
+                      <Badge variant={coin.change > 0 ? "default" : "destructive"} className="text-xs px-1.5 py-0.5">
+                        {coin.change > 0 ? '+' : ''}{coin.change}%
+                      </Badge>
+                    </div>
                   </div>
-                </div>
 
-                <div className="hidden lg:block text-right">
-                  <p className="font-semibold">{formatNumber(coin.marketCap)}</p>
-                  <p className="text-sm text-muted-foreground">Market Cap</p>
-                </div>
+                  <div className="hidden sm:block text-right">
+                    <p className="font-semibold text-sm">{formatNumber(coin.marketCap)}</p>
+                    <p className="text-xs text-muted-foreground">Market Cap</p>
+                  </div>
 
-                <div className="hidden lg:block text-right">
-                  <p className="font-semibold">{formatNumber(coin.volume)}</p>
-                  <p className="text-sm text-muted-foreground">Vol 24h</p>
-                </div>
+                  <div className="hidden lg:block text-right">
+                    <p className="font-semibold text-sm">{formatNumber(coin.volume)}</p>
+                    <p className="text-xs text-muted-foreground">Vol 24h</p>
+                  </div>
 
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => handleViewDetails(coin)}
-                >
-                  Ver Detalles
-                </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleViewDetails(coin)}
+                    className="text-xs px-2 py-1 h-7 sm:h-8 sm:px-3 sm:py-2"
+                  >
+                    Ver Detalles
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
