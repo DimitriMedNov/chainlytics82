@@ -1,10 +1,11 @@
-
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { TrendingUp, TrendingDown, BarChart3, DollarSign, Heart, ExternalLink, Clock, TrendingUp as ChartIcon } from "lucide-react"
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts"
 import { useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
+import { useToast } from "@/hooks/use-toast"
 
 interface CryptoDetailsModalProps {
   open: boolean
@@ -40,11 +41,17 @@ const CryptoDetailsModal = ({ open, onOpenChange, coin }: CryptoDetailsModalProp
   const [isInWatchlist, setIsInWatchlist] = useState(false)
   const [lastUpdated, setLastUpdated] = useState(new Date())
   const [chartData, setChartData] = useState<any[]>([])
+  const navigate = useNavigate()
+  const { toast } = useToast()
 
   useEffect(() => {
     if (coin && open) {
       setChartData(generateMockChartData(coin.symbol, coin.price))
       setLastUpdated(new Date())
+      
+      // Check if coin is already in watchlist (from localStorage)
+      const watchlist = JSON.parse(localStorage.getItem('crypto-watchlist') || '[]')
+      setIsInWatchlist(watchlist.some((item: any) => item.symbol === coin.symbol))
     }
   }, [coin, open])
 
@@ -67,7 +74,46 @@ const CryptoDetailsModal = ({ open, onOpenChange, coin }: CryptoDetailsModalProp
   }
 
   const toggleWatchlist = () => {
-    setIsInWatchlist(!isInWatchlist)
+    const watchlist = JSON.parse(localStorage.getItem('crypto-watchlist') || '[]')
+    
+    if (isInWatchlist) {
+      // Remove from watchlist
+      const updatedWatchlist = watchlist.filter((item: any) => item.symbol !== coin.symbol)
+      localStorage.setItem('crypto-watchlist', JSON.stringify(updatedWatchlist))
+      setIsInWatchlist(false)
+      toast({
+        title: "Eliminado de Watchlist",
+        description: `${coin.name} ha sido eliminado de tu watchlist`,
+      })
+    } else {
+      // Add to watchlist
+      const newItem = {
+        id: Date.now(),
+        name: coin.name,
+        symbol: coin.symbol,
+        price: coin.price,
+        change: coin.change,
+        isFavorite: false
+      }
+      const updatedWatchlist = [...watchlist, newItem]
+      localStorage.setItem('crypto-watchlist', JSON.stringify(updatedWatchlist))
+      setIsInWatchlist(true)
+      toast({
+        title: "Agregado a Watchlist",
+        description: `${coin.name} ha sido agregado a tu watchlist`,
+      })
+    }
+  }
+
+  const handleExchange = () => {
+    // Close modal first
+    onOpenChange(false)
+    // Navigate to converter page
+    navigate('/converter')
+    toast({
+      title: "Redirigiendo al Convertidor",
+      description: `Puedes intercambiar ${coin.name} en el convertidor de divisas`,
+    })
   }
 
   // Mock additional data - in a real app this would come from the API
@@ -109,7 +155,12 @@ const CryptoDetailsModal = ({ open, onOpenChange, coin }: CryptoDetailsModalProp
                 <span className="hidden sm:inline">{isInWatchlist ? 'En Watchlist' : 'Agregar a Watchlist'}</span>
                 <span className="sm:hidden">{isInWatchlist ? 'En Lista' : 'Agregar'}</span>
               </Button>
-              <Button variant="outline" size="sm" className="flex items-center gap-2 text-xs sm:text-sm px-2 sm:px-3">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleExchange}
+                className="flex items-center gap-2 text-xs sm:text-sm px-2 sm:px-3"
+              >
                 <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4" />
                 <span className="hidden sm:inline">Intercambiar</span>
                 <span className="sm:hidden">Trade</span>
