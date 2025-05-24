@@ -138,34 +138,34 @@ const Converter = () => {
   const toCurrencyInfo = getCurrencyInfo(toCurrency, currencies);
 
   return (
-    <div className="p-8 space-y-8 max-w-6xl mx-auto">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-6xl mx-auto">
       <div className="text-center space-y-2">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
           Convertidor de Cryptos
         </h1>
-        <p className="text-muted-foreground text-lg">
+        <p className="text-muted-foreground text-sm sm:text-base lg:text-lg px-4">
           Convierte entre diferentes criptomonedas y monedas fiat con tasas actualizadas
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8">
         <div className="lg:col-span-2">
           <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-xl">
-                <Calculator className="h-6 w-6 text-blue-600" />
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                <Calculator className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
                 Convertidor
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-4 sm:space-y-6">
               <div className="space-y-4">
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-3">
                   <Input
                     type="number"
                     placeholder="0.00"
                     value={fromAmount}
                     onChange={(e) => setFromAmount(e.target.value)}
-                    className="flex-1 h-12 text-lg font-medium border-2 focus:border-blue-500"
+                    className="flex-1 h-10 sm:h-12 text-base sm:text-lg font-medium border-2 focus:border-blue-500"
                     min="0"
                     step="any"
                   />
@@ -179,19 +179,19 @@ const Converter = () => {
                   />
                 </div>
 
-                <div className="flex justify-center py-2">
+                <div className="flex justify-center py-1 sm:py-2">
                   <Button 
                     variant="outline" 
                     size="icon" 
                     onClick={swapCurrencies}
-                    className="h-12 w-12 rounded-full border-2 hover:bg-blue-50 hover:border-blue-300 transition-all duration-200"
+                    className="h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 hover:bg-blue-50 hover:border-blue-300 transition-all duration-200"
                     disabled={isLoading}
                   >
-                    <ArrowUpDown className="h-5 w-5" />
+                    <ArrowUpDown className="h-4 w-4 sm:h-5 sm:w-5" />
                   </Button>
                 </div>
 
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-3">
                   <ConversionResult
                     result={result}
                     isLoading={isLoading}
@@ -210,7 +210,7 @@ const Converter = () => {
 
                 <Button 
                   onClick={convertCurrency} 
-                  className="w-full h-12 text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
+                  className="w-full h-10 sm:h-12 text-base sm:text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
                   disabled={isLoading}
                 >
                   {isLoading ? "Convirtiendo..." : "Convertir"}
@@ -220,7 +220,7 @@ const Converter = () => {
           </Card>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-4 lg:space-y-6">
           <QuickRates currencies={currencies} />
           <QuickConversions />
         </div>
