@@ -1,11 +1,12 @@
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ArrowUpDown, Calculator, TrendingUp, TrendingDown, Star, Copy, Check } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { useToast } from "@/hooks/use-toast"
 
 const Converter = () => {
   const [fromAmount, setFromAmount] = useState("")
@@ -13,43 +14,135 @@ const Converter = () => {
   const [toCurrency, setToCurrency] = useState("USD")
   const [result, setResult] = useState("")
   const [copied, setCopied] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const { toast } = useToast()
 
+  // Datos de ejemplo con precios más realistas (en un proyecto real, esto vendría de una API)
   const currencies = [
-    { symbol: "BTC", name: "Bitcoin", price: 45000, change: 2.4, category: "Major" },
-    { symbol: "ETH", name: "Ethereum", price: 3200, change: 1.8, category: "Major" },
-    { symbol: "ADA", name: "Cardano", price: 0.45, change: -0.5, category: "Alt" },
-    { symbol: "SOL", name: "Solana", price: 95, change: 5.2, category: "Alt" },
-    { symbol: "USD", name: "US Dollar", price: 1, change: 0, category: "Fiat" },
-    { symbol: "EUR", name: "Euro", price: 0.85, change: 0, category: "Fiat" },
+    { symbol: "BTC", name: "Bitcoin", price: 43500, change: 2.4, category: "Major", icon: "₿" },
+    { symbol: "ETH", name: "Ethereum", price: 2650, change: 1.8, category: "Major", icon: "Ξ" },
+    { symbol: "ADA", name: "Cardano", price: 0.38, change: -0.5, category: "Alt", icon: "₳" },
+    { symbol: "SOL", name: "Solana", price: 98, change: 5.2, category: "Alt", icon: "◎" },
+    { symbol: "USDT", name: "Tether", price: 1, change: 0, category: "Stable", icon: "₮" },
+    { symbol: "USD", name: "US Dollar", price: 1, change: 0, category: "Fiat", icon: "$" },
+    { symbol: "EUR", name: "Euro", price: 0.92, change: 0, category: "Fiat", icon: "€" },
   ]
 
   const convertCurrency = () => {
-    if (!fromAmount || isNaN(Number(fromAmount))) {
-      setResult("Ingresa un número válido")
+    console.log("Converting:", fromAmount, fromCurrency, "to", toCurrency)
+    
+    if (!fromAmount || fromAmount === "0") {
+      setResult("")
+      toast({
+        title: "Error",
+        description: "Por favor ingresa una cantidad válida",
+        variant: "destructive"
+      })
       return
     }
 
-    const fromPrice = currencies.find(c => c.symbol === fromCurrency)?.price || 1
-    const toPrice = currencies.find(c => c.symbol === toCurrency)?.price || 1
-    
-    const fromValueInUSD = Number(fromAmount) * fromPrice
-    const convertedValue = fromValueInUSD / toPrice
-    
-    setResult(convertedValue.toFixed(8))
+    const amount = parseFloat(fromAmount)
+    if (isNaN(amount) || amount <= 0) {
+      setResult("Ingresa un número válido")
+      toast({
+        title: "Error", 
+        description: "La cantidad debe ser un número positivo",
+        variant: "destructive"
+      })
+      return
+    }
+
+    setIsLoading(true)
+
+    // Simular un pequeño delay para mostrar loading
+    setTimeout(() => {
+      try {
+        const fromPrice = currencies.find(c => c.symbol === fromCurrency)?.price || 1
+        const toPrice = currencies.find(c => c.symbol === toCurrency)?.price || 1
+        
+        console.log("From price:", fromPrice, "To price:", toPrice)
+        
+        // Convertir todo a USD primero, luego a la moneda destino
+        const amountInUSD = amount * fromPrice
+        const convertedValue = amountInUSD / toPrice
+        
+        console.log("Amount in USD:", amountInUSD, "Converted value:", convertedValue)
+        
+        // Formatear el resultado según el tipo de moneda
+        let formattedResult
+        if (convertedValue >= 1) {
+          formattedResult = convertedValue.toFixed(2)
+        } else if (convertedValue >= 0.01) {
+          formattedResult = convertedValue.toFixed(4)
+        } else {
+          formattedResult = convertedValue.toFixed(8)
+        }
+        
+        setResult(formattedResult)
+        
+        toast({
+          title: "Conversión exitosa",
+          description: `${amount} ${fromCurrency} = ${formattedResult} ${toCurrency}`,
+        })
+      } catch (error) {
+        console.error("Error en conversión:", error)
+        setResult("Error en la conversión")
+        toast({
+          title: "Error",
+          description: "No se pudo realizar la conversión",
+          variant: "destructive"
+        })
+      } finally {
+        setIsLoading(false)
+      }
+    }, 500)
   }
 
   const swapCurrencies = () => {
+    console.log("Swapping currencies")
     const tempCurrency = fromCurrency
     setFromCurrency(toCurrency)
     setToCurrency(tempCurrency)
-    setFromAmount(result)
-    setResult(fromAmount)
+    
+    // Si hay un resultado, lo ponemos como nueva cantidad
+    if (result && result !== "Ingresa un número válido" && result !== "Error en la conversión") {
+      setFromAmount(result)
+      setResult("")
+    }
+    
+    toast({
+      title: "Monedas intercambiadas",
+      description: `Ahora convirtiendo de ${toCurrency} a ${tempCurrency}`,
+    })
   }
 
-  const copyResult = () => {
-    navigator.clipboard.writeText(result)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+  const copyResult = async () => {
+    if (!result || result === "Ingresa un número válido" || result === "Error en la conversión") {
+      toast({
+        title: "Error",
+        description: "No hay resultado válido para copiar",
+        variant: "destructive"
+      })
+      return
+    }
+
+    try {
+      await navigator.clipboard.writeText(result)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+      
+      toast({
+        title: "Copiado",
+        description: "Resultado copiado al portapapeles",
+      })
+    } catch (error) {
+      console.error("Error al copiar:", error)
+      toast({
+        title: "Error",
+        description: "No se pudo copiar al portapapeles",
+        variant: "destructive"
+      })
+    }
   }
 
   const getCurrencyInfo = (symbol: string) => {
@@ -63,6 +156,15 @@ const Converter = () => {
     return `$${price}`
   }
 
+  // Auto-convert cuando cambian los valores
+  useEffect(() => {
+    if (fromAmount && parseFloat(fromAmount) > 0) {
+      convertCurrency()
+    } else {
+      setResult("")
+    }
+  }, [fromCurrency, toCurrency])
+
   return (
     <div className="p-8 space-y-8 max-w-6xl mx-auto">
       <div className="text-center space-y-2">
@@ -70,7 +172,7 @@ const Converter = () => {
           Convertidor de Cryptos
         </h1>
         <p className="text-muted-foreground text-lg">
-          Convierte entre diferentes criptomonedas y monedas fiat con tasas en tiempo real
+          Convierte entre diferentes criptomonedas y monedas fiat con tasas actualizadas
         </p>
       </div>
 
@@ -102,6 +204,8 @@ const Converter = () => {
                       value={fromAmount}
                       onChange={(e) => setFromAmount(e.target.value)}
                       className="flex-1 h-12 text-lg font-medium border-2 focus:border-blue-500"
+                      min="0"
+                      step="any"
                     />
                     <Select value={fromCurrency} onValueChange={setFromCurrency}>
                       <SelectTrigger className="w-[160px] h-12 border-2">
@@ -112,7 +216,7 @@ const Converter = () => {
                           <SelectItem key={currency.symbol} value={currency.symbol}>
                             <div className="flex items-center gap-3 w-full">
                               <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-xs">
-                                {currency.symbol.charAt(0)}
+                                {currency.icon}
                               </div>
                               <div className="flex flex-col">
                                 <span className="font-semibold">{currency.symbol}</span>
@@ -144,6 +248,7 @@ const Converter = () => {
                     size="icon" 
                     onClick={swapCurrencies}
                     className="h-12 w-12 rounded-full border-2 hover:bg-blue-50 hover:border-blue-300 transition-all duration-200"
+                    disabled={isLoading}
                   >
                     <ArrowUpDown className="h-5 w-5" />
                   </Button>
@@ -162,12 +267,12 @@ const Converter = () => {
                     <div className="flex-1 relative">
                       <Input
                         type="text"
-                        placeholder="Resultado"
-                        value={result}
+                        placeholder={isLoading ? "Calculando..." : "Resultado"}
+                        value={isLoading ? "Calculando..." : result}
                         readOnly
                         className="h-12 text-lg font-medium bg-gray-50 dark:bg-gray-800 border-2 pr-12"
                       />
-                      {result && result !== "Ingresa un número válido" && (
+                      {result && result !== "Ingresa un número válido" && result !== "Error en la conversión" && !isLoading && (
                         <Button
                           variant="ghost"
                           size="icon"
@@ -187,7 +292,7 @@ const Converter = () => {
                           <SelectItem key={currency.symbol} value={currency.symbol}>
                             <div className="flex items-center gap-3 w-full">
                               <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-xs">
-                                {currency.symbol.charAt(0)}
+                                {currency.icon}
                               </div>
                               <div className="flex flex-col">
                                 <span className="font-semibold">{currency.symbol}</span>
@@ -216,8 +321,9 @@ const Converter = () => {
                 <Button 
                   onClick={convertCurrency} 
                   className="w-full h-12 text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
+                  disabled={isLoading}
                 >
-                  Convertir
+                  {isLoading ? "Convirtiendo..." : "Convertir"}
                 </Button>
               </div>
             </CardContent>
@@ -240,7 +346,7 @@ const Converter = () => {
                   <div key={currency.symbol} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold">
-                        {currency.symbol.charAt(0)}
+                        {currency.icon}
                       </div>
                       <div>
                         <div className="font-semibold">{currency.symbol}</div>
@@ -271,10 +377,10 @@ const Converter = () => {
             <CardContent>
               <div className="space-y-3">
                 {[
-                  { from: "1 BTC", to: "$45,000", desc: "Bitcoin a USD" },
-                  { from: "1 ETH", to: "$3,200", desc: "Ethereum a USD" },
-                  { from: "1000 ADA", to: "$450", desc: "Cardano a USD" },
-                  { from: "10 SOL", to: "$950", desc: "Solana a USD" },
+                  { from: "1 BTC", to: "$43,500", desc: "Bitcoin a USD" },
+                  { from: "1 ETH", to: "$2,650", desc: "Ethereum a USD" },
+                  { from: "1000 ADA", to: "$380", desc: "Cardano a USD" },
+                  { from: "10 SOL", to: "$980", desc: "Solana a USD" },
                 ].map((conversion, index) => (
                   <div key={index} className="flex items-center justify-between p-3 rounded-lg border hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
                     <div>
