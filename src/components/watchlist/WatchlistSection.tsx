@@ -30,28 +30,28 @@ const WatchlistSection = ({
   onRemove
 }: WatchlistSectionProps) => {
   const cardClass = isFavoriteSection 
-    ? "border-yellow-200 bg-yellow-50/50 dark:bg-yellow-950/20 dark:border-yellow-800"
-    : ""
+    ? "border-yellow-200 bg-gradient-to-br from-yellow-50/50 to-orange-50/30 dark:from-yellow-950/20 dark:to-orange-950/10 dark:border-yellow-800 shadow-sm"
+    : "bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-950/50 shadow-sm border-gray-200 dark:border-gray-800"
 
   const titleClass = isFavoriteSection
     ? "text-yellow-700 dark:text-yellow-400"
-    : ""
+    : "text-gray-900 dark:text-gray-100"
 
   return (
-    <Card className={cardClass}>
-      <CardHeader className="pb-3 sm:pb-6">
-        <CardTitle className={`flex items-center justify-between text-base sm:text-lg lg:text-xl ${titleClass}`}>
-          <span className="flex items-center gap-2">
-            {isFavoriteSection && <Star className="h-4 w-4 sm:h-5 sm:w-5 fill-current" />}
+    <Card className={`${cardClass} backdrop-blur-sm`}>
+      <CardHeader className="pb-4 sm:pb-6">
+        <CardTitle className={`flex items-center justify-between text-lg sm:text-xl lg:text-2xl font-bold ${titleClass}`}>
+          <span className="flex items-center gap-2 sm:gap-3">
+            {isFavoriteSection && <Star className="h-5 w-5 sm:h-6 sm:w-6 fill-current" />}
             {title}
           </span>
           {!isFavoriteSection && (
-            <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+            <div className="flex items-center gap-1 sm:gap-2 text-sm sm:text-base">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => onSort('price')}
-                className="text-xs sm:text-sm p-1 sm:p-2"
+                className="text-sm sm:text-base p-2 sm:p-3 font-medium hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
               >
                 Precio {sortBy === 'price' && (sortOrder === 'asc' ? '↑' : '↓')}
               </Button>
@@ -59,7 +59,7 @@ const WatchlistSection = ({
                 variant="ghost"
                 size="sm"
                 onClick={() => onSort('change')}
-                className="text-xs sm:text-sm p-1 sm:p-2"
+                className="text-sm sm:text-base p-2 sm:p-3 font-medium hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
               >
                 Cambio {sortBy === 'change' && (sortOrder === 'asc' ? '↑' : '↓')}
               </Button>
@@ -67,20 +67,18 @@ const WatchlistSection = ({
           )}
         </CardTitle>
       </CardHeader>
-      <CardContent className="pt-0">
-        <div className="grid gap-2 sm:gap-3 lg:gap-4">
-          {items.map((item) => (
-            <WatchlistItem
-              key={item.id}
-              item={item}
-              onToggleFavorite={onToggleFavorite}
-              onViewDetails={onViewDetails}
-              onTrade={onTrade}
-              onRemove={onRemove}
-              isFavorite={isFavoriteSection}
-            />
-          ))}
-        </div>
+      <CardContent className="pt-0 space-y-3 sm:space-y-4">
+        {items.map((item) => (
+          <WatchlistItem
+            key={item.id}
+            item={item}
+            onToggleFavorite={onToggleFavorite}
+            onViewDetails={onViewDetails}
+            onTrade={onTrade}
+            onRemove={onRemove}
+            isFavorite={isFavoriteSection}
+          />
+        ))}
       </CardContent>
     </Card>
   )

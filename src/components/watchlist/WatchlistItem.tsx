@@ -37,35 +37,42 @@ const WatchlistItem = ({
   }
 
   const gradientClass = isFavorite 
-    ? "bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500"
-    : "bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-600"
+    ? "bg-gradient-to-br from-amber-400 via-yellow-500 to-orange-500 shadow-lg"
+    : "bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-600 shadow-lg"
 
   const hoverClass = isFavorite 
-    ? "hover:bg-background/50"
-    : "hover:bg-muted/30"
+    ? "hover:bg-gradient-to-br hover:from-yellow-50 hover:to-orange-50 dark:hover:from-yellow-950/50 dark:hover:to-orange-950/30"
+    : "hover:bg-gradient-to-br hover:from-blue-50 hover:to-purple-50 dark:hover:from-blue-950/30 dark:hover:to-purple-950/30"
 
   return (
-    <div className={`flex items-center justify-between p-3 sm:p-4 lg:p-6 border rounded-xl ${hoverClass} transition-all duration-200 hover:shadow-md`}>
-      <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 flex-1 min-w-0">
-        <div className={`w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 ${gradientClass} rounded-full flex items-center justify-center text-white font-bold text-xs sm:text-sm lg:text-base shadow-lg flex-shrink-0`}>
+    <div className={`flex items-center justify-between p-4 sm:p-5 lg:p-6 border rounded-2xl ${hoverClass} transition-all duration-300 hover:shadow-lg hover:scale-[1.02] bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-gray-200 dark:border-gray-700`}>
+      <div className="flex items-center gap-3 sm:gap-4 lg:gap-5 flex-1 min-w-0">
+        <div className={`w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 ${gradientClass} rounded-2xl flex items-center justify-center text-white font-bold text-sm sm:text-base lg:text-lg flex-shrink-0`}>
           {item.symbol.charAt(0)}
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="font-semibold text-sm sm:text-base lg:text-lg truncate">{item.name}</h3>
-          <p className="text-xs sm:text-sm text-muted-foreground font-medium">{item.symbol}</p>
+          <h3 className="font-bold text-base sm:text-lg lg:text-xl truncate text-gray-900 dark:text-gray-100">{item.name}</h3>
+          <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 font-semibold">{item.symbol}</p>
         </div>
       </div>
       
-      <div className="flex items-center gap-2 sm:gap-3 lg:gap-6">
+      <div className="flex items-center gap-3 sm:gap-4 lg:gap-6">
         <div className="text-right">
-          <p className="font-bold text-xs sm:text-sm lg:text-xl">{formatCurrency(item.price)}</p>
+          <p className="font-bold text-base sm:text-lg lg:text-xl text-gray-900 dark:text-gray-100">{formatCurrency(item.price)}</p>
           <div className="flex items-center gap-1 justify-end">
             {item.change > 0 ? (
-              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />
+              <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-500" />
             ) : (
-              <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-red-500" />
+              <TrendingDown className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
             )}
-            <Badge variant={item.change > 0 ? "default" : "destructive"} className="text-xs">
+            <Badge 
+              variant={item.change > 0 ? "default" : "destructive"} 
+              className={`text-xs sm:text-sm font-semibold px-2 py-1 ${
+                item.change > 0 
+                  ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" 
+                  : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+              }`}
+            >
               {item.change > 0 ? '+' : ''}{item.change.toFixed(2)}%
             </Badge>
           </div>
@@ -79,16 +86,16 @@ const WatchlistItem = ({
               e.stopPropagation()
               onToggleFavorite(item.id)
             }}
-            className={`h-7 w-7 sm:h-8 sm:w-8 lg:h-9 lg:w-9 ${
+            className={`h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10 rounded-xl hover:scale-110 transition-all duration-200 ${
               item.isFavorite 
-                ? "text-yellow-500 hover:text-yellow-600" 
-                : "text-muted-foreground hover:text-yellow-500"
+                ? "text-yellow-500 hover:text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/30" 
+                : "text-gray-400 hover:text-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/30"
             }`}
           >
             {item.isFavorite ? (
-              <Star className="h-3 w-3 sm:h-4 sm:w-4 fill-current" />
+              <Star className="h-4 w-4 sm:h-5 sm:w-5 fill-current" />
             ) : (
-              <StarOff className="h-3 w-3 sm:h-4 sm:w-4" />
+              <StarOff className="h-4 w-4 sm:h-5 sm:w-5" />
             )}
           </Button>
           <Button
@@ -98,9 +105,9 @@ const WatchlistItem = ({
               e.stopPropagation()
               onViewDetails(item)
             }}
-            className="text-blue-500 hover:text-blue-600 h-7 w-7 sm:h-8 sm:w-8 lg:h-9 lg:w-9"
+            className="text-blue-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10 rounded-xl hover:scale-110 transition-all duration-200"
           >
-            <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+            <Eye className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
           <Button
             variant="ghost"
@@ -109,9 +116,9 @@ const WatchlistItem = ({
               e.stopPropagation()
               onTrade(item)
             }}
-            className="text-green-500 hover:text-green-600 h-7 w-7 sm:h-8 sm:w-8 lg:h-9 lg:w-9"
+            className="text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10 rounded-xl hover:scale-110 transition-all duration-200"
           >
-            <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4" />
+            <ExternalLink className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
           <Button
             variant="ghost"
@@ -120,9 +127,9 @@ const WatchlistItem = ({
               e.stopPropagation()
               onRemove(item.id)
             }}
-            className="text-red-500 hover:text-red-600 h-7 w-7 sm:h-8 sm:w-8 lg:h-9 lg:w-9"
+            className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10 rounded-xl hover:scale-110 transition-all duration-200"
           >
-            <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+            <Trash2 className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
         </div>
       </div>
