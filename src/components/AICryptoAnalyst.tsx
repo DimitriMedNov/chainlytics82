@@ -18,18 +18,6 @@ const SUGGESTIONS = [
   "Explícame el market cap",
 ];
 
-// Snapshot del mercado (datos mock que también usa la página Markets)
-const MARKET_CONTEXT = [
-  { name: "Bitcoin", symbol: "BTC", price: 45000, change24h: 2.5, marketCap: 875_000_000_000 },
-  { name: "Ethereum", symbol: "ETH", price: 3200, change24h: -1.2, marketCap: 385_000_000_000 },
-  { name: "Cardano", symbol: "ADA", price: 0.45, change24h: 5.8, marketCap: 15_000_000_000 },
-  { name: "Solana", symbol: "SOL", price: 95, change24h: 3.2, marketCap: 42_000_000_000 },
-  { name: "Polygon", symbol: "MATIC", price: 0.85, change24h: -2.1, marketCap: 8_500_000_000 },
-  { name: "Chainlink", symbol: "LINK", price: 14.5, change24h: 1.8, marketCap: 7_200_000_000 },
-  { name: "Dogecoin", symbol: "DOGE", price: 0.08, change24h: 8.5, marketCap: 11_500_000_000 },
-  { name: "Avalanche", symbol: "AVAX", price: 32, change24h: -0.5, marketCap: 12_000_000_000 },
-];
-
 export default function AICryptoAnalyst() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -57,7 +45,7 @@ export default function AICryptoAnalyst() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ messages: next, marketContext: MARKET_CONTEXT }),
+        body: JSON.stringify({ messages: next }),
       });
 
       if (resp.status === 429) {
