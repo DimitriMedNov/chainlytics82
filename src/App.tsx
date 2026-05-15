@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Navbar } from "@/components/Navbar";
+import AICryptoAnalyst from "@/components/AICryptoAnalyst";
 import Index from "./pages/Index";
 import Watchlist from "./pages/Watchlist";
 import Converter from "./pages/Converter";
@@ -30,6 +31,7 @@ const App = () => (
                 <Route path="/markets" element={<Markets />} />
               </Routes>
             </main>
+            <AICryptoAnalyst />
           </div>
         </BrowserRouter>
       </TooltipProvider>
