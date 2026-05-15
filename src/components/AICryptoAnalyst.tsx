@@ -246,6 +246,7 @@ export default function AICryptoAnalyst() {
           </div>
         </ScrollArea>
 
+        {session && (
         <form
           onSubmit={(e) => { e.preventDefault(); send(input); }}
           className="p-4 border-t flex gap-2"
@@ -260,6 +261,7 @@ export default function AICryptoAnalyst() {
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
           </Button>
         </form>
+        )}
       </SheetContent>
     </Sheet>
   );
