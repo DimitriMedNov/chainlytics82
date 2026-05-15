@@ -153,13 +153,32 @@ export default function AICryptoAnalyst() {
 
         <ScrollArea className="flex-1 px-4" ref={scrollRef as any}>
           <div className="py-4 space-y-4">
-            {messages.length === 0 && (
+            {!session && (
+              <div className="text-center py-10 space-y-4">
+                <div className="inline-flex h-12 w-12 rounded-full bg-primary/10 items-center justify-center">
+                  <LogIn className="h-6 w-6 text-primary" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="font-semibold">Inicia sesión para continuar</h3>
+                  <p className="text-sm text-muted-foreground px-4">
+                    El analista IA solo está disponible para usuarios autenticados.
+                  </p>
+                </div>
+                <Button asChild onClick={() => setOpen(false)}>
+                  <Link to="/auth">Iniciar sesión / Registrarse</Link>
+                </Button>
+              </div>
+            )}
+
+            {session && messages.length === 0 && (
               <div className="space-y-4">
                 <div className="text-center py-6">
                   <div className="inline-flex h-12 w-12 rounded-full bg-primary/10 items-center justify-center mb-3">
                     <Bot className="h-6 w-6 text-primary" />
                   </div>
-                  <h3 className="font-semibold mb-1">Hola, soy CryptoSense AI</h3>
+                  <h3 className="font-semibold mb-1">
+                    Hola{user?.email ? `, ${user.email.split("@")[0]}` : ""}
+                  </h3>
                   <p className="text-sm text-muted-foreground">
                     Pregúntame sobre el mercado, monedas específicas, tendencias o conceptos.
                   </p>
