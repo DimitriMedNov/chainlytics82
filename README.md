@@ -145,11 +145,3 @@ npm run type-check   # Verifica tipos TypeScript
 npm run build
 npm run preview
 ```
-
-### Plataformas de Hosting
-La aplicación es compatible con:
-
-- **Vercel**: Despliegue automático desde Git
-- **Netlify**: Build automático con configuración cero
-- **GitHub Pages**: Hosting estático gratuito
-- **AWS S3 + CloudFront**: Solución escalable en la nube
