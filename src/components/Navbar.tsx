@@ -95,6 +95,17 @@ export function Navbar() {
               </div>
               <div className="flex flex-col space-y-2">
                 <NavItems />
+                <div className="pt-4 mt-2 border-t">
+                  {session ? (
+                    <Button variant="outline" className="w-full gap-2" onClick={() => { setIsOpen(false); handleSignOut() }}>
+                      <LogOut className="h-4 w-4" /> Cerrar sesión
+                    </Button>
+                  ) : (
+                    <Button asChild className="w-full gap-2" onClick={() => setIsOpen(false)}>
+                      <NavLink to="/auth"><LogIn className="h-4 w-4" /> Iniciar sesión</NavLink>
+                    </Button>
+                  )}
+                </div>
               </div>
             </SheetContent>
           </Sheet>
