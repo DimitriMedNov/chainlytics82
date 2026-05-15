@@ -5,12 +5,14 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { Navbar } from "@/components/Navbar";
 import AICryptoAnalyst from "@/components/AICryptoAnalyst";
 import Index from "./pages/Index";
 import Watchlist from "./pages/Watchlist";
 import Converter from "./pages/Converter";
 import Markets from "./pages/Markets";
+import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
 
@@ -21,18 +23,21 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <div className="min-h-screen flex flex-col w-full">
-            <Navbar />
-            <main className="flex-1 overflow-auto">
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/watchlist" element={<Watchlist />} />
-                <Route path="/converter" element={<Converter />} />
-                <Route path="/markets" element={<Markets />} />
-              </Routes>
-            </main>
-            <AICryptoAnalyst />
-          </div>
+          <AuthProvider>
+            <div className="min-h-screen flex flex-col w-full">
+              <Navbar />
+              <main className="flex-1 overflow-auto">
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/watchlist" element={<Watchlist />} />
+                  <Route path="/converter" element={<Converter />} />
+                  <Route path="/markets" element={<Markets />} />
+                  <Route path="/auth" element={<Auth />} />
+                </Routes>
+              </main>
+              <AICryptoAnalyst />
+            </div>
+          </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
     </ThemeProvider>
