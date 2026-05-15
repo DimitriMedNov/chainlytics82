@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
-import { Sparkles, Send, Loader2, X, Bot, User } from "lucide-react";
+import { Sparkles, Send, Loader2, Bot, User, LogIn } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
@@ -8,6 +9,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -19,6 +22,7 @@ const SUGGESTIONS = [
 ];
 
 export default function AICryptoAnalyst() {
+  const { session, user } = useAuth();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
@@ -31,6 +35,10 @@ export default function AICryptoAnalyst() {
 
   const send = async (text: string) => {
     if (!text.trim() || loading) return;
+    if (!session) {
+      toast.error("Debes iniciar sesión para usar la IA");
+      return;
+    }
     const userMsg: Msg = { role: "user", content: text };
     const next = [...messages, userMsg];
     setMessages(next);
@@ -43,11 +51,22 @@ export default function AICryptoAnalyst() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({ messages: next }),
       });
 
+      if (resp.status === 401) {
+        toast.error("Sesión expirada. Inicia sesión nuevamente.");
+        await supabase.auth.signOut();
+        setLoading(false);
+        return;
+      }
+      if (resp.status === 403) {
+        toast.error("No tienes permisos para usar la IA.");
+        setLoading(false);
+        return;
+      }
       if (resp.status === 429) {
         toast.error("Demasiadas solicitudes. Intenta en un momento.");
         setLoading(false);
@@ -134,13 +153,32 @@ export default function AICryptoAnalyst() {
 
         <ScrollArea className="flex-1 px-4" ref={scrollRef as any}>
           <div className="py-4 space-y-4">
-            {messages.length === 0 && (
+            {!session && (
+              <div className="text-center py-10 space-y-4">
+                <div className="inline-flex h-12 w-12 rounded-full bg-primary/10 items-center justify-center">
+                  <LogIn className="h-6 w-6 text-primary" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="font-semibold">Inicia sesión para continuar</h3>
+                  <p className="text-sm text-muted-foreground px-4">
+                    El analista IA solo está disponible para usuarios autenticados.
+                  </p>
+                </div>
+                <Button asChild onClick={() => setOpen(false)}>
+                  <Link to="/auth">Iniciar sesión / Registrarse</Link>
+                </Button>
+              </div>
+            )}
+
+            {session && messages.length === 0 && (
               <div className="space-y-4">
                 <div className="text-center py-6">
                   <div className="inline-flex h-12 w-12 rounded-full bg-primary/10 items-center justify-center mb-3">
                     <Bot className="h-6 w-6 text-primary" />
                   </div>
-                  <h3 className="font-semibold mb-1">Hola, soy CryptoSense AI</h3>
+                  <h3 className="font-semibold mb-1">
+                    Hola{user?.email ? `, ${user.email.split("@")[0]}` : ""}
+                  </h3>
                   <p className="text-sm text-muted-foreground">
                     Pregúntame sobre el mercado, monedas específicas, tendencias o conceptos.
                   </p>
@@ -208,6 +246,7 @@ export default function AICryptoAnalyst() {
           </div>
         </ScrollArea>
 
+        {session && (
         <form
           onSubmit={(e) => { e.preventDefault(); send(input); }}
           className="p-4 border-t flex gap-2"
@@ -222,6 +261,7 @@ export default function AICryptoAnalyst() {
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
           </Button>
         </form>
+        )}
       </SheetContent>
     </Sheet>
   );
