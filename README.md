@@ -1,147 +1,42 @@
+# Chainlytics
 
-# Crypto Dashboard 🚀
+Crypto market dashboard with a portfolio tracker, a watchlist and an AI analyst.
 
-Un dashboard moderno de criptomonedas construido con React, TypeScript y Tailwind CSS que proporciona herramientas completas para el seguimiento y análisis de criptomendas.
+**Live demo:** https://chainlytics82-3v7y.vercel.app/
 
-## ✨ Características
+## What it does
 
-- **Dashboard Principal**: Vista general del mercado con estadísticas en tiempo real
-- **Lista de Seguimiento**: Gestiona tus criptomonedas favoritas con funciones de búsqueda y filtrado
-- **Convertidor de Cryptos**: Convierte entre diferentes criptomonedas y monedas fiat con tasas actualizadas
-- **Mercados**: Explora todos los mercados disponibles con información detallada
-- **Tema Oscuro/Claro**: Alterna entre temas con persistencia local
-- **Diseño Responsivo**: Optimizado para todos los dispositivos
+**Markets** — live prices and market data, with charts.
 
-## 🛠️ Tecnologías Utilizadas
+**Portfolio** — record your holdings and follow their value over time.
 
-- **Frontend**: React 18 + TypeScript + Vite
-- **Estilos**: Tailwind CSS + Shadcn/UI
-- **Gestión de Estado**: TanStack Query (React Query)
-- **Navegación**: React Router DOM
-- **Gráficos**: TradingView Widget + Recharts
-- **Iconos**: Lucide React
-- **Formularios**: React Hook Form + Zod
+**Watchlist** — the coins you care about, saved to your account.
 
-## 🚀 Instalación y Configuración
+**Converter** — quick conversion between coins and fiat.
 
-### Prerequisitos
+**AI analyst** — an `ai-crypto-analyst` Edge Function that reads the current market data
+and writes a plain-language summary. It runs server-side, so the model key never reaches
+the browser.
 
-- Node.js (versión 18 o superior)
-- npm, yarn, pnpm o bun
+## Data model
 
-### Pasos de instalación
+`profiles` and `user_roles` in PostgreSQL, under Row Level Security. Market data is read
+from a public API at request time rather than mirrored into the database.
 
-1. **Clona el repositorio**
-   ```bash
-   git clone <repository-url>
-   cd crypto-dashboard
-   ```
+## Stack
 
-2. **Instala las dependencias**
-   ```bash
-   npm install
-   # o
-   yarn install
-   # o
-   pnpm install
-   # o
-   bun install
-   ```
+React · TypeScript · Vite · Tailwind CSS · shadcn/ui · React Hook Form · Zod ·
+Supabase (PostgreSQL, Auth, Edge Functions)
 
-3. **Inicia el servidor de desarrollo**
-   ```bash
-   npm run dev
-   # o
-   yarn dev
-   # o
-   pnpm dev
-   # o
-   bun dev
-   ```
-
-4. **Abre tu navegador**
-   
-   Visita `http://localhost:8080` para ver la aplicación
-
-## 📱 Estructura del Proyecto
-
-```
-src/
-├── components/           # Componentes reutilizables
-│   ├── converter/       # Componentes del convertidor
-│   ├── crypto/          # Componentes de información cripto
-│   ├── ui/              # Componentes base de UI (Shadcn)
-│   └── watchlist/       # Componentes de lista de seguimiento
-├── data/                # Datos estáticos y configuraciones
-├── hooks/               # Custom hooks
-├── lib/                 # Utilidades y configuraciones
-├── pages/               # Páginas principales de la aplicación
-├── types/               # Definiciones de tipos TypeScript
-└── utils/               # Funciones utilitarias
-```
-
-## 🎯 Funcionalidades Principales
-
-### Dashboard Principal (`/`)
-- Estadísticas del mercado en tiempo real
-- Lista de criptomonedas populares
-- Gráfico interactivo de Bitcoin
-- Tarjetas de información rápida
-
-### Lista de Seguimiento (`/watchlist`)
-- Añade/elimina criptomonedas de tu lista personal
-- Búsqueda y filtrado avanzado
-- Ordenamiento por diferentes criterios
-- Información detallada de cada moneda
-
-### Convertidor (`/converter`)
-- Conversión entre múltiples criptomonedas
-- Soporte para monedas fiat
-- Tasas de cambio en tiempo real
-- Conversiones rápidas predefinidas
-
-### Mercados (`/markets`)
-- Vista completa de todos los mercados
-- Información detallada de trading
-- Análisis de tendencias
-- Datos históricos
-
-## 🎨 Personalización de Tema
-
-La aplicación incluye soporte completo para temas oscuro y claro:
-
-- **Cambio automático**: Detecta la preferencia del sistema
-- **Persistencia**: Recuerda tu elección en el navegador
-- **Transiciones suaves**: Animaciones fluidas entre temas
-
-## 📊 Integración de APIs
-
-El proyecto está preparado para integrarse con APIs de criptomonedas populares como:
-
-- CoinGecko API
-- CoinMarketCap API
-- Binance API
-- Custom WebSocket connections
-
-## 🔧 Scripts Disponibles
+## Run it locally
 
 ```bash
-# Desarrollo
-npm run dev          # Inicia el servidor de desarrollo
-
-# Construcción
-npm run build        # Construye la aplicación para producción
-npm run preview      # Vista previa de la construcción local
-
-# Calidad de código
-npm run lint         # Ejecuta ESLint
-npm run type-check   # Verifica tipos TypeScript
+npm install
+cp .env.example .env
+npm run dev
 ```
 
-## 🌐 Despliegue
+## Note
 
-### Producción Local
-```bash
-npm run build
-npm run preview
-```
+This is an educational dashboard. It is not investment advice and it does not execute
+any trade.
