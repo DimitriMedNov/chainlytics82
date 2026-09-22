@@ -1,68 +1,61 @@
-
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, TrendingDown } from "lucide-react";
-import { Currency } from "@/types/currency";
-import { formatPrice } from "@/utils/currencyUtils";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { formatCurrency } from "@/lib/format";
+import type { Convertible } from "@/hooks/useConvertibles";
 
-interface CurrencySelectorProps {
+export interface CurrencySelectorProps {
+  id: string;
   value: string;
   onValueChange: (value: string) => void;
-  currencies: Currency[];
+  options: Convertible[];
   label: string;
-  currentPrice?: number;
-  category?: string;
+  selected?: Convertible;
 }
 
-const CurrencySelector = ({ 
-  value, 
-  onValueChange, 
-  currencies, 
-  label, 
-  currentPrice, 
-  category 
+const CurrencySelector = ({
+  id,
+  value,
+  onValueChange,
+  options,
+  label,
+  selected,
 }: CurrencySelectorProps) => {
   return (
-    <div className="space-y-3 w-full">
-      <div className="flex items-center justify-between">
-        <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">{label}</label>
-        {category && (
-          <Badge variant="outline" className="text-xs px-2 py-1">
-            {category}
+    <div className="w-full space-y-2">
+      <div className="flex items-center justify-between gap-2">
+        <Label htmlFor={id}>{label}</Label>
+        {selected && (
+          <Badge variant="outline" className="text-xs capitalize">
+            {selected.kind}
           </Badge>
         )}
       </div>
       <Select value={value} onValueChange={onValueChange}>
-        <SelectTrigger className="w-full h-12 border-2 text-base">
-          <SelectValue />
+        <SelectTrigger id={id} className="h-12 w-full">
+          <SelectValue placeholder="Elige" />
         </SelectTrigger>
-        <SelectContent className="max-h-[300px] w-full min-w-[280px]">
-          {currencies.map((currency) => (
-            <SelectItem key={currency.symbol} value={currency.symbol}>
-              <div className="flex items-center gap-3 w-full min-w-0">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
-                  {currency.icon}
-                </div>
-                <div className="flex flex-col min-w-0 flex-1">
-                  <span className="font-semibold text-base truncate">{currency.symbol}</span>
-                  <span className="text-xs text-muted-foreground truncate">{currency.name}</span>
-                </div>
-                <div className="text-right flex-shrink-0">
-                  <div className="text-xs font-medium">{formatPrice(currency.price)}</div>
-                  <div className={`text-xs flex items-center gap-1 ${currency.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {currency.change >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                    {Math.abs(currency.change)}%
-                  </div>
-                </div>
-              </div>
+        <SelectContent className="max-h-[300px]">
+          {options.map((option) => (
+            <SelectItem key={option.code} value={option.code}>
+              <span className="flex w-full items-center gap-2">
+                <span className="font-semibold">{option.code}</span>
+                <span className="truncate text-xs text-muted-foreground">{option.name}</span>
+              </span>
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
-      {currentPrice && (
-        <div className="text-sm text-muted-foreground">
-          1 {value} = {formatPrice(currentPrice)}
-        </div>
+      {selected && (
+        <p className="text-sm text-muted-foreground">
+          1 {selected.code} = {formatCurrency(selected.usdPrice)}
+        </p>
       )}
     </div>
   );

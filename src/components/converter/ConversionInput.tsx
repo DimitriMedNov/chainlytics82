@@ -1,25 +1,36 @@
-
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
-interface ConversionInputProps {
+export interface ConversionInputProps {
+  id: string;
+  label: string;
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
-  disabled?: boolean;
 }
 
-const ConversionInput = ({ value, onChange, placeholder = "0.00", disabled = false }: ConversionInputProps) => {
+const ConversionInput = ({
+  id,
+  label,
+  value,
+  onChange,
+  placeholder = "0,00",
+}: ConversionInputProps) => {
   return (
-    <Input
-      type="number"
-      placeholder={placeholder}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="h-12 text-lg font-medium border-2 focus:border-blue-500"
-      min="0"
-      step="any"
-      disabled={disabled}
-    />
+    <div className="w-full space-y-2">
+      <Label htmlFor={id}>{label}</Label>
+      <Input
+        id={id}
+        type="number"
+        inputMode="decimal"
+        min="0"
+        step="any"
+        placeholder={placeholder}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="h-12 text-lg font-medium"
+      />
+    </div>
   );
 };
 

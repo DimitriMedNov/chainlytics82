@@ -1,71 +1,58 @@
+import { TrendingDown, TrendingUp } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { formatCurrency, formatPercent } from "@/lib/format";
+import type { Coin } from "@/types/coin";
 
-import { Badge } from "@/components/ui/badge"
-import { TrendingUp, TrendingDown } from "lucide-react"
-
-interface CryptoPriceSectionProps {
-  coin: {
-    price: number
-    change: number
-  }
-  additionalData: {
-    high24h: number
-    low24h: number
-    ath: number
-    atl: number
-  }
+export interface CryptoPriceSectionProps {
+  coin: Coin;
 }
 
-const CryptoPriceSection = ({ coin, additionalData }: CryptoPriceSectionProps) => {
-  const formatCurrency = (num: number) => {
-    return new Intl.NumberFormat('es-ES', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: num < 1 ? 4 : 2,
-      maximumFractionDigits: num < 1 ? 4 : 2
-    }).format(num)
-  }
+const CryptoPriceSection = ({ coin }: CryptoPriceSectionProps) => {
+  const isUp = coin.change24h >= 0;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+    <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
       <div className="space-y-2 sm:space-y-3">
-        <p className="text-xs sm:text-sm text-muted-foreground font-medium">Precio Actual</p>
-        <p className="text-2xl sm:text-4xl font-bold text-foreground">{formatCurrency(coin.price)}</p>
+        <p className="text-sm font-medium text-muted-foreground">Precio actual</p>
+        <p className="text-2xl font-bold sm:text-4xl">{formatCurrency(coin.price)}</p>
         <div className="flex items-center gap-2 sm:gap-3">
-          {coin.change > 0 ? (
-            <TrendingUp className="h-4 w-4 sm:h-6 sm:w-6 text-green-500" />
+          {isUp ? (
+            <TrendingUp className="h-5 w-5 text-success" aria-hidden="true" />
           ) : (
-            <TrendingDown className="h-4 w-4 sm:h-6 sm:w-6 text-red-500" />
+            <TrendingDown className="h-5 w-5 text-warning" aria-hidden="true" />
           )}
-          <Badge 
-            variant={coin.change > 0 ? "default" : "destructive"} 
-            className="text-sm sm:text-lg px-2 sm:px-3 py-1 font-semibold"
-          >
-            {coin.change > 0 ? '+' : ''}{coin.change.toFixed(2)}%
+          <Badge variant={isUp ? "default" : "destructive"} className="px-2 py-1 text-sm font-semibold">
+            {formatPercent(coin.change24h)}
           </Badge>
-          <span className="text-xs sm:text-sm text-muted-foreground">24h</span>
+          <span className="text-sm text-muted-foreground">24 h</span>
+          {coin.change7d !== null && (
+            <span className="text-sm text-muted-foreground">
+              · {formatPercent(coin.change7d)} en 7 d
+            </span>
+          )}
         </div>
       </div>
-      
-      <div className="grid grid-cols-2 gap-3 sm:gap-4">
-        <div className="space-y-1 sm:space-y-2">
-          <p className="text-xs sm:text-sm text-muted-foreground">Máximo 24h</p>
-          <p className="text-sm sm:text-xl font-bold text-green-600">{formatCurrency(additionalData.high24h)}</p>
-        </div>
-        <div className="space-y-1 sm:space-y-2">
-          <p className="text-xs sm:text-sm text-muted-foreground">Mínimo 24h</p>
-          <p className="text-sm sm:text-xl font-bold text-red-600">{formatCurrency(additionalData.low24h)}</p>
-        </div>
-        <div className="space-y-1 sm:space-y-2">
-          <p className="text-xs sm:text-sm text-muted-foreground">Máximo Histórico</p>
-          <p className="text-sm sm:text-lg font-semibold text-amber-600">{formatCurrency(additionalData.ath)}</p>
-        </div>
-        <div className="space-y-1 sm:space-y-2">
-          <p className="text-xs sm:text-sm text-muted-foreground">Mínimo Histórico</p>
-          <p className="text-sm sm:text-lg font-semibold text-slate-600">{formatCurrency(additionalData.atl)}</p>
-        </div>
-      </div>
-    </div>
-  )
-}
 
-export default CryptoPriceSection
+      <dl className="grid grid-cols-2 gap-3 sm:gap-4">
+        <div className="space-y-1">
+          <dt className="text-sm text-muted-foreground">Máximo 24 h</dt>
+          <dd className="font-bold text-success sm:text-xl">{formatCurrency(coin.high24h)}</dd>
+        </div>
+        <div className="space-y-1">
+          <dt className="text-sm text-muted-foreground">Mínimo 24 h</dt>
+          <dd className="font-bold text-warning sm:text-xl">{formatCurrency(coin.low24h)}</dd>
+        </div>
+        <div className="space-y-1">
+          <dt className="text-sm text-muted-foreground">Máximo histórico</dt>
+          <dd className="font-semibold sm:text-lg">{formatCurrency(coin.ath)}</dd>
+        </div>
+        <div className="space-y-1">
+          <dt className="text-sm text-muted-foreground">Mínimo histórico</dt>
+          <dd className="font-semibold sm:text-lg">{formatCurrency(coin.atl)}</dd>
+        </div>
+      </dl>
+    </div>
+  );
+};
+
+export default CryptoPriceSection;

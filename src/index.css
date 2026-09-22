@@ -25,6 +25,18 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 262 83% 58%;
     --radius: 0.5rem;
+
+    /* Tokens de gráfico y de señal. Se usan en recharts como hsl(var(--chart-1)). */
+    --chart-1: 262 83% 58%;
+    --chart-2: 199 89% 48%;
+    --chart-3: 43 96% 56%;
+    --chart-4: 160 84% 39%;
+    --chart-5: 330 81% 60%;
+    /* Oscurecidos para llegar a 4,5:1 sobre el fondo claro. */
+    --success: 142 72% 29%;
+    --success-foreground: 0 0% 100%;
+    --warning: 25 90% 35%;
+    --warning-foreground: 0 0% 100%;
   }
 
   .dark {
@@ -47,6 +59,16 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 262 83% 58%;
+
+    --chart-1: 262 83% 68%;
+    --chart-2: 199 89% 60%;
+    --chart-3: 43 96% 62%;
+    --chart-4: 160 84% 50%;
+    --chart-5: 330 81% 68%;
+    --success: 142 69% 55%;
+    --success-foreground: 222.2 84% 4.9%;
+    --warning: 25 95% 61%;
+    --warning-foreground: 222.2 84% 4.9%;
   }
 
   body {

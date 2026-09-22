@@ -1,58 +1,52 @@
+import { ExternalLink, Heart } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import type { Coin } from "@/types/coin";
 
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Heart, ExternalLink } from "lucide-react"
-
-interface CryptoHeaderProps {
-  coin: {
-    rank: number
-    name: string
-    symbol: string
-  }
-  isInWatchlist: boolean
-  onToggleWatchlist: () => void
-  onExchange: () => void
+export interface CryptoHeaderProps {
+  coin: Coin;
+  isInWatchlist: boolean;
+  onToggleWatchlist: () => void;
+  onExchange: () => void;
 }
 
 const CryptoHeader = ({ coin, isInWatchlist, onToggleWatchlist, onExchange }: CryptoHeaderProps) => {
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-      <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-        <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-orange-500 via-purple-600 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg sm:text-2xl shadow-lg flex-shrink-0">
-          {coin.symbol.charAt(0)}
-        </div>
+    <div className="flex flex-col items-start justify-between gap-4 pr-8 sm:flex-row sm:items-center">
+      <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+        <img
+          src={coin.image}
+          alt=""
+          width={56}
+          height={56}
+          className="h-12 w-12 flex-shrink-0 rounded-full sm:h-14 sm:w-14"
+        />
         <div className="min-w-0">
-          <h2 className="text-xl sm:text-3xl font-bold text-foreground truncate">{coin.name}</h2>
+          <h2 className="truncate text-xl font-bold sm:text-3xl">{coin.name}</h2>
           <div className="flex items-center gap-2">
-            <p className="text-sm sm:text-lg text-muted-foreground font-medium">{coin.symbol}</p>
-            <Badge variant="outline" className="text-xs sm:text-sm">#{coin.rank}</Badge>
+            <p className="font-medium text-muted-foreground">{coin.symbol}</p>
+            <Badge variant="outline">#{coin.rank}</Badge>
           </div>
         </div>
       </div>
-      <div className="flex items-center gap-2 w-full sm:w-auto">
+
+      <div className="flex w-full items-center gap-2 sm:w-auto">
         <Button
           variant={isInWatchlist ? "default" : "outline"}
-          size="sm"
           onClick={onToggleWatchlist}
-          className="flex items-center gap-2 text-xs sm:text-sm px-2 sm:px-3"
+          className="min-h-11 flex-1 gap-2 sm:flex-none"
         >
-          <Heart className={`h-3 w-3 sm:h-4 sm:w-4 ${isInWatchlist ? 'fill-current' : ''}`} />
-          <span className="hidden sm:inline">{isInWatchlist ? 'En Watchlist' : 'Agregar a Watchlist'}</span>
-          <span className="sm:hidden">{isInWatchlist ? 'En Lista' : 'Agregar'}</span>
+          <Heart className={cn("h-4 w-4", isInWatchlist && "fill-current")} aria-hidden="true" />
+          {isInWatchlist ? "En watchlist" : "Seguir"}
         </Button>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={onExchange}
-          className="flex items-center gap-2 text-xs sm:text-sm px-2 sm:px-3"
-        >
-          <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4" />
-          <span className="hidden sm:inline">Intercambiar</span>
-          <span className="sm:hidden">Trade</span>
+        <Button variant="outline" onClick={onExchange} className="min-h-11 flex-1 gap-2 sm:flex-none">
+          <ExternalLink className="h-4 w-4" aria-hidden="true" />
+          Convertir
         </Button>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default CryptoHeader
+export default CryptoHeader;

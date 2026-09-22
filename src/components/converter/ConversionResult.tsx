@@ -1,37 +1,45 @@
-
+import { Check, Copy } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Copy, Check } from "lucide-react";
 
-interface ConversionResultProps {
+export interface ConversionResultProps {
+  id: string;
+  label: string;
   result: string;
-  isLoading: boolean;
   copied: boolean;
   onCopy: () => void;
 }
 
-const ConversionResult = ({ result, isLoading, copied, onCopy }: ConversionResultProps) => {
-  const hasValidResult = result && result !== "Ingresa un número válido" && result !== "Error en la conversión";
-
+const ConversionResult = ({ id, label, result, copied, onCopy }: ConversionResultProps) => {
   return (
-    <div className="w-full relative">
-      <Input
-        type="text"
-        placeholder={isLoading ? "Calculando..." : "Resultado"}
-        value={isLoading ? "Calculando..." : result}
-        readOnly
-        className="h-12 text-lg font-medium bg-gray-50 dark:bg-gray-800 border-2 pr-12"
-      />
-      {hasValidResult && !isLoading && (
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onCopy}
-          className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8"
-        >
-          {copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
-        </Button>
-      )}
+    <div className="w-full space-y-2">
+      <Label htmlFor={id}>{label}</Label>
+      <div className="relative">
+        <Input
+          id={id}
+          type="text"
+          placeholder="Resultado"
+          value={result}
+          readOnly
+          className="h-12 bg-muted pr-14 text-lg font-medium"
+        />
+        {result !== "" && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onCopy}
+            aria-label="Copiar resultado"
+            className="absolute right-1 top-1/2 h-11 w-11 -translate-y-1/2"
+          >
+            {copied ? (
+              <Check className="h-4 w-4 text-success" aria-hidden="true" />
+            ) : (
+              <Copy className="h-4 w-4" aria-hidden="true" />
+            )}
+          </Button>
+        )}
+      </div>
     </div>
   );
 };

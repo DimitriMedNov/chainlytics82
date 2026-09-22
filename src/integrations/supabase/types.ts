@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      portfolio_holdings: {
+        Row: {
+          amount: number
+          coin_id: string
+          created_at: string
+          id: string
+          symbol: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          coin_id: string
+          created_at?: string
+          id?: string
+          symbol: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          coin_id?: string
+          created_at?: string
+          id?: string
+          symbol?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -55,6 +85,33 @@ export type Database = {
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      watchlist_items: {
+        Row: {
+          coin_id: string
+          created_at: string
+          id: string
+          is_favorite: boolean
+          symbol: string
+          user_id: string
+        }
+        Insert: {
+          coin_id: string
+          created_at?: string
+          id?: string
+          is_favorite?: boolean
+          symbol: string
+          user_id: string
+        }
+        Update: {
+          coin_id?: string
+          created_at?: string
+          id?: string
+          is_favorite?: boolean
+          symbol?: string
           user_id?: string
         }
         Relationships: []

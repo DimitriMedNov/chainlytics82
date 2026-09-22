@@ -1,45 +1,75 @@
-
+import { TrendingDown, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TrendingUp, TrendingDown } from "lucide-react";
-import { Currency } from "@/types/currency";
-import { formatPrice } from "@/utils/currencyUtils";
+import { Skeleton } from "@/components/ui/skeleton";
+import { formatCurrency, formatPercent } from "@/lib/format";
+import { cn } from "@/lib/utils";
+import type { Convertible } from "@/hooks/useConvertibles";
 
-interface QuickRatesProps {
-  currencies: Currency[];
+export interface QuickRatesProps {
+  options: Convertible[];
+  isPending: boolean;
 }
 
-const QuickRates = ({ currencies }: QuickRatesProps) => {
+const QuickRates = ({ options, isPending }: QuickRatesProps) => {
+  const top = options.filter((option) => option.kind === "cripto").slice(0, 4);
+
   return (
-    <Card className="shadow-lg border-0">
+    <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <TrendingUp className="h-5 w-5 text-green-600" />
-          Tasas Actuales
-        </CardTitle>
+        <CardTitle className="text-lg">Tasas actuales</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {currencies.slice(0, 4).map((currency) => (
-            <div key={currency.symbol} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold">
-                  {currency.icon}
+        {isPending ? (
+          <div className="space-y-3" aria-busy="true">
+            {Array.from({ length: 4 }, (_, index) => `tasa-${index}`).map((key) => (
+              <Skeleton key={key} className="h-16 w-full" />
+            ))}
+          </div>
+        ) : (
+          <ul className="space-y-3">
+            {top.map((option) => (
+              <li
+                key={option.code}
+                className="flex items-center justify-between gap-3 rounded-lg bg-muted/50 p-3"
+              >
+                <div className="flex min-w-0 items-center gap-3">
+                  {option.image && (
+                    <img
+                      src={option.image}
+                      alt=""
+                      width={32}
+                      height={32}
+                      loading="lazy"
+                      className="h-8 w-8 flex-shrink-0 rounded-full"
+                    />
+                  )}
+                  <div className="min-w-0">
+                    <p className="font-semibold">{option.code}</p>
+                    <p className="truncate text-xs text-muted-foreground">{option.name}</p>
+                  </div>
                 </div>
-                <div>
-                  <div className="font-semibold">{currency.symbol}</div>
-                  <div className="text-xs text-muted-foreground">{currency.name}</div>
+                <div className="text-right">
+                  <p className="font-semibold">{formatCurrency(option.usdPrice)}</p>
+                  {option.change24h !== null && (
+                    <p
+                      className={cn(
+                        "flex items-center justify-end gap-1 text-xs",
+                        option.change24h >= 0 ? "text-success" : "text-warning",
+                      )}
+                    >
+                      {option.change24h >= 0 ? (
+                        <TrendingUp className="h-3 w-3" aria-hidden="true" />
+                      ) : (
+                        <TrendingDown className="h-3 w-3" aria-hidden="true" />
+                      )}
+                      {formatPercent(option.change24h)}
+                    </p>
+                  )}
                 </div>
-              </div>
-              <div className="text-right">
-                <div className="font-semibold">{formatPrice(currency.price)}</div>
-                <div className={`text-xs flex items-center gap-1 justify-end ${currency.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {currency.change >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                  {Math.abs(currency.change)}%
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </CardContent>
     </Card>
   );

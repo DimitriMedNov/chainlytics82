@@ -1,30 +1,25 @@
+import { Search, Star } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/states/EmptyState";
 
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Star, Search } from "lucide-react"
-
-interface WatchlistEmptyStateProps {
-  onNavigateToMarkets: () => void
+export interface WatchlistEmptyStateProps {
+  onNavigateToMarkets: () => void;
 }
 
 const WatchlistEmptyState = ({ onNavigateToMarkets }: WatchlistEmptyStateProps) => {
   return (
-    <Card className="border-dashed border-2">
-      <CardContent className="text-center py-16">
-        <div className="w-16 h-16 mx-auto mb-4 bg-muted rounded-full flex items-center justify-center">
-          <Star className="h-8 w-8 text-muted-foreground" />
-        </div>
-        <h3 className="text-xl font-semibold mb-2">Tu watchlist está vacío</h3>
-        <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-          Agrega criptomonedas desde la página de Mercados para empezar a seguir sus precios y recibir actualizaciones
-        </p>
-        <Button onClick={onNavigateToMarkets} className="gap-2">
-          <Search className="h-4 w-4" />
-          Explorar Mercados
+    <EmptyState
+      icon={Star}
+      title="Tu watchlist está vacía"
+      description="Añade criptomonedas desde Mercados para seguir sus precios desde aquí."
+      action={
+        <Button onClick={onNavigateToMarkets} className="min-h-11 gap-2">
+          <Search className="h-4 w-4" aria-hidden="true" />
+          Explorar mercados
         </Button>
-      </CardContent>
-    </Card>
-  )
-}
+      }
+    />
+  );
+};
 
-export default WatchlistEmptyState
+export default WatchlistEmptyState;

@@ -1,194 +1,138 @@
-
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
 import { Calculator } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { currencies } from "@/data/currencies";
-import { getCurrencyInfo, formatConversionResult } from "@/utils/currencyUtils";
+import { ErrorState } from "@/components/states/ErrorState";
+import type { Convertible } from "@/hooks/useConvertibles";
+import { formatAmount } from "@/lib/format";
 import ConversionInput from "./ConversionInput";
 import SwapButton from "./SwapButton";
 import ConversionResult from "./ConversionResult";
 import CurrencySelector from "./CurrencySelector";
 
-const ConverterForm = () => {
-  const [fromAmount, setFromAmount] = useState("");
-  const [fromCurrency, setFromCurrency] = useState("BTC");
-  const [toCurrency, setToCurrency] = useState("USD");
-  const [result, setResult] = useState("");
+export interface ConverterFormProps {
+  options: Convertible[];
+  isPending: boolean;
+  isError: boolean;
+  errorMessage: string;
+  isRetrying: boolean;
+  onRetry: () => void;
+}
+
+const ConverterForm = ({
+  options,
+  isPending,
+  isError,
+  errorMessage,
+  isRetrying,
+  onRetry,
+}: ConverterFormProps) => {
+  const [amount, setAmount] = useState("1");
+  const [fromCode, setFromCode] = useState("BTC");
+  const [toCode, setToCode] = useState("USD");
   const [copied, setCopied] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const convertCurrency = () => {
-    console.log("Converting:", fromAmount, fromCurrency, "to", toCurrency);
-    
-    if (!fromAmount || fromAmount === "0") {
-      setResult("");
-      toast({
-        title: "Error",
-        description: "Por favor ingresa una cantidad válida",
-        variant: "destructive"
-      });
-      return;
-    }
+  const from = options.find((option) => option.code === fromCode);
+  const to = options.find((option) => option.code === toCode);
 
-    const amount = parseFloat(fromAmount);
-    if (isNaN(amount) || amount <= 0) {
-      setResult("Ingresa un número válido");
-      toast({
-        title: "Error", 
-        description: "La cantidad debe ser un número positivo",
-        variant: "destructive"
-      });
-      return;
-    }
+  // El resultado es un valor derivado: se recalcula solo al cambiar entrada o monedas.
+  const parsedAmount = Number.parseFloat(amount.replace(",", "."));
+  const canConvert =
+    from !== undefined && to !== undefined && Number.isFinite(parsedAmount) && parsedAmount > 0;
+  const resultValue = canConvert ? (parsedAmount * from.usdPrice) / to.usdPrice : null;
+  const result = resultValue === null ? "" : formatAmount(resultValue);
 
-    setIsLoading(true);
+  useEffect(() => {
+    if (!copied) return;
+    const timer = window.setTimeout(() => setCopied(false), 2000);
+    return () => window.clearTimeout(timer);
+  }, [copied]);
 
-    setTimeout(() => {
-      try {
-        const fromPrice = getCurrencyInfo(fromCurrency, currencies)?.price || 1;
-        const toPrice = getCurrencyInfo(toCurrency, currencies)?.price || 1;
-        
-        console.log("From price:", fromPrice, "To price:", toPrice);
-        
-        const amountInUSD = amount * fromPrice;
-        const convertedValue = amountInUSD / toPrice;
-        
-        console.log("Amount in USD:", amountInUSD, "Converted value:", convertedValue);
-        
-        const formattedResult = formatConversionResult(convertedValue);
-        setResult(formattedResult);
-        
-        toast({
-          title: "Conversión exitosa",
-          description: `${amount} ${fromCurrency} = ${formattedResult} ${toCurrency}`,
-        });
-      } catch (error) {
-        console.error("Error en conversión:", error);
-        setResult("Error en la conversión");
-        toast({
-          title: "Error",
-          description: "No se pudo realizar la conversión",
-          variant: "destructive"
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    }, 500);
-  };
-
-  const swapCurrencies = () => {
-    console.log("Swapping currencies");
-    const tempCurrency = fromCurrency;
-    setFromCurrency(toCurrency);
-    setToCurrency(tempCurrency);
-    
-    if (result && result !== "Ingresa un número válido" && result !== "Error en la conversión") {
-      setFromAmount(result);
-      setResult("");
-    }
-    
-    toast({
-      title: "Monedas intercambiadas",
-      description: `Ahora convirtiendo de ${toCurrency} a ${tempCurrency}`,
-    });
+  const swap = () => {
+    setFromCode(toCode);
+    setToCode(fromCode);
+    // El campo de cantidad necesita un número en crudo, no el texto formateado.
+    if (resultValue !== null) setAmount(String(resultValue));
   };
 
   const copyResult = async () => {
-    if (!result || result === "Ingresa un número válido" || result === "Error en la conversión") {
-      toast({
-        title: "Error",
-        description: "No hay resultado válido para copiar",
-        variant: "destructive"
-      });
-      return;
-    }
-
     try {
       await navigator.clipboard.writeText(result);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-      
+    } catch {
       toast({
-        title: "Copiado",
-        description: "Resultado copiado al portapapeles",
-      });
-    } catch (error) {
-      console.error("Error al copiar:", error);
-      toast({
-        title: "Error",
-        description: "No se pudo copiar al portapapeles",
-        variant: "destructive"
+        title: "No se pudo copiar",
+        description: "Tu navegador bloqueó el acceso al portapapeles.",
+        variant: "destructive",
       });
     }
   };
 
-  useEffect(() => {
-    if (fromAmount && parseFloat(fromAmount) > 0) {
-      convertCurrency();
-    } else {
-      setResult("");
-    }
-  }, [fromCurrency, toCurrency]);
-
-  const fromCurrencyInfo = getCurrencyInfo(fromCurrency, currencies);
-  const toCurrencyInfo = getCurrencyInfo(toCurrency, currencies);
-
   return (
-    <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800">
+    <Card>
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-          <Calculator className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
+          <Calculator className="h-5 w-5" aria-hidden="true" />
           Convertidor
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4 sm:space-y-6">
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-[1fr_200px] gap-3">
-            <ConversionInput
-              value={fromAmount}
-              onChange={setFromAmount}
-              placeholder="0.00"
-              disabled={isLoading}
-            />
-            <CurrencySelector
-              value={fromCurrency}
-              onValueChange={setFromCurrency}
-              currencies={currencies}
-              label="Desde"
-              currentPrice={fromCurrencyInfo?.price}
-              category={fromCurrencyInfo?.category}
-            />
+      <CardContent>
+        {isError ? (
+          <ErrorState
+            title="No se pudieron cargar las tasas"
+            message={errorMessage}
+            onRetry={onRetry}
+            isRetrying={isRetrying}
+          />
+        ) : isPending ? (
+          <div className="space-y-4" aria-busy="true">
+            <Skeleton className="h-[72px] w-full" />
+            <Skeleton className="mx-auto h-12 w-12 rounded-full" />
+            <Skeleton className="h-[72px] w-full" />
           </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_220px]">
+              <ConversionInput id="convert-amount" label="Cantidad" value={amount} onChange={setAmount} />
+              <CurrencySelector
+                id="convert-from"
+                label="Desde"
+                value={fromCode}
+                onValueChange={setFromCode}
+                options={options}
+                selected={from}
+              />
+            </div>
 
-          <SwapButton onClick={swapCurrencies} disabled={isLoading} />
+            <SwapButton onClick={swap} />
 
-          <div className="grid grid-cols-1 sm:grid-cols-[1fr_200px] gap-3">
-            <ConversionResult
-              result={result}
-              isLoading={isLoading}
-              copied={copied}
-              onCopy={copyResult}
-            />
-            <CurrencySelector
-              value={toCurrency}
-              onValueChange={setToCurrency}
-              currencies={currencies}
-              label="Hacia"
-              currentPrice={toCurrencyInfo?.price}
-              category={toCurrencyInfo?.category}
-            />
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_220px]">
+              <ConversionResult
+                id="convert-result"
+                label="Resultado"
+                result={result}
+                copied={copied}
+                onCopy={() => void copyResult()}
+              />
+              <CurrencySelector
+                id="convert-to"
+                label="Hacia"
+                value={toCode}
+                onValueChange={setToCode}
+                options={options}
+                selected={to}
+              />
+            </div>
+
+            {canConvert && (
+              <p className="text-center text-sm text-muted-foreground">
+                {formatAmount(parsedAmount)} {fromCode} = {result} {toCode}
+              </p>
+            )}
           </div>
-
-          <button 
-            onClick={convertCurrency} 
-            className="w-full h-12 text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-200 text-white rounded-md disabled:opacity-50"
-            disabled={isLoading}
-          >
-            {isLoading ? "Convirtiendo..." : "Convertir"}
-          </button>
-        </div>
+        )}
       </CardContent>
     </Card>
   );

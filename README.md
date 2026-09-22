@@ -1,42 +1,95 @@
 # Chainlytics
 
-Crypto market dashboard with a portfolio tracker, a watchlist and an AI analyst.
+Panel de criptomonedas con precios en vivo, portfolio, watchlist, convertidor y un
+analista con IA.
 
-**Live demo:** https://chainlytics82-3v7y.vercel.app/
+**Demo:** https://chainlytics82-3v7y.vercel.app/
 
-## What it does
+## Qué hace
 
-**Markets** — live prices and market data, with charts.
+**Panel** — capitalización total del mercado, volumen de 24 h, dominancia de Bitcoin y el
+top 5 de monedas. Incluye el gráfico de TradingView y el histórico de Bitcoin a 6 meses.
 
-**Portfolio** — record your holdings and follow their value over time.
+**Mercados** — las 100 criptomonedas con mayor capitalización. Búsqueda, filtro por
+monedas que suben o bajan, y orden por capitalización, volumen, cambio, precio o ranking.
 
-**Watchlist** — the coins you care about, saved to your account.
+**Portfolio** — registra cuánto tienes de cada moneda y ve su valor actual, el cambio de
+las últimas 24 h y el peso de cada posición. Se guarda en tu cuenta.
 
-**Converter** — quick conversion between coins and fiat.
+**Watchlist** — las monedas que sigues, con favoritos y orden por nombre, precio o cambio.
+Se guarda en tu cuenta.
 
-**AI analyst** — an `ai-crypto-analyst` Edge Function that reads the current market data
-and writes a plain-language summary. It runs server-side, so the model key never reaches
-the browser.
+**Convertidor** — entre las 30 criptomonedas principales y cinco monedas fiat (USD, EUR,
+MXN, GBP, JPY).
 
-## Data model
+**Analista IA** — una Edge Function `ai-crypto-analyst` que lee los datos de mercado del
+momento y responde en lenguaje llano. Se ejecuta en el servidor, así que la clave del
+modelo nunca llega al navegador. Requiere iniciar sesión.
 
-`profiles` and `user_roles` in PostgreSQL, under Row Level Security. Market data is read
-from a public API at request time rather than mirrored into the database.
+## De dónde salen los datos
+
+Todos los precios vienen de la [API pública de CoinGecko](https://www.coingecko.com/en/api)
+en el momento de la petición: no hay datos de ejemplo ni precios escritos a mano.
+
+Toda la app comparte **una sola** consulta de mercados (`src/hooks/useMarketData.ts`), que
+React Query reutiliza entre pantallas. CoinGecko limita las peticiones anónimas, así que
+esto evita chocar con el límite al navegar.
+
+La watchlist y el portfolio guardan **qué** monedas sigues y **cuánta** cantidad tienes,
+nunca precios: el precio siempre es el de la API en ese momento.
+
+Con la sesión iniciada viven en Supabase, bajo Row Level Security, y te siguen entre
+dispositivos. Sin sesión se guardan en este navegador, y la primera vez que inicies sesión
+se suben a tu cuenta solos. La app te dice en cada pantalla dónde se está guardando.
+
+## Modelo de datos
+
+Cuatro tablas en PostgreSQL, todas bajo Row Level Security, y cada usuario solo ve sus
+propias filas:
+
+| Tabla | Para qué |
+|---|---|
+| `profiles` | nombre visible del usuario |
+| `user_roles` | rol (`user` / `admin`), que autoriza el analista IA |
+| `watchlist_items` | qué monedas sigue cada usuario |
+| `portfolio_holdings` | cuánta cantidad tiene de cada moneda |
+
+Los datos de mercado no se copian a la base de datos: se leen de la API al mostrarlos.
 
 ## Stack
 
-React · TypeScript · Vite · Tailwind CSS · shadcn/ui · React Hook Form · Zod ·
-Supabase (PostgreSQL, Auth, Edge Functions)
+React 18 · TypeScript (`strict`) · Vite · Tailwind CSS · shadcn/ui · React Query · Recharts ·
+Zod · Supabase (PostgreSQL, Auth, Edge Functions)
 
-## Run it locally
+## Cómo correrlo
 
 ```bash
 npm install
-cp .env.example .env
+cp .env.example .env   # rellena los tres valores de tu proyecto Supabase
 npm run dev
 ```
 
-## Note
+La app queda en `http://localhost:8080`.
 
-This is an educational dashboard. It is not investment advice and it does not execute
-any trade.
+Comprobaciones antes de subir cambios:
+
+```bash
+npx tsc --noEmit   # tipos
+npm run lint       # reglas
+npm run build      # que compile
+```
+
+El analista IA necesita, como secretos de la Edge Function en Supabase:
+
+| Variable | Por defecto |
+|---|---|
+| `AI_API_KEY` | obligatoria (acepta `LOVABLE_API_KEY` por compatibilidad) |
+| `AI_BASE_URL` | `https://ai.gateway.lovable.dev/v1` |
+| `AI_MODEL` | `google/gemini-3-flash-preview` |
+
+Sirve cualquier gateway compatible con la API de chat de OpenAI: para cambiar de proveedor
+basta con apuntar `AI_BASE_URL` y `AI_MODEL` a otro sitio.
+
+## Aviso
+
+Es un panel educativo. No es asesoría de inversión y no ejecuta ninguna operación.

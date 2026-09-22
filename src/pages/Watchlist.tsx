@@ -1,91 +1,159 @@
-
-import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
-import CryptoDetailsModal from "@/components/CryptoDetailsModal"
-import WatchlistHeader from "@/components/watchlist/WatchlistHeader"
-import WatchlistSearch from "@/components/watchlist/WatchlistSearch"
-import WatchlistEmptyState from "@/components/watchlist/WatchlistEmptyState"
-import WatchlistSection from "@/components/watchlist/WatchlistSection"
-import { useWatchlistActions } from "@/hooks/useWatchlistActions"
-import { useWatchlistSorting } from "@/hooks/useWatchlistSorting"
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { SearchX } from "lucide-react";
+import CryptoDetailsModal from "@/components/CryptoDetailsModal";
+import WatchlistHeader from "@/components/watchlist/WatchlistHeader";
+import WatchlistSearch from "@/components/watchlist/WatchlistSearch";
+import WatchlistEmptyState from "@/components/watchlist/WatchlistEmptyState";
+import WatchlistSection from "@/components/watchlist/WatchlistSection";
+import { ErrorState } from "@/components/states/ErrorState";
+import { EmptyState } from "@/components/states/EmptyState";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
+import { useMarkets } from "@/hooks/useMarketData";
+import { joinWithMarket, useWatchlist, type WatchlistCoin } from "@/hooks/useWatchlist";
+import { useWatchlistSorting } from "@/hooks/useWatchlistSorting";
+import type { Coin } from "@/types/coin";
 
 const Watchlist = () => {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [watchlistItems, setWatchlistItems] = useState<any[]>([])
-  const [selectedCoin, setSelectedCoin] = useState<any>(null)
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const navigate = useNavigate()
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCoin, setSelectedCoin] = useState<Coin | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const { toggleFavorite, removeFromWatchlist, handleViewDetails, handleTrade } = useWatchlistActions()
+  const watchlist = useWatchlist();
+  const { entries, remove, toggleFavorite } = watchlist;
+  const { data, isPending, isError, error, refetch, isFetching } = useMarkets();
 
-  useEffect(() => {
-    const savedWatchlist = JSON.parse(localStorage.getItem('crypto-watchlist') || '[]')
-    console.log('Loaded watchlist:', savedWatchlist)
-    setWatchlistItems(savedWatchlist)
-  }, [])
+  const coins = useMemo(() => joinWithMarket(entries, data), [entries, data]);
 
-  const filteredItems = watchlistItems.filter(item =>
-    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.symbol.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filteredItems = useMemo(() => {
+    const needle = searchTerm.trim().toLowerCase();
+    if (needle === "") return coins;
+    return coins.filter(
+      (item) =>
+        item.name.toLowerCase().includes(needle) || item.symbol.toLowerCase().includes(needle),
+    );
+  }, [coins, searchTerm]);
 
-  const { sortBy, sortOrder, sortedItems, handleSort } = useWatchlistSorting(filteredItems)
+  const { sortBy, sortOrder, sortedItems, handleSort } = useWatchlistSorting(filteredItems);
 
-  const favoriteItems = sortedItems.filter(item => item.isFavorite)
-  const otherItems = sortedItems.filter(item => !item.isFavorite)
+  const favoriteItems = sortedItems.filter((item) => item.isFavorite);
+  const otherItems = sortedItems.filter((item) => !item.isFavorite);
 
-  const watchlistActions = {
-    onToggleFavorite: (id: number) => toggleFavorite(id, watchlistItems, setWatchlistItems),
-    onRemove: (id: number) => removeFromWatchlist(id, watchlistItems, setWatchlistItems),
-    onViewDetails: (item: any) => handleViewDetails(item, setSelectedCoin, setIsModalOpen),
-    onTrade: handleTrade
-  }
+  const handleRemove = (symbol: string) => {
+    const item = coins.find((coin) => coin.symbol === symbol);
+    remove(symbol);
+    toast({
+      title: "Eliminada del watchlist",
+      description: `${item?.name ?? symbol} ya no está en tu lista`,
+    });
+  };
 
-  if (watchlistItems.length === 0) {
-    return (
-      <div className="p-3 sm:p-4 lg:p-6 xl:p-8 space-y-4 sm:space-y-6 lg:space-y-8 max-w-7xl mx-auto">
-        <WatchlistHeader itemCount={0} onSort={() => handleSort('name')} />
-        <WatchlistEmptyState onNavigateToMarkets={() => navigate('/markets')} />
-      </div>
-    )
-  }
+  const handleTrade = (item: WatchlistCoin) => {
+    navigate("/converter");
+    toast({
+      title: "Vamos al convertidor",
+      description: `Ahí puedes convertir ${item.name}`,
+    });
+  };
+
+  const actions = {
+    onToggleFavorite: toggleFavorite,
+    onRemove: handleRemove,
+    onViewDetails: (item: WatchlistCoin) => {
+      setSelectedCoin(item);
+      setIsModalOpen(true);
+    },
+    onTrade: handleTrade,
+  };
 
   return (
-    <div className="p-3 sm:p-4 lg:p-6 xl:p-8 space-y-4 sm:space-y-6 lg:space-y-8 max-w-7xl mx-auto">
-      <WatchlistHeader itemCount={watchlistItems.length} onSort={() => handleSort('name')} />
-      <WatchlistSearch searchTerm={searchTerm} onSearchChange={setSearchTerm} />
-
-      {favoriteItems.length > 0 && (
-        <WatchlistSection
-          title={`Favoritos (${favoriteItems.length})`}
-          items={favoriteItems}
-          isFavoriteSection={true}
-          sortBy={sortBy}
-          sortOrder={sortOrder}
-          onSort={handleSort}
-          {...watchlistActions}
-        />
-      )}
-
-      {otherItems.length > 0 && (
-        <WatchlistSection
-          title={`Todas las Criptomonedas (${otherItems.length})`}
-          items={otherItems}
-          isFavoriteSection={false}
-          sortBy={sortBy}
-          sortOrder={sortOrder}
-          onSort={handleSort}
-          {...watchlistActions}
-        />
-      )}
-
-      <CryptoDetailsModal
-        open={isModalOpen}
-        onOpenChange={setIsModalOpen}
-        coin={selectedCoin}
+    <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:space-y-8 lg:p-8">
+      <WatchlistHeader
+        itemCount={entries.length}
+        onSort={() => handleSort("name")}
+        isSynced={watchlist.isSynced}
       />
-    </div>
-  )
-}
 
-export default Watchlist
+      {watchlist.isError ? (
+        <ErrorState
+          title="No se pudo cargar tu watchlist"
+          message={watchlist.errorMessage}
+          onRetry={() => void refetch()}
+          isRetrying={isFetching}
+        />
+      ) : watchlist.isPending ? (
+        <div className="space-y-4" aria-busy="true">
+          {Array.from({ length: 3 }, (_, index) => `carga-${index}`).map((key) => (
+            <Skeleton key={key} className="h-24 w-full" />
+          ))}
+        </div>
+      ) : entries.length === 0 ? (
+        <WatchlistEmptyState onNavigateToMarkets={() => navigate("/markets")} />
+      ) : isError ? (
+        <ErrorState
+          title="No se pudieron cargar los precios"
+          message={error.message}
+          onRetry={() => void refetch()}
+          isRetrying={isFetching}
+        />
+      ) : isPending ? (
+        <div className="space-y-4" aria-busy="true">
+          <Skeleton className="h-24 w-full" />
+          {Array.from({ length: 3 }, (_, index) => `fila-${index}`).map((key) => (
+            <Skeleton key={key} className="h-24 w-full" />
+          ))}
+        </div>
+      ) : (
+        <>
+          <WatchlistSearch searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+
+          {sortedItems.length === 0 ? (
+            <EmptyState
+              icon={SearchX}
+              title="Ninguna coincidencia"
+              description="Ninguna moneda de tu watchlist coincide con esa búsqueda."
+              action={
+                <Button variant="outline" className="min-h-11" onClick={() => setSearchTerm("")}>
+                  Limpiar búsqueda
+                </Button>
+              }
+            />
+          ) : (
+            <>
+              {favoriteItems.length > 0 && (
+                <WatchlistSection
+                  title={`Favoritas (${favoriteItems.length})`}
+                  items={favoriteItems}
+                  isFavoriteSection
+                  sortBy={sortBy}
+                  sortOrder={sortOrder}
+                  onSort={handleSort}
+                  {...actions}
+                />
+              )}
+
+              {otherItems.length > 0 && (
+                <WatchlistSection
+                  title={`Todas (${otherItems.length})`}
+                  items={otherItems}
+                  sortBy={sortBy}
+                  sortOrder={sortOrder}
+                  onSort={handleSort}
+                  {...actions}
+                />
+              )}
+            </>
+          )}
+        </>
+      )}
+
+      <CryptoDetailsModal open={isModalOpen} onOpenChange={setIsModalOpen} coin={selectedCoin} />
+    </div>
+  );
+};
+
+export default Watchlist;

@@ -24,3 +24,8 @@ dist-ssr
 *.sw?
 
 .lovable/
+
+# Variables de entorno (nunca se versionan)
+.env
+.env.local
+.env.*.local

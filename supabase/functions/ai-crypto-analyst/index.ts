@@ -1,6 +1,49 @@
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
+/** Forma de una moneda tal como la devuelve /coins/markets. */
+interface CoinGeckoMarket {
+  market_cap_rank?: number;
+  name?: string;
+  symbol?: string;
+  current_price?: number;
+  price_change_percentage_24h?: number;
+  price_change_percentage_7d_in_currency?: number;
+  market_cap?: number;
+  total_volume?: number;
+  high_24h?: number;
+  low_24h?: number;
+  ath?: number;
+  ath_change_percentage?: number;
+}
+
+/** Contexto de mercado que se le pasa al modelo. */
+interface MarketContext {
+  fetchedAt: string;
+  global: {
+    totalMarketCapUsd?: number;
+    totalVolume24hUsd?: number;
+    btcDominance?: number;
+    ethDominance?: number;
+    marketCapChange24hPct?: number;
+    activeCryptocurrencies?: number;
+  } | null;
+  topCoins: Array<{
+    rank?: number;
+    name?: string;
+    symbol?: string;
+    price?: number;
+    change24hPct?: number;
+    change7dPct?: number;
+    marketCap?: number;
+    volume24h?: number;
+    high24h?: number;
+    low24h?: number;
+    ath?: number;
+    athChangePct?: number;
+  }>;
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -47,7 +90,9 @@ Deno.serve(async (req) => {
       });
     }
 
-    const allowed = (roles ?? []).some((r: any) => r.role === 'user' || r.role === 'admin');
+    const allowed = (roles ?? []).some(
+      (r: { role: string }) => r.role === 'user' || r.role === 'admin',
+    );
     if (!allowed) {
       return new Response(JSON.stringify({ error: 'Permisos insuficientes para usar el analista IA' }), {
         status: 403,
@@ -77,11 +122,19 @@ Deno.serve(async (req) => {
       }
     }
 
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY is not configured');
+    // El proveedor de IA es configurable: cualquier gateway compatible con la
+    // API de chat de OpenAI sirve. Por defecto sigue apuntando a Lovable para
+    // no romper el despliegue actual.
+    const AI_API_KEY = Deno.env.get('AI_API_KEY') ?? Deno.env.get('LOVABLE_API_KEY');
+    const AI_BASE_URL = Deno.env.get('AI_BASE_URL') ?? 'https://ai.gateway.lovable.dev/v1';
+    const AI_MODEL = Deno.env.get('AI_MODEL') ?? 'google/gemini-3-flash-preview';
+
+    if (!AI_API_KEY) {
+      throw new Error('Falta la clave del proveedor de IA (AI_API_KEY o LOVABLE_API_KEY)');
+    }
 
     // Fetch live market data from CoinGecko (top 15 by market cap + global stats)
-    let marketContext: any = null;
+    let marketContext: MarketContext | null = null;
     try {
       const [marketsRes, globalRes] = await Promise.all([
         fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=15&page=1&sparkline=false&price_change_percentage=24h,7d'),
@@ -100,7 +153,7 @@ Deno.serve(async (req) => {
           marketCapChange24hPct: global.data.market_cap_change_percentage_24h_usd,
           activeCryptocurrencies: global.data.active_cryptocurrencies,
         } : null,
-        topCoins: Array.isArray(markets) ? markets.map((c: any) => ({
+        topCoins: Array.isArray(markets) ? markets.map((c: CoinGeckoMarket) => ({
           rank: c.market_cap_rank,
           name: c.name,
           symbol: c.symbol?.toUpperCase(),
@@ -133,14 +186,14 @@ Reglas:
 Datos de mercado en TIEMPO REAL (fuente: CoinGecko):
 ${marketContext ? JSON.stringify(marketContext, null, 2) : 'No se pudo obtener datos en vivo. Indícalo al usuario.'}`;
 
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const response = await fetch(`${AI_BASE_URL}/chat/completions`, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${AI_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-3-flash-preview',
+        model: AI_MODEL,
         messages: [{ role: 'system', content: systemPrompt }, ...messages],
         stream: true,
       }),
@@ -154,7 +207,7 @@ ${marketContext ? JSON.stringify(marketContext, null, 2) : 'No se pudo obtener d
         });
       }
       if (response.status === 402) {
-        return new Response(JSON.stringify({ error: 'Se agotaron los créditos de IA. Agrega fondos en Settings → Workspace → Usage.' }), {
+        return new Response(JSON.stringify({ error: 'Se agotaron los créditos de IA del proveedor configurado.' }), {
           status: 402,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });

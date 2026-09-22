@@ -79,8 +79,8 @@ export default function Auth() {
           <div className="mx-auto h-12 w-12 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center mb-2">
             <Sparkles className="h-6 w-6 text-primary-foreground" />
           </div>
-          <CardTitle>Accede a CryptoSense AI</CardTitle>
-          <CardDescription>Inicia sesión para usar el analista crypto con IA</CardDescription>
+          <CardTitle>Accede a Chainlytics</CardTitle>
+          <CardDescription>Inicia sesión para usar el analista de criptomonedas con IA</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin">

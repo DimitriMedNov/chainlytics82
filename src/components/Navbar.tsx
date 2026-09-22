@@ -1,5 +1,5 @@
 
-import { BarChart3, Eye, Calculator, TrendingUp, Home, Menu, LogIn, LogOut } from "lucide-react"
+import { BarChart3, Calculator, Eye, Home, LogIn, LogOut, Menu, TrendingUp, Wallet } from "lucide-react"
 import { NavLink, useLocation, useNavigate } from "react-router-dom"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -9,10 +9,11 @@ import { useAuth } from "@/contexts/AuthContext"
 import { toast } from "sonner"
 
 const items = [
-  { title: "Dashboard", url: "/", icon: Home },
+  { title: "Panel", url: "/", icon: Home },
+  { title: "Mercados", url: "/markets", icon: TrendingUp },
+  { title: "Portfolio", url: "/portfolio", icon: Wallet },
   { title: "Watchlist", url: "/watchlist", icon: Eye },
-  { title: "Converter", url: "/converter", icon: Calculator },
-  { title: "Markets", url: "/markets", icon: TrendingUp },
+  { title: "Convertidor", url: "/converter", icon: Calculator },
 ]
 
 export function Navbar() {
@@ -56,7 +57,7 @@ export function Navbar() {
         {/* Logo */}
         <div className="flex items-center gap-2 mr-6">
           <BarChart3 className="h-6 w-6 text-primary" />
-          <span className="font-semibold text-lg">Crypto Dashboard</span>
+          <span className="font-semibold text-lg">Chainlytics</span>
         </div>
 
         {/* Desktop Navigation */}
@@ -81,8 +82,8 @@ export function Navbar() {
           {/* Mobile menu trigger */}
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
-                <Menu className="h-5 w-5" />
+              <Button variant="ghost" size="icon" className="md:hidden h-11 w-11">
+                <Menu className="h-5 w-5" aria-hidden="true" />
                 <span className="sr-only">Toggle menu</span>
               </Button>
             </SheetTrigger>
@@ -90,7 +91,7 @@ export function Navbar() {
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2">
                   <BarChart3 className="h-5 w-5 text-primary" />
-                  <span className="font-semibold">Crypto Dashboard</span>
+                  <span className="font-semibold">Chainlytics</span>
                 </div>
               </div>
               <div className="flex flex-col space-y-2">
