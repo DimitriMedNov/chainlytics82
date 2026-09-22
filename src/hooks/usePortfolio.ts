@@ -67,7 +67,7 @@ export function readLocalTransactions(): Transaction[] {
   return [];
 }
 
-function writeLocalTransactions(transactions: Transaction[]): void {
+export function writeLocalTransactions(transactions: Transaction[]): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
   } catch {

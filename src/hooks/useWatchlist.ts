@@ -62,7 +62,7 @@ export function readLocalWatchlist(): WatchlistEntry[] {
   return [];
 }
 
-function writeLocalWatchlist(entries: WatchlistEntry[]): void {
+export function writeLocalWatchlist(entries: WatchlistEntry[]): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
   } catch {

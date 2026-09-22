@@ -3,13 +3,28 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { clearLocalWatchlist, readLocalWatchlist } from "@/hooks/useWatchlist";
-import { clearLocalTransactions, readLocalTransactions } from "@/hooks/usePortfolio";
+import {
+  clearLocalWatchlist,
+  readLocalWatchlist,
+  writeLocalWatchlist,
+  type WatchlistEntry,
+} from "@/hooks/useWatchlist";
+import {
+  clearLocalTransactions,
+  readLocalTransactions,
+  writeLocalTransactions,
+} from "@/hooks/usePortfolio";
+import type { Transaction } from "@/types/portfolio";
 
 /**
  * Al iniciar sesión, sube a la cuenta lo que estuviera guardado solo en este
- * navegador. `upsert` con ignoreDuplicates evita pisar lo que ya hubiera en
- * la nube: si la moneda ya está, gana la versión de la cuenta.
+ * navegador.
+ *
+ * Los movimientos no tienen clave natural, así que subirlos dos veces los
+ * duplica. Para que no pase, se vacía el almacenamiento local ANTES de subir
+ * (una escritura síncrona que cierra la ventana en la que dos arranques
+ * simultáneos leerían lo mismo) y, si la subida falla, se devuelven a su
+ * sitio.
  */
 export function useLocalDataSync(): void {
   const { user } = useAuth();
@@ -21,18 +36,24 @@ export function useLocalDataSync(): void {
     if (!userId || migratedFor.current === userId) return;
     migratedFor.current = userId;
 
-    const localWatchlist = readLocalWatchlist();
-    const localTransactions = readLocalTransactions();
-    if (localWatchlist.length === 0 && localTransactions.length === 0) return;
+    // Se toma el contenido y se vacía en el mismo tic, antes de cualquier await.
+    const watchlist: WatchlistEntry[] = readLocalWatchlist();
+    const transactions: Transaction[] = readLocalTransactions();
+    if (watchlist.length === 0 && transactions.length === 0) return;
+
+    clearLocalWatchlist();
+    clearLocalTransactions();
 
     let cancelled = false;
 
     const run = async () => {
       let movidos = 0;
 
-      if (localWatchlist.length > 0) {
+      if (watchlist.length > 0) {
+        // La watchlist sí tiene clave natural (usuario + moneda), así que un
+        // upsert la deja idempotente por sí solo.
         const { error } = await supabase.from("watchlist_items").upsert(
-          localWatchlist.map((entry) => ({
+          watchlist.map((entry) => ({
             user_id: userId,
             coin_id: entry.id === "" ? entry.symbol.toLowerCase() : entry.id,
             symbol: entry.symbol,
@@ -40,18 +61,16 @@ export function useLocalDataSync(): void {
           })),
           { onConflict: "user_id,coin_id", ignoreDuplicates: true },
         );
-        if (!error) {
-          clearLocalWatchlist();
-          movidos += localWatchlist.length;
+        if (error) {
+          writeLocalWatchlist(watchlist);
+        } else {
+          movidos += watchlist.length;
         }
       }
 
-      if (localTransactions.length > 0) {
-        // Los movimientos no tienen clave natural, así que se insertan tal
-        // cual: si ya subiste estos, estarías duplicándolos, y por eso solo
-        // se hace una vez por usuario y después se borra lo local.
+      if (transactions.length > 0) {
         const { error } = await supabase.from("portfolio_transactions").insert(
-          localTransactions.map((tx) => ({
+          transactions.map((tx) => ({
             user_id: userId,
             coin_id: tx.coinId,
             symbol: tx.symbol,
@@ -61,9 +80,10 @@ export function useLocalDataSync(): void {
             happened_at: tx.happenedAt,
           })),
         );
-        if (!error) {
-          clearLocalTransactions();
-          movidos += localTransactions.length;
+        if (error) {
+          writeLocalTransactions(transactions);
+        } else {
+          movidos += transactions.length;
         }
       }
 
