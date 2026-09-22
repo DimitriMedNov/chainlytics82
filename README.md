@@ -101,6 +101,15 @@ El analista IA necesita, como secretos de la Edge Function en Supabase:
 Sirve cualquier gateway compatible con la API de chat de OpenAI: para cambiar de proveedor
 basta con apuntar `AI_BASE_URL` y `AI_MODEL` a otro sitio.
 
+## Si no hay servicio de cuentas
+
+La app arranca igual y avisa de lo que no puede hacer, en vez de romperse:
+precios, mercados, comparación y convertidor no necesitan cuenta, y la
+watchlist y el portfolio se guardan en el navegador. Lo único que se apaga es
+iniciar sesión, la sincronización y el analista IA. Distingue entre "faltan
+las variables del `.env`" y "está configurado pero no responde", porque se
+arreglan de formas distintas.
+
 ## Aviso
 
 Es un panel educativo. No es asesoría de inversión y no ejecuta ninguna operación.

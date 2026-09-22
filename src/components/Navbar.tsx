@@ -22,7 +22,7 @@ const items = [
 export function Navbar() {
   const location = useLocation()
   const navigate = useNavigate()
-  const { session, user, signOut } = useAuth()
+  const { session, user, signOut, canSignIn } = useAuth()
   const { open: openSearch } = useSearch()
   const [isOpen, setIsOpen] = useState(false)
 
@@ -77,14 +77,14 @@ export function Navbar() {
           <ThemeToggle />
           {session ? (
             <Button variant="ghost" size="sm" onClick={handleSignOut} className="hidden sm:flex gap-2">
-              <LogOut className="h-4 w-4" />
+              <LogOut className="h-4 w-4" aria-hidden="true" />
               <span className="max-w-[120px] truncate">{user?.email}</span>
             </Button>
-          ) : (
+          ) : canSignIn ? (
             <Button variant="default" size="sm" asChild className="hidden sm:flex gap-2">
-              <NavLink to="/auth"><LogIn className="h-4 w-4" /> Iniciar sesión</NavLink>
+              <NavLink to="/auth"><LogIn className="h-4 w-4" aria-hidden="true" /> Iniciar sesión</NavLink>
             </Button>
-          )}
+          ) : null}
           
           {/* Mobile menu trigger */}
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -103,17 +103,19 @@ export function Navbar() {
               </div>
               <div className="flex flex-col space-y-2">
                 <NavItems alwaysShowLabels />
-                <div className="pt-4 mt-2 border-t">
-                  {session ? (
-                    <Button variant="outline" className="w-full gap-2" onClick={() => { setIsOpen(false); handleSignOut() }}>
-                      <LogOut className="h-4 w-4" /> Cerrar sesión
-                    </Button>
-                  ) : (
-                    <Button asChild className="w-full gap-2" onClick={() => setIsOpen(false)}>
-                      <NavLink to="/auth"><LogIn className="h-4 w-4" /> Iniciar sesión</NavLink>
-                    </Button>
-                  )}
-                </div>
+                {(session || canSignIn) && (
+                  <div className="pt-4 mt-2 border-t">
+                    {session ? (
+                      <Button variant="outline" className="w-full gap-2" onClick={() => { setIsOpen(false); handleSignOut() }}>
+                        <LogOut className="h-4 w-4" aria-hidden="true" /> Cerrar sesión
+                      </Button>
+                    ) : (
+                      <Button asChild className="w-full gap-2" onClick={() => setIsOpen(false)}>
+                        <NavLink to="/auth"><LogIn className="h-4 w-4" aria-hidden="true" /> Iniciar sesión</NavLink>
+                      </Button>
+                    )}
+                  </div>
+                )}
               </div>
             </SheetContent>
           </Sheet>

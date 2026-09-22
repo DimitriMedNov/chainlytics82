@@ -10,6 +10,7 @@ import { Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { BackendUnavailable } from "@/components/states/BackendUnavailable";
 
 const credSchema = z.object({
   email: z.string().trim().email("Email inválido").max(255),
@@ -17,7 +18,7 @@ const credSchema = z.object({
 });
 
 export default function Auth() {
-  const { session, loading } = useAuth();
+  const { session, loading, backend } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,8 +28,20 @@ export default function Auth() {
     if (session) navigate("/", { replace: true });
   }, [session, navigate]);
 
-  if (loading) return null;
+  if (loading || backend === "checking") return null;
   if (session) return <Navigate to="/" replace />;
+
+  // Sin servicio de cuentas, el formulario solo llevaría a un error de red.
+  if (backend !== "ready") {
+    return (
+      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center p-4">
+        <BackendUnavailable
+          status={backend}
+          what="no puedes iniciar sesión ni usar el analista con IA"
+        />
+      </div>
+    );
+  }
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();

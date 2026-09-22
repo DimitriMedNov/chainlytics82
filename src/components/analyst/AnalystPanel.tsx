@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Sparkles, Send, Loader2, Bot, User, LogIn } from "lucide-react";
+import { Sparkles, Send, Loader2, Bot, User, LogIn, CloudOff } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,7 @@ export interface AnalystPanelProps {
 }
 
 export default function AnalystPanel({ open, onOpenChange }: AnalystPanelProps) {
-  const { session, user } = useAuth();
+  const { session, user, canSignIn, backend } = useAuth();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -149,10 +149,25 @@ export default function AnalystPanel({ open, onOpenChange }: AnalystPanelProps) 
 
         <ScrollArea className="flex-1 px-4">
           <div className="py-4 space-y-4">
-            {!session && (
+            {!session && !canSignIn && backend !== "checking" && (
+              <div className="text-center py-10 space-y-4">
+                <div className="inline-flex h-12 w-12 rounded-full bg-muted items-center justify-center">
+                  <CloudOff className="h-6 w-6 text-muted-foreground" aria-hidden="true" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="font-semibold">El analista no está disponible</h3>
+                  <p className="text-sm text-muted-foreground px-4">
+                    Se ejecuta en el servidor, y ahora mismo el servicio no responde. Los
+                    precios de la app siguen funcionando.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {!session && canSignIn && (
               <div className="text-center py-10 space-y-4">
                 <div className="inline-flex h-12 w-12 rounded-full bg-primary/10 items-center justify-center">
-                  <LogIn className="h-6 w-6 text-primary" />
+                  <LogIn className="h-6 w-6 text-primary" aria-hidden="true" />
                 </div>
                 <div className="space-y-1">
                   <h3 className="font-semibold">Inicia sesión para continuar</h3>
