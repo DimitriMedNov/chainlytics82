@@ -33,6 +33,8 @@ export interface GlobalMarket {
 
 /** Un punto del gráfico de precios. */
 export interface PricePoint {
+  /** Milisegundos desde la época. Es lo que permite cruzar varias series. */
+  timestamp: number;
   /** Etiqueta corta para el eje X. */
   date: string;
   /** Fecha completa para el tooltip. */

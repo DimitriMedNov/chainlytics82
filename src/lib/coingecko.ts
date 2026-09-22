@@ -170,6 +170,7 @@ export async function fetchPriceHistory(
     const [timestamp, price] = entry as [number, number];
     const moment = new Date(timestamp);
     return {
+      timestamp,
       date: porHoras
         ? moment.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })
         : moment.toLocaleDateString("es-ES", { day: "2-digit", month: "short" }),

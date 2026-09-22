@@ -9,6 +9,8 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "test:portfolio": "node --experimental-strip-types src/lib/__pruebas__/portfolioMath.prueba.ts",
+    "test:comparar": "node --experimental-strip-types src/lib/__pruebas__/compareMath.prueba.ts",
+    "test": "npm run test:portfolio && npm run test:comparar",
     "preview": "vite preview"
   },
   "dependencies": {

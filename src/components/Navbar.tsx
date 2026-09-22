@@ -1,5 +1,5 @@
 
-import { BarChart3, Calculator, Eye, Home, LogIn, LogOut, Menu, TrendingUp, Wallet } from "lucide-react"
+import { BarChart3, Calculator, Eye, Home, LogIn, LogOut, Menu, Scale, TrendingUp, Wallet } from "lucide-react"
 import { NavLink, useLocation, useNavigate } from "react-router-dom"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -14,6 +14,7 @@ const items = [
   { title: "Panel", url: "/", icon: Home },
   { title: "Mercados", url: "/markets", icon: TrendingUp },
   { title: "Portfolio", url: "/portfolio", icon: Wallet },
+  { title: "Comparar", url: "/comparar", icon: Scale },
   { title: "Watchlist", url: "/watchlist", icon: Eye },
   { title: "Convertidor", url: "/converter", icon: Calculator },
 ]
@@ -25,7 +26,9 @@ export function Navbar() {
   const { open: openSearch } = useSearch()
   const [isOpen, setIsOpen] = useState(false)
 
-  const NavItems = () => (
+  // En el menú lateral el texto siempre se ve; en la barra de arriba se
+  // esconde entre md y lg para que quepan todas las secciones.
+  const NavItems = ({ alwaysShowLabels = false }: { alwaysShowLabels?: boolean }) => (
     <>
       {items.map((item) => (
         <NavLink
@@ -41,8 +44,8 @@ export function Navbar() {
             }`
           }
         >
-          <item.icon className="h-4 w-4" />
-          <span>{item.title}</span>
+          <item.icon className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+          <span className={alwaysShowLabels ? "" : "sr-only xl:not-sr-only"}>{item.title}</span>
         </NavLink>
       ))}
     </>
@@ -58,13 +61,13 @@ export function Navbar() {
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center gap-2 px-4 sm:px-8">
         {/* Logo */}
-        <div className="flex min-w-0 items-center gap-2 sm:mr-6">
+        <div className="flex flex-shrink-0 items-center gap-2 sm:mr-4">
           <BarChart3 className="h-6 w-6 text-primary" />
-          <span className="truncate font-semibold text-lg">Chainlytics</span>
+          <span className="font-semibold text-lg">Chainlytics</span>
         </div>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center space-x-1 flex-1">
+        <div className="hidden min-w-0 flex-1 items-center gap-0.5 md:flex">
           <NavItems />
         </div>
 
@@ -99,7 +102,7 @@ export function Navbar() {
                 </div>
               </div>
               <div className="flex flex-col space-y-2">
-                <NavItems />
+                <NavItems alwaysShowLabels />
                 <div className="pt-4 mt-2 border-t">
                   {session ? (
                     <Button variant="outline" className="w-full gap-2" onClick={() => { setIsOpen(false); handleSignOut() }}>

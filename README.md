@@ -18,6 +18,10 @@ real: coste medio ponderado, ganancia sobre el papel y ganancia ya realizada al 
 Si no recuerdas a qué precio compraste algo, la posición queda marcada **sin coste** y se
 excluye del cálculo: no se inventa un número. Se guarda en tu cuenta.
 
+**Comparar** — hasta cinco monedas en el mismo gráfico, todas partiendo de 0 %, para ver
+cuál lo ha hecho mejor en el periodo que elijas. La selección va en la URL, así que la
+comparación se puede compartir tal cual.
+
 **Watchlist** — las monedas que sigues, con favoritos y orden por nombre, precio o cambio.
 Se guarda en tu cuenta.
 
@@ -78,11 +82,13 @@ Comprobaciones antes de subir cambios:
 ```bash
 npx tsc --noEmit       # tipos
 npm run lint           # reglas
-npm run test:portfolio # cálculo de coste y ganancia (24 comprobaciones)
+npm run test           # los dos cálculos de abajo
+npm run test:portfolio # coste y ganancia (24 comprobaciones)
+npm run test:comparar  # cruce y normalización de series (17 comprobaciones)
 npm run build          # que compile
 ```
 
-Las pruebas del portfolio usan el TypeScript nativo de Node, sin runner instalado.
+Las pruebas usan el TypeScript nativo de Node, sin runner instalado.
 
 El analista IA necesita, como secretos de la Edge Function en Supabase:
 

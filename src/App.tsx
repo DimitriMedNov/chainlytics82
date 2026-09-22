@@ -17,6 +17,7 @@ import Index from "./pages/Index";
 // Las rutas secundarias se cargan al entrar, para no meterlas en el paquete inicial.
 const Markets = lazy(() => import("./pages/Markets"));
 const Portfolio = lazy(() => import("./pages/Portfolio"));
+const Compare = lazy(() => import("./pages/Compare"));
 const Watchlist = lazy(() => import("./pages/Watchlist"));
 const Converter = lazy(() => import("./pages/Converter"));
 const Auth = lazy(() => import("./pages/Auth"));
@@ -89,6 +90,7 @@ const App = () => (
                       <Route path="/" element={<Index />} />
                       <Route path="/markets" element={<Markets />} />
                       <Route path="/portfolio" element={<Portfolio />} />
+                      <Route path="/comparar" element={<Compare />} />
                       <Route path="/watchlist" element={<Watchlist />} />
                       <Route path="/converter" element={<Converter />} />
                       <Route path="/auth" element={<Auth />} />
