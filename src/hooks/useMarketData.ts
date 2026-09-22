@@ -1,9 +1,12 @@
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import {
+  fetchCoinsByIds,
   fetchFiatRates,
   fetchGlobalMarket,
   fetchMarkets,
   fetchPriceHistory,
+  searchCoins,
+  type CoinSearchResult,
 } from "@/lib/coingecko";
 import type { Coin, FiatRate, GlobalMarket, PricePoint } from "@/types/coin";
 
@@ -58,5 +61,30 @@ export function useFiatRates(): UseQueryResult<FiatRate[], Error> {
     queryKey: ["fiat-rates"],
     queryFn: ({ signal }) => fetchFiatRates(signal),
     staleTime: UN_MINUTO * 10,
+  });
+}
+
+/**
+ * Busca en todo el catálogo. `enabled` evita disparar una petición por cada
+ * tecla: la pantalla de búsqueda pasa el término ya retrasado.
+ */
+export function useCoinSearch(query: string): UseQueryResult<CoinSearchResult[], Error> {
+  return useQuery({
+    queryKey: ["coin-search", query],
+    queryFn: ({ signal }) => searchCoins(query, 12, signal),
+    enabled: query.trim().length >= 2,
+    staleTime: UN_MINUTO * 10,
+  });
+}
+
+/** Datos de mercado de monedas sueltas, aunque estén fuera del top cargado. */
+export function useCoinsByIds(ids: string[]): UseQueryResult<Coin[], Error> {
+  const clave = [...ids].sort();
+  return useQuery({
+    queryKey: ["coins-by-id", clave],
+    queryFn: ({ signal }) => fetchCoinsByIds(clave, signal),
+    enabled: clave.length > 0,
+    staleTime: UN_MINUTO,
+    refetchInterval: UN_MINUTO,
   });
 }

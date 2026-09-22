@@ -1,6 +1,7 @@
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { TooltipProps } from "recharts";
 import { TrendingUp } from "lucide-react";
+import { RangeSelector, type RangeDays } from "@/components/charts/RangeSelector";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/states/ErrorState";
 import { formatAxisPrice, formatCurrency } from "@/lib/format";
@@ -8,7 +9,8 @@ import { useChartColors } from "@/hooks/useChartColors";
 import type { PricePoint } from "@/types/coin";
 
 export interface CryptoPriceChartProps {
-  days: number;
+  days: RangeDays;
+  onDaysChange: (days: RangeDays) => void;
   data: PricePoint[] | undefined;
   isPending: boolean;
   isError: boolean;
@@ -31,6 +33,7 @@ function ChartTooltip({ active, payload }: TooltipProps<number, string>) {
 
 const CryptoPriceChart = ({
   days,
+  onDaysChange,
   data,
   isPending,
   isError,
@@ -42,9 +45,12 @@ const CryptoPriceChart = ({
 
   return (
     <section className="rounded-xl border p-3 sm:p-6">
-      <div className="mb-4 flex items-center gap-2">
-        <TrendingUp className="h-5 w-5 text-chart-1" aria-hidden="true" />
-        <h3 className="font-semibold sm:text-lg">Precio de los últimos {days} días</h3>
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-2">
+          <TrendingUp className="h-5 w-5 text-chart-1" aria-hidden="true" />
+          <h3 className="font-semibold sm:text-lg">Evolución del precio</h3>
+        </div>
+        <RangeSelector value={days} onChange={onDaysChange} label="Periodo del gráfico" />
       </div>
 
       {isError ? (

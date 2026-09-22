@@ -1,13 +1,15 @@
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { TooltipProps } from "recharts";
+import { useState } from "react";
 import { usePriceHistory } from "@/hooks/useMarketData";
+import { RangeSelector, type RangeDays } from "@/components/charts/RangeSelector";
 import { useChartColors } from "@/hooks/useChartColors";
 import { formatAxisPrice, formatCurrency } from "@/lib/format";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/states/ErrorState";
 import type { PricePoint } from "@/types/coin";
 
-const DIAS = 180;
+const RANGO_POR_DEFECTO: RangeDays = 90;
 
 function ChartTooltip({ active, payload }: TooltipProps<number, string>) {
   if (!active || !payload?.length) return null;
@@ -24,11 +26,20 @@ function ChartTooltip({ active, payload }: TooltipProps<number, string>) {
 /** Evolución real del precio de Bitcoin en los últimos 6 meses. */
 const PortfolioCard = () => {
   const colors = useChartColors();
-  const { data, isPending, isError, error, refetch, isFetching } = usePriceHistory("bitcoin", DIAS);
+  const [days, setDays] = useState<RangeDays>(RANGO_POR_DEFECTO);
+  const { data, isPending, isError, error, refetch, isFetching } = usePriceHistory("bitcoin", days);
 
   return (
     <section className="glass-card mb-8 animate-fade-in rounded-lg border border-border/20 p-6">
-      <h2 className="mb-6 text-xl font-semibold">Bitcoin · 6 meses</h2>
+      <div className="mb-6 space-y-3">
+        <h2 className="text-xl font-semibold">Bitcoin</h2>
+        <RangeSelector
+          value={days}
+          onChange={setDays}
+          label="Periodo del gráfico de Bitcoin"
+          className="-mx-1"
+        />
+      </div>
 
       {isError ? (
         <ErrorState

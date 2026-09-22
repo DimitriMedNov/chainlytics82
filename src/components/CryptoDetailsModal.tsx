@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
@@ -8,6 +9,7 @@ import CryptoPriceSection from "./crypto/CryptoPriceSection";
 import CryptoPriceChart from "./crypto/CryptoPriceChart";
 import CryptoMarketStats from "./crypto/CryptoMarketStats";
 import CryptoAdditionalInfo from "./crypto/CryptoAdditionalInfo";
+import type { RangeDays } from "@/components/charts/RangeSelector";
 import type { Coin } from "@/types/coin";
 
 export interface CryptoDetailsModalProps {
@@ -16,13 +18,19 @@ export interface CryptoDetailsModalProps {
   coin: Coin | null;
 }
 
-const DIAS_GRAFICO = 30;
+const RANGO_POR_DEFECTO: RangeDays = 30;
 
 const CryptoDetailsModal = ({ open, onOpenChange, coin }: CryptoDetailsModalProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { has, add, remove } = useWatchlist();
-  const history = usePriceHistory(coin?.id, DIAS_GRAFICO, open);
+  const [days, setDays] = useState<RangeDays>(RANGO_POR_DEFECTO);
+  const history = usePriceHistory(coin?.id, days, open);
+
+  // Cada moneda se abre en el rango por defecto, no en el de la anterior.
+  useEffect(() => {
+    if (open) setDays(RANGO_POR_DEFECTO);
+  }, [open, coin?.id]);
 
   const isInWatchlist = coin ? has(coin.symbol) : false;
 
@@ -69,7 +77,8 @@ const CryptoDetailsModal = ({ open, onOpenChange, coin }: CryptoDetailsModalProp
             <div className="space-y-6 sm:space-y-8">
               <CryptoPriceSection coin={coin} />
               <CryptoPriceChart
-                days={DIAS_GRAFICO}
+                days={days}
+                onDaysChange={setDays}
                 data={history.data}
                 isPending={history.isPending}
                 isError={history.isError}

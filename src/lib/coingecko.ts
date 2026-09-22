@@ -56,7 +56,11 @@ async function getJson(path: string, signal?: AbortSignal): Promise<unknown> {
     if (guard.timedOut()) {
       throw new ApiError(408, "El servicio de precios tardó demasiado en responder.");
     }
-    throw new ApiError(0, "No hay conexión con el servicio de precios.");
+    throw new ApiError(
+      0,
+      "No se pudo contactar con el servicio de precios: puede que no haya conexión " +
+        "o que CoinGecko esté limitando las peticiones. Espera un momento y reintenta.",
+    );
   } finally {
     guard.cleanup();
   }
@@ -142,14 +146,19 @@ export async function fetchGlobalMarket(signal?: AbortSignal): Promise<GlobalMar
   };
 }
 
-/** Histórico de precios de una moneda para los últimos `days` días. */
+/**
+ * Histórico de precios. Por debajo de dos días pedimos la serie fina (la API
+ * no acepta `interval=daily` ahí) y etiquetamos con la hora en vez de la fecha.
+ */
 export async function fetchPriceHistory(
   coinId: string,
   days: number,
   signal?: AbortSignal,
 ): Promise<PricePoint[]> {
+  const porHoras = days <= 1;
+  const intervalo = porHoras ? "" : "&interval=daily";
   const payload = await getJson(
-    `/coins/${coinId}/market_chart?vs_currency=usd&days=${days}&interval=daily`,
+    `/coins/${coinId}/market_chart?vs_currency=usd&days=${days}${intervalo}`,
     signal,
   );
   const prices = (payload as { prices?: unknown })?.prices;
@@ -161,8 +170,17 @@ export async function fetchPriceHistory(
     const [timestamp, price] = entry as [number, number];
     const moment = new Date(timestamp);
     return {
-      date: moment.toLocaleDateString("es-ES", { day: "2-digit", month: "short" }),
-      fullDate: moment.toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" }),
+      date: porHoras
+        ? moment.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })
+        : moment.toLocaleDateString("es-ES", { day: "2-digit", month: "short" }),
+      fullDate: porHoras
+        ? moment.toLocaleString("es-ES", {
+            day: "numeric",
+            month: "long",
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+        : moment.toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" }),
       price: num(price),
     };
   });
@@ -198,4 +216,57 @@ export async function fetchFiatRates(signal?: AbortSignal): Promise<FiatRate[]> 
     if (unitsPerBtc <= 0) return [];
     return [{ code, name, usdPerUnit: usdPerBtc / unitsPerBtc }];
   });
+}
+
+
+/** Un resultado de búsqueda: aún sin precio, solo lo justo para identificarla. */
+export interface CoinSearchResult {
+  id: string;
+  name: string;
+  symbol: string;
+  thumb: string;
+  rank: number | null;
+}
+
+/**
+ * Busca entre TODAS las monedas del catálogo, no solo el top que tenemos
+ * cargado. Devuelve como mucho `limit` resultados, los mejor posicionados.
+ */
+export async function searchCoins(
+  query: string,
+  limit = 12,
+  signal?: AbortSignal,
+): Promise<CoinSearchResult[]> {
+  const term = query.trim();
+  if (term === "") return [];
+
+  const payload = await getJson(`/search?query=${encodeURIComponent(term)}`, signal);
+  const coins = (payload as { coins?: unknown })?.coins;
+  if (!Array.isArray(coins)) return [];
+
+  return coins.slice(0, limit).map((item) => {
+    const raw = item as Record<string, unknown>;
+    return {
+      id: str(raw.id),
+      name: str(raw.name),
+      symbol: str(raw.symbol).toUpperCase(),
+      thumb: str(raw.thumb ?? raw.large),
+      rank: numOrNull(raw.market_cap_rank),
+    };
+  });
+}
+
+/** Datos de mercado de monedas concretas, estén o no en el top cargado. */
+export async function fetchCoinsByIds(ids: string[], signal?: AbortSignal): Promise<Coin[]> {
+  if (ids.length === 0) return [];
+
+  const data = await getJson(
+    `/coins/markets?vs_currency=usd&ids=${encodeURIComponent(ids.join(","))}` +
+      `&sparkline=false&price_change_percentage=24h,7d`,
+    signal,
+  );
+  if (!Array.isArray(data)) {
+    throw new ApiError(0, "El servicio de precios devolvió un formato inesperado.");
+  }
+  return data.map((item) => toCoin(item as Record<string, unknown>));
 }

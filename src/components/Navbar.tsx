@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import ThemeToggle from "@/components/ThemeToggle"
 import { useAuth } from "@/contexts/AuthContext"
+import { useSearch } from "@/contexts/SearchContext"
+import { CoinSearchTrigger } from "@/components/search/CoinSearchTrigger"
 import { toast } from "sonner"
 
 const items = [
@@ -20,6 +22,7 @@ export function Navbar() {
   const location = useLocation()
   const navigate = useNavigate()
   const { session, user, signOut } = useAuth()
+  const { open: openSearch } = useSearch()
   const [isOpen, setIsOpen] = useState(false)
 
   const NavItems = () => (
@@ -67,6 +70,7 @@ export function Navbar() {
 
         {/* Right side actions */}
         <div className="flex items-center gap-2 ml-auto">
+          <CoinSearchTrigger onClick={openSearch} />
           <ThemeToggle />
           {session ? (
             <Button variant="ghost" size="sm" onClick={handleSignOut} className="hidden sm:flex gap-2">
