@@ -227,6 +227,8 @@ export function usePortfolio() {
     setMissingCost,
     isError: remote.isError,
     errorMessage: remote.error?.message ?? "",
+    isRefetching: remote.isFetching,
+    refetch: () => void remote.refetch(),
     isPending: userId !== null && remote.isPending,
     isSaving: addMutation.isPending || removeMutation.isPending || setCostMutation.isPending,
     isSynced: userId !== null,

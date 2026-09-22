@@ -221,6 +221,8 @@ export function useWatchlist() {
     /** Solo con sesión: si la lectura desde Supabase falló. */
     isError: remote.isError,
     errorMessage: remote.error?.message ?? "",
+    isRefetching: remote.isFetching,
+    refetch: () => void remote.refetch(),
     isPending: userId !== null && remote.isPending,
     isSynced: userId !== null,
   };

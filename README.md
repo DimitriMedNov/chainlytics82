@@ -101,6 +101,19 @@ El analista IA necesita, como secretos de la Edge Function en Supabase:
 Sirve cualquier gateway compatible con la API de chat de OpenAI: para cambiar de proveedor
 basta con apuntar `AI_BASE_URL` y `AI_MODEL` a otro sitio.
 
+La demo usa [OpenRouter](https://openrouter.ai) con `nemotron-3-ultra`, configurado solo
+por secretos:
+
+```bash
+supabase secrets set AI_API_KEY="sk-or-..." \
+  AI_BASE_URL="https://openrouter.ai/api/v1" \
+  AI_MODEL="<id del modelo en OpenRouter>"
+```
+
+El modelo tiene que emitir streaming de verdad: de los gratuitos de OpenRouter que se
+probaron, varios devolvían la respuesta sin trozos o con otro formato, y el chat se queda
+vacío.
+
 ## Si no hay servicio de cuentas
 
 La app arranca igual y avisa de lo que no puede hacer, en vez de romperse:

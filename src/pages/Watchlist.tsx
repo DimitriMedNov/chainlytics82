@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SearchX } from "lucide-react";
 import CryptoDetailsModal from "@/components/CryptoDetailsModal";
@@ -12,12 +12,11 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { useMarkets } from "@/hooks/useMarketData";
-import { joinWithMarket, useWatchlist, type WatchlistCoin } from "@/hooks/useWatchlist";
-import { useWatchlistSorting } from "@/hooks/useWatchlistSorting";
+import { useWatchlist, type WatchlistCoin } from "@/hooks/useWatchlist";
+import { useWatchlistView } from "@/hooks/useWatchlistView";
 import type { Coin } from "@/types/coin";
 
 const Watchlist = () => {
-  const [searchTerm, setSearchTerm] = useState("");
   const [selectedCoin, setSelectedCoin] = useState<Coin | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
@@ -26,22 +25,8 @@ const Watchlist = () => {
   const watchlist = useWatchlist();
   const { entries, remove, toggleFavorite } = watchlist;
   const { data, isPending, isError, error, refetch, isFetching } = useMarkets();
-
-  const coins = useMemo(() => joinWithMarket(entries, data), [entries, data]);
-
-  const filteredItems = useMemo(() => {
-    const needle = searchTerm.trim().toLowerCase();
-    if (needle === "") return coins;
-    return coins.filter(
-      (item) =>
-        item.name.toLowerCase().includes(needle) || item.symbol.toLowerCase().includes(needle),
-    );
-  }, [coins, searchTerm]);
-
-  const { sortBy, sortOrder, sortedItems, handleSort } = useWatchlistSorting(filteredItems);
-
-  const favoriteItems = sortedItems.filter((item) => item.isFavorite);
-  const otherItems = sortedItems.filter((item) => !item.isFavorite);
+  const view = useWatchlistView(entries, data);
+  const { coins, searchTerm, setSearchTerm, sortBy, sortOrder, handleSort, sortedItems } = view;
 
   const handleRemove = (symbol: string) => {
     const item = coins.find((coin) => coin.symbol === symbol);
@@ -82,8 +67,8 @@ const Watchlist = () => {
         <ErrorState
           title="No se pudo cargar tu watchlist"
           message={watchlist.errorMessage}
-          onRetry={() => void refetch()}
-          isRetrying={isFetching}
+          onRetry={watchlist.refetch}
+          isRetrying={watchlist.isRefetching}
         />
       ) : watchlist.isPending ? (
         <div className="space-y-4" aria-busy="true">
@@ -124,10 +109,10 @@ const Watchlist = () => {
             />
           ) : (
             <>
-              {favoriteItems.length > 0 && (
+              {view.favoriteItems.length > 0 && (
                 <WatchlistSection
-                  title={`Favoritas (${favoriteItems.length})`}
-                  items={favoriteItems}
+                  title={`Favoritas (${view.favoriteItems.length})`}
+                  items={view.favoriteItems}
                   isFavoriteSection
                   sortBy={sortBy}
                   sortOrder={sortOrder}
@@ -136,10 +121,10 @@ const Watchlist = () => {
                 />
               )}
 
-              {otherItems.length > 0 && (
+              {view.otherItems.length > 0 && (
                 <WatchlistSection
-                  title={`Todas (${otherItems.length})`}
-                  items={otherItems}
+                  title={`Todas (${view.otherItems.length})`}
+                  items={view.otherItems}
                   sortBy={sortBy}
                   sortOrder={sortOrder}
                   onSort={handleSort}
