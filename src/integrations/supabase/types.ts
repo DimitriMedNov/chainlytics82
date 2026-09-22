@@ -14,32 +14,38 @@ export type Database = {
   }
   public: {
     Tables: {
-      portfolio_holdings: {
+      portfolio_transactions: {
         Row: {
           amount: number
           coin_id: string
           created_at: string
+          happened_at: string
           id: string
+          kind: Database["public"]["Enums"]["transaction_kind"]
           symbol: string
-          updated_at: string
+          unit_price: number | null
           user_id: string
         }
         Insert: {
           amount: number
           coin_id: string
           created_at?: string
+          happened_at?: string
           id?: string
+          kind: Database["public"]["Enums"]["transaction_kind"]
           symbol: string
-          updated_at?: string
+          unit_price?: number | null
           user_id: string
         }
         Update: {
           amount?: number
           coin_id?: string
           created_at?: string
+          happened_at?: string
           id?: string
+          kind?: Database["public"]["Enums"]["transaction_kind"]
           symbol?: string
-          updated_at?: string
+          unit_price?: number | null
           user_id?: string
         }
         Relationships: []
@@ -131,6 +137,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      transaction_kind: "compra" | "venta"
     }
     CompositeTypes: {
       [_ in never]: never

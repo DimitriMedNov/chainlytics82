@@ -2,89 +2,109 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import type { Coin } from "@/types/coin";
+import type { NewTransaction, Transaction } from "@/types/portfolio";
 
-const STORAGE_KEY = "chainlytics.portfolio";
+const STORAGE_KEY = "chainlytics.portfolio.movimientos";
+/** Clave anterior, cuando solo guardábamos cantidades sin coste. */
+const LEGACY_KEY = "chainlytics.portfolio";
 
-/** Lo que guardamos: qué moneda y cuánta. El valor se calcula con el precio en vivo. */
-export interface Holding {
-  id: string;
-  symbol: string;
-  amount: number;
-}
-
-/** Una posición ya valorada a precio de mercado. */
-export interface ValuedHolding extends Holding {
-  name: string;
-  image: string;
-  price: number;
-  change24h: number;
-  value: number;
-}
-
-export interface PortfolioTotals {
-  value: number;
-  /** Cuánto ha cambiado el total en 24 h, en dólares y en porcentaje. */
-  change24hValue: number;
-  change24hPct: number;
-  best: ValuedHolding | null;
-}
-
-function isHolding(value: unknown): value is Holding {
+function isTransaction(value: unknown): value is Transaction {
   if (typeof value !== "object" || value === null) return false;
   const item = value as Record<string, unknown>;
   return (
     typeof item.id === "string" &&
+    typeof item.coinId === "string" &&
     typeof item.symbol === "string" &&
+    (item.kind === "compra" || item.kind === "venta") &&
     typeof item.amount === "number" &&
-    Number.isFinite(item.amount)
+    Number.isFinite(item.amount) &&
+    (item.unitPrice === null || typeof item.unitPrice === "number") &&
+    typeof item.happenedAt === "string"
   );
 }
 
-export function readLocalPortfolio(): Holding[] {
+/**
+ * Las posiciones del formato viejo no tenían precio de compra. Se convierten
+ * en una compra con coste desconocido: la cantidad se conserva y el coste se
+ * queda sin saber, que es la verdad.
+ */
+function migrateLegacy(raw: unknown): Transaction[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.flatMap((item) => {
+    if (typeof item !== "object" || item === null) return [];
+    const old = item as Record<string, unknown>;
+    if (typeof old.id !== "string" || typeof old.amount !== "number") return [];
+    return [
+      {
+        id: `legacy-${old.id}`,
+        coinId: old.id,
+        symbol: typeof old.symbol === "string" ? old.symbol.toUpperCase() : "",
+        kind: "compra" as const,
+        amount: old.amount,
+        unitPrice: null,
+        happenedAt: new Date().toISOString(),
+      },
+    ];
+  });
+}
+
+export function readLocalTransactions(): Transaction[] {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) return [];
-    const parsed: unknown = JSON.parse(stored);
-    return Array.isArray(parsed) ? parsed.filter(isHolding) : [];
+    if (stored) {
+      const parsed: unknown = JSON.parse(stored);
+      return Array.isArray(parsed) ? parsed.filter(isTransaction) : [];
+    }
+    const legacy = localStorage.getItem(LEGACY_KEY);
+    if (legacy) {
+      const migradas = migrateLegacy(JSON.parse(legacy) as unknown);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(migradas));
+      return migradas;
+    }
   } catch {
-    return [];
+    // Almacenamiento corrupto o bloqueado: empezamos de cero.
   }
+  return [];
 }
 
-function writeLocalPortfolio(holdings: Holding[]): void {
+function writeLocalTransactions(transactions: Transaction[]): void {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(holdings));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
   } catch {
-    // Almacenamiento bloqueado: las posiciones viven solo en esta sesión.
+    // Almacenamiento bloqueado: los movimientos viven solo en esta sesión.
   }
 }
 
-export function clearLocalPortfolio(): void {
+export function clearLocalTransactions(): void {
   try {
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(LEGACY_KEY);
   } catch {
-    // Nada que hacer si el almacenamiento está bloqueado.
+    // Nada que hacer.
   }
 }
 
-async function fetchRemote(userId: string): Promise<Holding[]> {
+async function fetchRemote(userId: string): Promise<Transaction[]> {
   const { data, error } = await supabase
-    .from("portfolio_holdings")
-    .select("coin_id, symbol, amount")
+    .from("portfolio_transactions")
+    .select("id, coin_id, symbol, kind, amount, unit_price, happened_at")
     .eq("user_id", userId)
-    .order("created_at", { ascending: true });
+    .order("happened_at", { ascending: true });
 
   if (error) throw new Error(error.message);
   return (data ?? []).map((row) => ({
-    id: row.coin_id,
+    id: row.id,
+    coinId: row.coin_id,
     symbol: row.symbol.toUpperCase(),
+    kind: row.kind,
     amount: Number(row.amount),
+    unitPrice: row.unit_price === null ? null : Number(row.unit_price),
+    happenedAt: row.happened_at,
   }));
 }
 
 /**
- * Posiciones del portfolio. Con sesión iniciada viven en Supabase; sin
+ * Movimientos del portfolio. Con sesión iniciada viven en Supabase; sin
  * sesión, en este navegador.
  */
 export function usePortfolio() {
@@ -92,83 +112,107 @@ export function usePortfolio() {
   const userId = user?.id ?? null;
   const queryClient = useQueryClient();
 
-  const [localHoldings, setLocalHoldings] = useState<Holding[]>(readLocalPortfolio);
+  const [localTransactions, setLocalTransactions] =
+    useState<Transaction[]>(readLocalTransactions);
 
   const remote = useQuery({
-    queryKey: ["portfolio", userId],
+    queryKey: ["portfolio-transactions", userId],
     queryFn: () => fetchRemote(userId as string),
     enabled: userId !== null,
     staleTime: 30_000,
   });
 
   useEffect(() => {
-    if (userId === null) writeLocalPortfolio(localHoldings);
-  }, [localHoldings, userId]);
+    if (userId === null) writeLocalTransactions(localTransactions);
+  }, [localTransactions, userId]);
 
-  const holdings = useMemo(
-    () => (userId === null ? localHoldings : (remote.data ?? [])),
-    [userId, localHoldings, remote.data],
+  const transactions = useMemo(
+    () => (userId === null ? localTransactions : (remote.data ?? [])),
+    [userId, localTransactions, remote.data],
   );
 
   const invalidate = useCallback(() => {
-    void queryClient.invalidateQueries({ queryKey: ["portfolio", userId] });
+    void queryClient.invalidateQueries({ queryKey: ["portfolio-transactions", userId] });
   }, [queryClient, userId]);
 
   const addMutation = useMutation({
-    mutationFn: async ({ coin, amount }: { coin: Pick<Coin, "id" | "symbol">; amount: number }) => {
-      const existing = holdings.find((item) => item.id === coin.id);
-      const total = (existing?.amount ?? 0) + amount;
+    mutationFn: async (tx: NewTransaction) => {
+      const { error } = await supabase.from("portfolio_transactions").insert({
+        user_id: userId as string,
+        coin_id: tx.coinId,
+        symbol: tx.symbol.toUpperCase(),
+        kind: tx.kind,
+        amount: tx.amount,
+        unit_price: tx.unitPrice,
+        happened_at: tx.happenedAt,
+      });
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: invalidate,
+  });
 
-      const { error } = await supabase.from("portfolio_holdings").upsert(
-        {
-          user_id: userId as string,
-          coin_id: coin.id,
-          symbol: coin.symbol.toUpperCase(),
-          amount: total,
-        },
-        { onConflict: "user_id,coin_id" },
-      );
+  const setCostMutation = useMutation({
+    mutationFn: async ({ coinId, unitPrice }: { coinId: string; unitPrice: number }) => {
+      const { error } = await supabase
+        .from("portfolio_transactions")
+        .update({ unit_price: unitPrice })
+        .eq("user_id", userId as string)
+        .eq("coin_id", coinId)
+        .is("unit_price", null);
       if (error) throw new Error(error.message);
     },
     onSuccess: invalidate,
   });
 
   const removeMutation = useMutation({
-    mutationFn: async (coinId: string) => {
+    mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from("portfolio_holdings")
+        .from("portfolio_transactions")
         .delete()
         .eq("user_id", userId as string)
-        .eq("coin_id", coinId);
+        .eq("id", id);
       if (error) throw new Error(error.message);
     },
     onSuccess: invalidate,
   });
 
-  /** Añade una posición. Si ya tienes esa moneda, suma la cantidad. */
-  const addHolding = useCallback(
-    (coin: Pick<Coin, "id" | "symbol">, amount: number) => {
+  const addTransaction = useCallback(
+    (tx: NewTransaction) => {
       if (userId === null) {
-        setLocalHoldings((current) => {
-          const existing = current.find((item) => item.id === coin.id);
-          if (existing) {
-            return current.map((item) =>
-              item.id === coin.id ? { ...item, amount: item.amount + amount } : item,
-            );
-          }
-          return [...current, { id: coin.id, symbol: coin.symbol.toUpperCase(), amount }];
-        });
+        setLocalTransactions((current) => [
+          ...current,
+          { ...tx, id: `local-${Date.now()}-${current.length}` },
+        ]);
         return;
       }
-      addMutation.mutate({ coin, amount });
+      addMutation.mutate(tx);
     },
     [userId, addMutation],
   );
 
-  const removeHolding = useCallback(
+  /**
+   * Pone precio a los movimientos de una moneda que no lo tenían. No añade
+   * nada: rellena el hueco de lo que ya estaba registrado.
+   */
+  const setMissingCost = useCallback(
+    (coinId: string, unitPrice: number) => {
+      if (userId === null) {
+        setLocalTransactions((current) =>
+          current.map((tx) =>
+            tx.coinId === coinId && tx.unitPrice === null ? { ...tx, unitPrice } : tx,
+          ),
+        );
+        return;
+      }
+      setCostMutation.mutate({ coinId, unitPrice });
+    },
+    [userId, setCostMutation],
+  );
+
+  const removeTransaction = useCallback(
     (id: string) => {
       if (userId === null) {
-        setLocalHoldings((current) => current.filter((item) => item.id !== id));
+        setLocalTransactions((current) => current.filter((tx) => tx.id !== id));
         return;
       }
       removeMutation.mutate(id);
@@ -177,54 +221,14 @@ export function usePortfolio() {
   );
 
   return {
-    holdings,
-    addHolding,
-    removeHolding,
+    transactions,
+    addTransaction,
+    removeTransaction,
+    setMissingCost,
     isError: remote.isError,
     errorMessage: remote.error?.message ?? "",
     isPending: userId !== null && remote.isPending,
+    isSaving: addMutation.isPending || removeMutation.isPending || setCostMutation.isPending,
     isSynced: userId !== null,
   };
-}
-
-/** Valora las posiciones con los precios de mercado actuales. */
-export function valueHoldings(holdings: Holding[], coins: Coin[] | undefined): ValuedHolding[] {
-  if (!coins) return [];
-  return holdings.flatMap((holding) => {
-    const coin = coins.find((item) => item.id === holding.id || item.symbol === holding.symbol);
-    if (!coin) return [];
-    return [
-      {
-        ...holding,
-        name: coin.name,
-        image: coin.image,
-        price: coin.price,
-        change24h: coin.change24h,
-        value: coin.price * holding.amount,
-      },
-    ];
-  });
-}
-
-/**
- * Totales del portfolio. El cambio de 24 h sale de deshacer el porcentaje de
- * cada moneda para saber cuánto valía ayer, no de un número inventado.
- */
-export function portfolioTotals(valued: ValuedHolding[]): PortfolioTotals {
-  const value = valued.reduce((sum, item) => sum + item.value, 0);
-
-  const valueYesterday = valued.reduce((sum, item) => {
-    const factor = 1 + item.change24h / 100;
-    return sum + (factor > 0 ? item.value / factor : item.value);
-  }, 0);
-
-  const change24hValue = value - valueYesterday;
-  const change24hPct = valueYesterday > 0 ? (change24hValue / valueYesterday) * 100 : 0;
-
-  const best = valued.reduce<ValuedHolding | null>(
-    (winner, item) => (winner === null || item.change24h > winner.change24h ? item : winner),
-    null,
-  );
-
-  return { value, change24hValue, change24hPct, best };
 }

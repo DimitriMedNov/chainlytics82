@@ -13,8 +13,10 @@ top 5 de monedas. Incluye el gráfico de TradingView y el histórico de Bitcoin 
 **Mercados** — las 100 criptomonedas con mayor capitalización. Búsqueda, filtro por
 monedas que suben o bajan, y orden por capitalización, volumen, cambio, precio o ranking.
 
-**Portfolio** — registra cuánto tienes de cada moneda y ve su valor actual, el cambio de
-las últimas 24 h y el peso de cada posición. Se guarda en tu cuenta.
+**Portfolio** — registra tus compras y ventas con el precio que pagaste y ve tu ganancia
+real: coste medio ponderado, ganancia sobre el papel y ganancia ya realizada al vender.
+Si no recuerdas a qué precio compraste algo, la posición queda marcada **sin coste** y se
+excluye del cálculo: no se inventa un número. Se guarda en tu cuenta.
 
 **Watchlist** — las monedas que sigues, con favoritos y orden por nombre, precio o cambio.
 Se guarda en tu cuenta.
@@ -52,7 +54,7 @@ propias filas:
 | `profiles` | nombre visible del usuario |
 | `user_roles` | rol (`user` / `admin`), que autoriza el analista IA |
 | `watchlist_items` | qué monedas sigue cada usuario |
-| `portfolio_holdings` | cuánta cantidad tiene de cada moneda |
+| `portfolio_transactions` | compras y ventas: cantidad, precio pagado y fecha |
 
 Los datos de mercado no se copian a la base de datos: se leen de la API al mostrarlos.
 
@@ -74,10 +76,13 @@ La app queda en `http://localhost:8080`.
 Comprobaciones antes de subir cambios:
 
 ```bash
-npx tsc --noEmit   # tipos
-npm run lint       # reglas
-npm run build      # que compile
+npx tsc --noEmit       # tipos
+npm run lint           # reglas
+npm run test:portfolio # cálculo de coste y ganancia (24 comprobaciones)
+npm run build          # que compile
 ```
+
+Las pruebas del portfolio usan el TypeScript nativo de Node, sin runner instalado.
 
 El analista IA necesita, como secretos de la Edge Function en Supabase:
 

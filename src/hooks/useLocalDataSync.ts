@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { clearLocalWatchlist, readLocalWatchlist } from "@/hooks/useWatchlist";
-import { clearLocalPortfolio, readLocalPortfolio } from "@/hooks/usePortfolio";
+import { clearLocalTransactions, readLocalTransactions } from "@/hooks/usePortfolio";
 
 /**
  * Al iniciar sesión, sube a la cuenta lo que estuviera guardado solo en este
@@ -22,8 +22,8 @@ export function useLocalDataSync(): void {
     migratedFor.current = userId;
 
     const localWatchlist = readLocalWatchlist();
-    const localPortfolio = readLocalPortfolio();
-    if (localWatchlist.length === 0 && localPortfolio.length === 0) return;
+    const localTransactions = readLocalTransactions();
+    if (localWatchlist.length === 0 && localTransactions.length === 0) return;
 
     let cancelled = false;
 
@@ -46,26 +46,31 @@ export function useLocalDataSync(): void {
         }
       }
 
-      if (localPortfolio.length > 0) {
-        const { error } = await supabase.from("portfolio_holdings").upsert(
-          localPortfolio.map((holding) => ({
+      if (localTransactions.length > 0) {
+        // Los movimientos no tienen clave natural, así que se insertan tal
+        // cual: si ya subiste estos, estarías duplicándolos, y por eso solo
+        // se hace una vez por usuario y después se borra lo local.
+        const { error } = await supabase.from("portfolio_transactions").insert(
+          localTransactions.map((tx) => ({
             user_id: userId,
-            coin_id: holding.id,
-            symbol: holding.symbol,
-            amount: holding.amount,
+            coin_id: tx.coinId,
+            symbol: tx.symbol,
+            kind: tx.kind,
+            amount: tx.amount,
+            unit_price: tx.unitPrice,
+            happened_at: tx.happenedAt,
           })),
-          { onConflict: "user_id,coin_id", ignoreDuplicates: true },
         );
         if (!error) {
-          clearLocalPortfolio();
-          movidos += localPortfolio.length;
+          clearLocalTransactions();
+          movidos += localTransactions.length;
         }
       }
 
       if (cancelled || movidos === 0) return;
 
       void queryClient.invalidateQueries({ queryKey: ["watchlist", userId] });
-      void queryClient.invalidateQueries({ queryKey: ["portfolio", userId] });
+      void queryClient.invalidateQueries({ queryKey: ["portfolio-transactions", userId] });
       toast.success("Datos guardados en tu cuenta", {
         description: `Movimos ${movidos} ${movidos === 1 ? "elemento" : "elementos"} de este navegador a tu cuenta.`,
       });

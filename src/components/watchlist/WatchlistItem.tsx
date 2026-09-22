@@ -38,7 +38,7 @@ const WatchlistItem = ({
         </div>
       </div>
 
-      <div className="flex items-center justify-between gap-3 sm:justify-end sm:gap-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 sm:flex-nowrap sm:justify-end sm:gap-6">
         <div className="text-left sm:text-right">
           <p className="font-bold sm:text-lg">{formatCurrency(item.price)}</p>
           <div className="flex items-center gap-1 sm:justify-end">
@@ -53,7 +53,7 @@ const WatchlistItem = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="ml-auto flex items-center gap-1">
           <Button
             variant="ghost"
             size="icon"

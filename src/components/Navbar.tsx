@@ -56,11 +56,11 @@ export function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center">
+      <div className="container flex h-16 items-center gap-2 px-4 sm:px-8">
         {/* Logo */}
-        <div className="flex items-center gap-2 mr-6">
+        <div className="flex min-w-0 items-center gap-2 sm:mr-6">
           <BarChart3 className="h-6 w-6 text-primary" />
-          <span className="font-semibold text-lg">Chainlytics</span>
+          <span className="truncate font-semibold text-lg">Chainlytics</span>
         </div>
 
         {/* Desktop Navigation */}
