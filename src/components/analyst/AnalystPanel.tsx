@@ -46,7 +46,7 @@ export default function AnalystPanel({ open, onOpenChange }: AnalystPanelProps) 
       <SheetContent side="right" className="flex w-full flex-col p-0 sm:max-w-md">
         <SheetHeader className="border-b p-4">
           <SheetTitle className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/60">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-linear-to-br from-primary to-primary/60">
               <Sparkles className="h-4 w-4 text-primary-foreground" aria-hidden="true" />
             </div>
             <div className="flex flex-col items-start">
@@ -59,7 +59,7 @@ export default function AnalystPanel({ open, onOpenChange }: AnalystPanelProps) 
         </SheetHeader>
 
         <ScrollArea className="flex-1 px-4">
-          <div className="space-y-4 py-4">
+          <div className="v3-space-y-4 py-4">
             {intro && (
               <AnalystIntro
                 variant={intro}
@@ -97,7 +97,7 @@ export default function AnalystPanel({ open, onOpenChange }: AnalystPanelProps) 
               size="icon"
               disabled={loading || !input.trim()}
               aria-label="Enviar pregunta"
-              className="h-11 w-11 flex-shrink-0"
+              className="h-11 w-11 shrink-0"
             >
               {loading ? (
                 <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />

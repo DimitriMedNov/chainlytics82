@@ -63,11 +63,11 @@ export default function PortfolioDistribution({
           <CardTitle>Peso de cada moneda</CardTitle>
         </CardHeader>
         <CardContent>
-          <ul className="space-y-4">
+          <ul className="v3-space-y-4">
             {positions.map((position, index) => {
               const peso = totalValue > 0 ? (position.value / totalValue) * 100 : 0;
               return (
-                <li key={position.coinId} className="space-y-1">
+                <li key={position.coinId} className="v3-space-y-1">
                   <div className="flex items-center justify-between gap-4 text-sm">
                     <span className="font-medium">{position.symbol}</span>
                     <span className="text-muted-foreground">{formatPercentShare(peso)}</span>

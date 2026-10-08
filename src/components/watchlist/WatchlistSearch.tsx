@@ -10,7 +10,7 @@ export interface WatchlistSearchProps {
 const WatchlistSearch = ({ searchTerm, onSearchChange }: WatchlistSearchProps) => {
   return (
     <Card>
-      <CardContent className="space-y-2 pt-6">
+      <CardContent className="v3-space-y-2 pt-6">
         <Label htmlFor="watchlist-search">Buscar en tu watchlist</Label>
         <Input
           id="watchlist-search"
@@ -18,7 +18,7 @@ const WatchlistSearch = ({ searchTerm, onSearchChange }: WatchlistSearchProps) =
           placeholder="Por nombre o símbolo…"
           value={searchTerm}
           onChange={(event) => onSearchChange(event.target.value)}
-          className="h-11 w-full"
+          className="h-11 w-full [appearance:textfield] -outline-offset-2"
         />
       </CardContent>
     </Card>

@@ -15,7 +15,7 @@ const CryptoMarketStats = ({ coin }: CryptoMarketStatsProps) => {
           <h3 className="font-semibold sm:text-lg">Capitalización de mercado</h3>
         </div>
         <p className="mb-3 text-xl font-bold sm:text-3xl">{formatCompact(coin.marketCap)}</p>
-        <dl className="space-y-2 text-sm">
+        <dl className="v3-space-y-2 text-sm">
           <div className="flex justify-between gap-4">
             <dt className="text-muted-foreground">Totalmente diluida:</dt>
             <dd className="font-medium">
@@ -35,7 +35,7 @@ const CryptoMarketStats = ({ coin }: CryptoMarketStatsProps) => {
           <h3 className="font-semibold sm:text-lg">Volumen y oferta</h3>
         </div>
         <p className="mb-3 text-xl font-bold sm:text-3xl">{formatCompact(coin.volume24h)}</p>
-        <dl className="space-y-2 text-sm">
+        <dl className="v3-space-y-2 text-sm">
           <div className="flex justify-between gap-4">
             <dt className="text-muted-foreground">Oferta circulante:</dt>
             <dd className="font-medium">{formatSupply(coin.circulatingSupply)}</dd>

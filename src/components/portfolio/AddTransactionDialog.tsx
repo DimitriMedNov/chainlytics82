@@ -60,7 +60,7 @@ const AddTransactionDialog = ({ coins, onAdd, disabled = false }: AddTransaction
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={form.handleSubmit} className="space-y-4">
+        <form onSubmit={form.handleSubmit} className="v3-space-y-4">
           <Tabs value={form.kind} onValueChange={(value) => form.setKind(value as TransactionKind)}>
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="compra">Compra</TabsTrigger>
@@ -68,7 +68,7 @@ const AddTransactionDialog = ({ coins, onAdd, disabled = false }: AddTransaction
             </TabsList>
           </Tabs>
 
-          <div className="space-y-2">
+          <div className="v3-space-y-2">
             <Label htmlFor="tx-coin">Criptomoneda</Label>
             <Select value={form.coinId} onValueChange={form.setCoinId}>
               <SelectTrigger id="tx-coin" className="h-11">
@@ -85,7 +85,7 @@ const AddTransactionDialog = ({ coins, onAdd, disabled = false }: AddTransaction
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
+            <div className="v3-space-y-2">
               <Label htmlFor="tx-amount">Cantidad</Label>
               <Input
                 id="tx-amount"
@@ -99,7 +99,7 @@ const AddTransactionDialog = ({ coins, onAdd, disabled = false }: AddTransaction
                 className="h-11"
               />
             </div>
-            <div className="space-y-2">
+            <div className="v3-space-y-2">
               <Label htmlFor="tx-price">Precio por unidad</Label>
               <Input
                 id="tx-price"
@@ -115,7 +115,7 @@ const AddTransactionDialog = ({ coins, onAdd, disabled = false }: AddTransaction
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="v3-space-y-2">
             <Label htmlFor="tx-date">Fecha</Label>
             <Input
               id="tx-date"

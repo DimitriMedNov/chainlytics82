@@ -31,7 +31,7 @@ const PortfolioCard = () => {
 
   return (
     <section className="glass-card mb-8 animate-fade-in rounded-lg border border-border/20 p-6">
-      <div className="mb-6 space-y-3">
+      <div className="mb-6 v3-space-y-3">
         <h2 className="text-xl font-semibold">Bitcoin</h2>
         <RangeSelector
           value={days}
@@ -49,7 +49,7 @@ const PortfolioCard = () => {
           isRetrying={isFetching}
         />
       ) : isPending ? (
-        <div className="h-[200px] w-full space-y-3" aria-busy="true">
+        <div className="h-[200px] w-full v3-space-y-3" aria-busy="true">
           <Skeleton className="h-4 w-24" />
           <Skeleton className="h-[164px] w-full" />
         </div>

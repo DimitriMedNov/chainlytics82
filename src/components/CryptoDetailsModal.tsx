@@ -74,7 +74,7 @@ const CryptoDetailsModal = ({ open, onOpenChange, coin }: CryptoDetailsModalProp
               </DialogTitle>
             </DialogHeader>
 
-            <div className="space-y-6 sm:space-y-8">
+            <div className="v3-space-y-6 sm:v3-space-y-8">
               <CryptoPriceSection coin={coin} />
               <CryptoPriceChart
                 days={days}

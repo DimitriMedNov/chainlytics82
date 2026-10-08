@@ -20,13 +20,13 @@ const QuickRates = ({ options, isPending }: QuickRatesProps) => {
       </CardHeader>
       <CardContent>
         {isPending ? (
-          <div className="space-y-3" aria-busy="true">
+          <div className="v3-space-y-3" aria-busy="true">
             {Array.from({ length: 4 }, (_, index) => `tasa-${index}`).map((key) => (
               <Skeleton key={key} className="h-16 w-full" />
             ))}
           </div>
         ) : (
-          <ul className="space-y-3">
+          <ul className="v3-space-y-3">
             {top.map((option) => (
               <li
                 key={option.code}
@@ -40,7 +40,7 @@ const QuickRates = ({ options, isPending }: QuickRatesProps) => {
                       width={32}
                       height={32}
                       loading="lazy"
-                      className="h-8 w-8 flex-shrink-0 rounded-full"
+                      className="h-8 w-8 shrink-0 rounded-full"
                     />
                   )}
                   <div className="min-w-0">

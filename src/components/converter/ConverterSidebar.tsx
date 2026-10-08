@@ -9,7 +9,7 @@ export interface ConverterSidebarProps {
 
 const ConverterSidebar = ({ options, isPending }: ConverterSidebarProps) => {
   return (
-    <aside className="space-y-4 lg:space-y-6">
+    <aside className="v3-space-y-4 lg:v3-space-y-6">
       <QuickRates options={options} isPending={isPending} />
       <QuickConversions options={options} isPending={isPending} />
     </aside>

@@ -26,7 +26,7 @@ const Portfolio = () => {
   const totals = useMemo(() => summarize(positions, transactions), [positions, transactions]);
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:space-y-8 lg:p-8">
+    <div className="mx-auto max-w-7xl v3-space-y-6 p-4 sm:p-6 lg:v3-space-y-8 lg:p-8">
       <header className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
         <div>
           <h1 className="text-2xl font-bold sm:text-3xl">Mi portfolio</h1>
@@ -59,7 +59,7 @@ const Portfolio = () => {
           isRetrying={isFetching}
         />
       ) : isPending || portfolio.isPending ? (
-        <div className="space-y-6" aria-busy="true">
+        <div className="v3-space-y-6" aria-busy="true">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
             {["valor", "invertido", "ganancia", "posiciones"].map((key) => (
               <Skeleton key={key} className="h-32 w-full" />

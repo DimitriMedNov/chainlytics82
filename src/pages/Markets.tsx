@@ -26,7 +26,7 @@ const Markets = () => {
   };
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-4 sm:space-y-8 sm:p-6 lg:p-8">
+    <div className="mx-auto max-w-7xl v3-space-y-6 p-4 sm:v3-space-y-8 sm:p-6 lg:p-8">
       <header>
         <h1 className="mb-2 text-2xl font-bold sm:text-3xl">Mercados</h1>
         <p className="text-sm text-muted-foreground sm:text-base">
@@ -59,11 +59,11 @@ const Markets = () => {
               isRetrying={isFetching}
             />
           ) : isPending ? (
-            <ul className="space-y-3 sm:space-y-4" aria-busy="true">
+            <ul className="v3-space-y-3 sm:v3-space-y-4" aria-busy="true">
               {Array.from({ length: 8 }, (_, index) => `fila-${index}`).map((key) => (
                 <li key={key} className="flex items-center gap-4 rounded-lg border p-4">
                   <Skeleton className="h-10 w-10 rounded-full" />
-                  <div className="flex-1 space-y-2">
+                  <div className="flex-1 v3-space-y-2">
                     <Skeleton className="h-4 w-32" />
                     <Skeleton className="h-3 w-16" />
                   </div>
@@ -83,7 +83,7 @@ const Markets = () => {
               }
             />
           ) : (
-            <ul className="space-y-3 sm:space-y-4">
+            <ul className="v3-space-y-3 sm:v3-space-y-4">
               {visibleCoins.map((coin) => (
                 <MarketCoinRow key={coin.id} coin={coin} onViewDetails={openDetails} />
               ))}

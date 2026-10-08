@@ -1,98 +1,470 @@
+/*
+  ═══════════════════════════════════════════════════════════════════════════
+  SISTEMA VISUAL DE CHAINLYTICS (front nuevo, `src/ui/`)
+  Guía larga: src/ui/shared/README.md
+  ═══════════════════════════════════════════════════════════════════════════
+  Marca que se mantiene: nombre, violeta `--primary: 262 83% 58%`, icono de barras.
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+  FORMA DE LOS TOKENS: tres números HSL sin `hsl()`. Se leen `hsl(var(--x))` o con
+  transparencia `hsl(var(--x) / 0.5)`. En clases: `bg-card`, `text-muted-foreground`...
+
+  SUPERFICIES (de más hundida a más alta)
+    --background   bg-background   lienzo de la página
+    --card         bg-card         tarjetas y secciones (lo normal)
+    --elevated     bg-elevated     lo que va DENTRO de una tarjeta y debe despegar
+                                   (cifra destacada, fila activa, cabecera de tabla)
+    --popover      bg-popover      lo que flota: menús, diálogos, avisos, tooltips
+    --muted        bg-muted        relleno neutro: esqueletos, pistas, chips
+    --accent       bg-accent       hover y selección
+  TEXTO
+    --foreground (normal) · --muted-foreground (atenuado) · --link (violeta legible como
+    TEXTO en los dos temas; `--primary` es para RELLENOS con `--primary-foreground`).
+  SEÑAL: --success (sube) · --destructive (baja / error) · --warning. Nunca solo color:
+    siempre con signo, flecha o texto.
+  SERIES: --chart-1..5 (violeta, azul, ámbar, turquesa, rosa). Bklit: var(--bklit-chart-N).
+  BORDES: --border (divisores y tarjetas) · --input (campos) · --ring (foco).
+  RADIOS: rounded-sm 6 · rounded-md 8 · rounded-lg 10 (tarjeta) · rounded-xl 14 (diálogo).
+  SOMBRAS: shadow-card (tarjeta) · shadow-raised (hover, barra) · shadow-overlay (flota).
+  TEXTO (utilidades `type-*`; las cifras SIEMPRE con `type-num` o una `type-figure*`):
+    type-title 24/32 semibold      h1 de página
+    type-section 15/22 semibold    título de sección o tarjeta
+    type-eyebrow 11/16 medium MAY  etiqueta de cifra, cabecera de tabla
+    type-figure-lg 28/34 semibold  cifra principal
+    type-figure 18/26 semibold     cifra secundaria
+    type-num                       cifras tabulares en cualquier tamaño
+    cuerpo: text-sm (14/20) · ayuda: text-xs (12/16) · mínimo: text-2xs (11/16)
+  PÁGINA: ancho máximo `max-w-page` (1440 px); márgenes px-4 / sm:px-6 / lg:px-8;
+    separación entre secciones gap-6; dentro de una tarjeta p-4 / sm:p-5.
+  ÁREA TÁCTIL: todo lo pulsable mide 44×44 px como mínimo (`min-h-11 min-w-11`).
+  FOCO: contorno de 2 px con `--ring` en todo elemento con `:focus-visible`.
+  CONTRASTE (calculado, mínimo 4,5:1 para texto; claro / oscuro):
+    texto normal sobre fondo 17,5 / 17,9 · sobre tarjeta 18,4 / 17,1
+    texto atenuado sobre fondo 6,4 / 7,9 · sobre tarjeta 6,7 / 7,5 · sobre muted 5,8 / 6,6
+    texto sobre primario 5,7 / 5,7 · enlace sobre tarjeta 7,4 / 7,7
+    éxito sobre tarjeta 6,2 / 9,5 · peligro sobre tarjeta 6,4 / 5,9 · aviso 6,3 / 9,9
+    series sobre tarjeta (mínimo 3:1): 5,7 4,3 3,8 4,8 4,8 / 5,9 8,6 10,8 10,0 7,0
+  ═══════════════════════════════════════════════════════════════════════════
+*/
+@import 'tailwindcss';
+
+@import 'tw-animate-css';
+
+/* Tailwind no lee la carpeta de trabajo de los agentes: si la lee, Vite recarga la página cada vez que se escribe en ella. */
+@source not '../.claude';
+
+/* Texto con formato (clases `prose`). Estaba instalado y nunca se cargaba. */
+@plugin '@tailwindcss/typography';
+
+@custom-variant dark (&:is(.dark *));
+/* Compatibilidad v3: hover también en pantallas táctiles, como antes de la subida. */
+@custom-variant hover (&:hover);
+
+@utility container {
+  margin-inline: auto;
+  padding-inline: 2rem;
+  @media (width >= --theme(--breakpoint-sm)) {
+    max-width: none;
+  }
+  @media (width >= 1400px) {
+    max-width: 1400px;
+  }
+}
+
+/*
+  Solo para la interfaz anterior (src/components y src/pages). Son las reglas exactas
+  de `space-x-*` y `space-y-*` de Tailwind 3: el margen va en el hijo siguiente, no en
+  el anterior, y gana a un `mt-*`/`mb-*` propio del hijo. La interfaz nueva de `src/ui`
+  usa los `space-*` de Tailwind 4 tal cual. Se borran cuando se retire la interfaz
+  anterior (si nadie las usa, Tailwind no genera nada).
+*/
+@utility v3-space-y-* {
+  & > :not([hidden]) ~ :not([hidden]) {
+    margin-top: calc(var(--spacing) * --value(number));
+    margin-bottom: 0;
+  }
+}
+@utility v3-space-x-* {
+  & > :not([hidden]) ~ :not([hidden]) {
+    margin-left: calc(var(--spacing) * --value(number));
+    margin-right: 0;
+  }
+}
+
+@theme {
+  /* Fuente del sistema (sin descargas): Inter si está instalada, si no la del sistema. */
+  --font-sans:
+    "Inter Variable", Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+    "Noto Color Emoji";
+  --font-mono:
+    ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  /* Texto mínimo (11 px) y punto de corte para móviles muy estrechos (380 px). */
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
+  --breakpoint-xs: 23.75rem;
+  /* Ancho máximo de página: `max-w-page`. */
+  --container-page: 90rem;
+
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --color-elevated: hsl(var(--elevated));
+  --color-link: hsl(var(--link));
+
+  --color-success: hsl(var(--success));
+  --color-success-foreground: hsl(var(--success-foreground));
+
+  --color-warning: hsl(var(--warning));
+  --color-warning-foreground: hsl(var(--warning-foreground));
+
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
+
+  --radius-xs: calc(var(--radius) - 6px);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+
+  --shadow-card: var(--elevation-card);
+  --shadow-raised: var(--elevation-raised);
+  --shadow-overlay: var(--elevation-overlay);
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-fade-in: fade-in 0.5s ease-out;
+  --animate-slide-up: slide-up 0.5s ease-out;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+  @keyframes fade-in {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+  @keyframes slide-up {
+    0% {
+      transform: translateY(10px);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: hsl(var(--border));
+  }
+}
+
+/*
+  Compatibilidad con Tailwind v3 (snippets de la guía oficial de subida), para
+  que la interfaz anterior se vea y se comporte igual hasta que se retire:
+  - los botones vuelven a mostrar el cursor de mano,
+  - el placeholder sin clase propia vuelve a ser gray-400.
+  El sistema visual nuevo decide después si se quedan.
+*/
+@layer base {
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+  input::placeholder,
+  textarea::placeholder {
+    color: hsl(var(--muted-foreground));
+  }
+}
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 262 83% 58%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222.2 84% 4.9%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96%;
-    --accent-foreground: 222.2 84% 4.9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 262 83% 58%;
-    --radius: 0.5rem;
+    color-scheme: light;
 
-    /* Tokens de gráfico y de señal. Se usan en recharts como hsl(var(--chart-1)). */
-    --chart-1: 262 83% 58%;
-    --chart-2: 199 89% 48%;
-    --chart-3: 43 96% 56%;
-    --chart-4: 160 84% 39%;
-    --chart-5: 330 81% 60%;
-    /* Oscurecidos para llegar a 4,5:1 sobre el fondo claro. */
-    --success: 142 72% 29%;
+    /* Superficies */
+    --background: 240 20% 98%;
+    --foreground: 240 15% 9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 15% 9%;
+    --elevated: 240 20% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 15% 9%;
+    --muted: 240 12% 94.5%;
+    --muted-foreground: 240 6% 38%;
+    --secondary: 240 12% 94.5%;
+    --secondary-foreground: 240 15% 9%;
+    --accent: 240 12% 92%;
+    --accent-foreground: 240 15% 9%;
+
+    /* Marca */
+    --primary: 262 83% 58%;
+    --primary-foreground: 0 0% 100%;
+    --link: 262 83% 50%;
+
+    /* Señal */
+    --destructive: 0 74% 42%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 152 82% 24%;
     --success-foreground: 0 0% 100%;
-    --warning: 25 90% 35%;
+    --warning: 28 92% 31%;
     --warning-foreground: 0 0% 100%;
+
+    /* Bordes y foco */
+    --border: 240 10% 88%;
+    --input: 240 8% 78%;
+    --ring: 262 83% 58%;
+    --radius: 0.625rem;
+
+    /* Series: violeta, azul, ámbar, turquesa, rosa. */
+    --chart-1: 262 83% 58%;
+    --chart-2: 199 92% 38%;
+    --chart-3: 32 95% 40%;
+    --chart-4: 172 80% 28%;
+    --chart-5: 330 75% 48%;
+
+    /* Elevación */
+    --elevation-card: 0 1px 2px 0 hsl(240 15% 9% / 0.05), 0 0 0 1px hsl(240 15% 9% / 0.02);
+    --elevation-raised: 0 4px 12px -2px hsl(240 15% 9% / 0.1), 0 2px 4px -2px hsl(240 15% 9% / 0.06);
+    --elevation-overlay: 0 16px 40px -8px hsl(240 15% 9% / 0.2), 0 4px 12px -4px hsl(240 15% 9% / 0.1);
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 262 83% 58%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 262 83% 58%;
+    color-scheme: dark;
 
-    --chart-1: 262 83% 68%;
-    --chart-2: 199 89% 60%;
-    --chart-3: 43 96% 62%;
-    --chart-4: 160 84% 50%;
-    --chart-5: 330 81% 68%;
-    --success: 142 69% 55%;
-    --success-foreground: 222.2 84% 4.9%;
-    --warning: 25 95% 61%;
-    --warning-foreground: 222.2 84% 4.9%;
+    --background: 240 10% 4.5%;
+    --foreground: 240 10% 96%;
+    --card: 240 8% 7.5%;
+    --card-foreground: 240 10% 96%;
+    --elevated: 240 7% 10.5%;
+    --popover: 240 7% 10.5%;
+    --popover-foreground: 240 10% 96%;
+    --muted: 240 6% 13%;
+    --muted-foreground: 240 6% 66%;
+    --secondary: 240 6% 14%;
+    --secondary-foreground: 240 10% 96%;
+    --accent: 240 6% 16%;
+    --accent-foreground: 240 10% 96%;
+
+    --primary: 262 83% 58%;
+    --primary-foreground: 0 0% 100%;
+    --link: 262 92% 78%;
+
+    /* Más claro que antes (0 62.8% 30.6%) para que se lea como línea y como texto. */
+    --destructive: 0 86% 66%;
+    --destructive-foreground: 240 10% 4.5%;
+    --success: 152 62% 52%;
+    --success-foreground: 240 10% 4.5%;
+    --warning: 38 92% 58%;
+    --warning-foreground: 240 10% 4.5%;
+
+    --border: 240 6% 17%;
+    --input: 240 6% 26%;
+    --ring: 262 90% 70%;
+
+    --chart-1: 262 90% 72%;
+    --chart-2: 199 90% 60%;
+    --chart-3: 40 95% 60%;
+    --chart-4: 172 66% 50%;
+    --chart-5: 330 85% 70%;
+
+    --elevation-card: 0 1px 2px 0 hsl(0 0% 0% / 0.4), inset 0 1px 0 0 hsl(0 0% 100% / 0.03);
+    --elevation-raised: 0 6px 16px -4px hsl(0 0% 0% / 0.6), inset 0 1px 0 0 hsl(0 0% 100% / 0.04);
+    --elevation-overlay: 0 20px 48px -8px hsl(0 0% 0% / 0.75), 0 0 0 1px hsl(0 0% 100% / 0.04);
   }
 
   body {
     @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv11", "ss01";
+    text-rendering: optimizeLegibility;
+  }
+
+
+  ::selection {
+    background-color: hsl(var(--primary) / 0.3);
   }
 }
 
-.glass-card {
-  @apply bg-secondary/20 backdrop-blur-lg border border-border/10 shadow-lg;
+/*
+  Foco visible en todo lo que se alcanza con Tab. Va fuera de capa a propósito:
+  así gana al `outline-none` que traen los componentes de los registros, cuyo
+  anillo al 50 % no llega a 3:1 sobre el fondo. `:where()` no añade especificidad.
+*/
+:where(a, button, input, select, textarea, summary, [role="button"], [role="tab"], [tabindex="0"]):focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
 }
 
-.crypto-chart {
-  @apply h-[300px] w-full;
+/* Escala tipográfica del front nuevo. Ver el comentario del inicio. */
+@utility type-title {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+@utility type-section {
+  font-size: 0.9375rem;
+  line-height: 1.375rem;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+@utility type-eyebrow {
+  font-size: 0.6875rem;
+  line-height: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+@utility type-figure-lg {
+  font-size: 1.75rem;
+  line-height: 2.125rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+@utility type-figure {
+  font-size: 1.125rem;
+  line-height: 1.625rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+@utility type-num {
+  font-variant-numeric: tabular-nums;
 }
 
-@keyframes pulse-subtle {
-  0%, 100% {
-    opacity: 1;
+/*
+  Variables de las gráficas de Bklit (registro @bklit, `chart-context`).
+  Bklit define `--chart-1..5` como colores completos en oklch y los lee con
+  `var(--chart-1)`. Este proyecto ya usa esos nombres con otra forma (tres números
+  HSL, leídos como `hsl(var(--chart-1))` por recharts y por `useChartColors`), así
+  que la paleta de Bklit vive bajo `--bklit-chart-1..5` y apunta a los colores de
+  serie del proyecto. En los archivos de `src/ui/charts` se cambió
+  `var(--chart-N)` por `var(--bklit-chart-N)`. El resto son nombres propios de
+  Bklit, apuntados aquí a los tokens del proyecto.
+*/
+@layer base {
+  /*
+    Todo apunta a tokens del proyecto, así las gráficas siguen el tema sin un
+    bloque `.dark` propio (los tokens ya cambian en `.dark`, sobre el mismo `<html>`).
+  */
+  :root {
+    --bklit-chart-1: hsl(var(--chart-1));
+    --bklit-chart-2: hsl(var(--chart-2));
+    --bklit-chart-3: hsl(var(--chart-3));
+    --bklit-chart-4: hsl(var(--chart-4));
+    --bklit-chart-5: hsl(var(--chart-5));
+    --chart-background: hsl(var(--card));
+    --chart-foreground: hsl(var(--foreground));
+    --chart-foreground-muted: hsl(var(--muted-foreground));
+    --chart-line-primary: var(--bklit-chart-1);
+    --chart-line-secondary: var(--bklit-chart-2);
+    --chart-crosshair: hsl(var(--muted-foreground) / 0.6);
+    --chart-grid: hsl(var(--border));
+    --chart-brush-border: var(--chart-grid);
+    --chart-tooltip-background: hsl(var(--popover) / 0.94);
+    --chart-tooltip-foreground: hsl(var(--popover-foreground));
+    --chart-tooltip-muted: hsl(var(--muted-foreground));
+    --chart-marker-background: hsl(var(--elevated));
+    --chart-marker-border: hsl(var(--input));
+    --chart-marker-foreground: hsl(var(--foreground));
+    --chart-label: hsl(var(--muted-foreground));
+    /* Rampa secuencial (mapas de calor): del relleno neutro al violeta de marca. */
+    --chart-scale-01: color-mix(in oklab, hsl(var(--chart-1)) 12%, hsl(var(--muted)));
+    --chart-scale-02: color-mix(in oklab, hsl(var(--chart-1)) 30%, hsl(var(--muted)));
+    --chart-scale-03: color-mix(in oklab, hsl(var(--chart-1)) 52%, hsl(var(--muted)));
+    --chart-scale-04: color-mix(in oklab, hsl(var(--chart-1)) 76%, hsl(var(--muted)));
+    --chart-scale-05: hsl(var(--chart-1));
+    --chart-scale-pattern-color: hsl(var(--card));
+    --legend: hsl(var(--card));
+    --legend-foreground: hsl(var(--foreground));
+    --legend-muted: hsl(var(--muted));
+    --legend-muted-foreground: hsl(var(--muted-foreground));
+    --legend-track: hsl(var(--border));
   }
-  50% {
-    opacity: 0.8;
-  }
 }
 
-.animate-pulse-subtle {
-  animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+/* Clases de Tailwind que usan los componentes de Bklit (`text-chart-label`, etc.). */
+@theme inline {
+  --color-chart-background: var(--chart-background);
+  --color-chart-foreground: var(--chart-foreground);
+  --color-chart-foreground-muted: var(--chart-foreground-muted);
+  --color-chart-crosshair: var(--chart-crosshair);
+  --color-chart-grid: var(--chart-grid);
+  --color-chart-tooltip-background: var(--chart-tooltip-background);
+  --color-chart-tooltip-foreground: var(--chart-tooltip-foreground);
+  --color-chart-tooltip-muted: var(--chart-tooltip-muted);
+  --color-chart-marker-background: var(--chart-marker-background);
+  --color-chart-marker-border: var(--chart-marker-border);
+  --color-chart-marker-foreground: var(--chart-marker-foreground);
+  --color-chart-label: var(--chart-label);
+  --color-chart-scale-01: var(--chart-scale-01);
+  --color-chart-scale-02: var(--chart-scale-02);
+  --color-chart-scale-03: var(--chart-scale-03);
+  --color-chart-scale-04: var(--chart-scale-04);
+  --color-chart-scale-05: var(--chart-scale-05);
+  --color-chart-scale-pattern-color: var(--chart-scale-pattern-color);
+  --color-legend: var(--legend);
+  --color-legend-foreground: var(--legend-foreground);
+  --color-legend-muted: var(--legend-muted);
+  --color-legend-muted-foreground: var(--legend-muted-foreground);
+  --color-legend-track: var(--legend-track);
 }

@@ -32,7 +32,7 @@ export function BackendUnavailable({ status, what }: BackendUnavailableProps) {
             : "El servicio de cuentas no responde"}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4 text-center">
+      <CardContent className="v3-space-y-4 text-center">
         <p className="text-sm text-muted-foreground">
           {sinConfigurar
             ? "Faltan las variables de Supabase en el archivo .env."

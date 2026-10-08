@@ -37,7 +37,7 @@ export function CoinPicker({
   );
 
   return (
-    <div className="space-y-3">
+    <div className="v3-space-y-3">
       <div className="flex flex-wrap items-center gap-2">
         {selected.map((coin, index) => (
           <span
@@ -46,7 +46,7 @@ export function CoinPicker({
           >
             <span
               aria-hidden="true"
-              className="h-2.5 w-2.5 flex-shrink-0 rounded-full"
+              className="h-2.5 w-2.5 shrink-0 rounded-full"
               style={{ backgroundColor: colors[index % colors.length] }}
             />
             <span className="font-medium">{coin.symbol}</span>
@@ -66,7 +66,7 @@ export function CoinPicker({
         )}
       </div>
 
-      <div className="space-y-2">
+      <div className="v3-space-y-2">
         <Label htmlFor="comparar-anadir">
           {lleno ? `Máximo ${max} monedas` : "Añadir moneda"}
         </Label>

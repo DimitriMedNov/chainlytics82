@@ -23,7 +23,7 @@ export default function AICryptoAnalyst() {
         size="lg"
         onClick={handleOpen}
         aria-label="Abrir el analista con IA"
-        className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-gradient-to-br from-primary to-primary/70 p-0 shadow-lg transition-transform duration-300 hover:scale-110 hover:shadow-xl"
+        className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-linear-to-br from-primary to-primary/70 p-0 shadow-lg transition-transform duration-300 hover:scale-110 hover:shadow-xl"
       >
         <Sparkles className="h-6 w-6 text-primary-foreground" aria-hidden="true" />
       </Button>

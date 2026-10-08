@@ -37,7 +37,7 @@ function ChartTooltip({
   return (
     <div className="rounded-lg border border-border bg-background px-3 py-2 text-sm shadow-lg">
       <p className="mb-1 text-muted-foreground">{row.fullDate}</p>
-      <ul className="space-y-0.5">
+      <ul className="v3-space-y-0.5">
         {lineas.map((item) => {
           const coin = coins.find((c) => c.id === item.dataKey);
           return (

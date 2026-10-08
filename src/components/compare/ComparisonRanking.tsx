@@ -22,7 +22,7 @@ export default function ComparisonRanking({ results, coins, colors }: Comparison
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <ol className="space-y-3">
+        <ol className="v3-space-y-3">
           {results.map((result, index) => {
             const colorIndex = coins.findIndex((c) => c.id === result.coinId);
             const coin = coins[colorIndex];
@@ -33,12 +33,12 @@ export default function ComparisonRanking({ results, coins, colors }: Comparison
                 className="flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between"
               >
                 <div className="flex min-w-0 items-center gap-3">
-                  <span className="w-6 flex-shrink-0 text-sm font-semibold text-muted-foreground">
+                  <span className="w-6 shrink-0 text-sm font-semibold text-muted-foreground">
                     {index + 1}.
                   </span>
                   <span
                     aria-hidden="true"
-                    className="h-3 w-3 flex-shrink-0 rounded-full"
+                    className="h-3 w-3 shrink-0 rounded-full"
                     style={{ backgroundColor: colors[colorIndex % colors.length] }}
                   />
                   {coin && (
@@ -48,7 +48,7 @@ export default function ComparisonRanking({ results, coins, colors }: Comparison
                       width={32}
                       height={32}
                       loading="lazy"
-                      className="h-8 w-8 flex-shrink-0 rounded-full"
+                      className="h-8 w-8 shrink-0 rounded-full"
                     />
                   )}
                   <div className="min-w-0">

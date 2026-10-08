@@ -37,7 +37,7 @@ export function RangeSelector({ value, onChange, label, className }: RangeSelect
             onClick={() => onChange(range.days)}
             aria-pressed={activo}
             className={cn(
-              "min-h-11 rounded-md px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0 sm:py-1.5",
+              "min-h-11 rounded-md px-3 text-sm font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0 sm:py-1.5",
               activo
                 ? "bg-primary text-primary-foreground"
                 : "text-muted-foreground hover:bg-accent hover:text-foreground",

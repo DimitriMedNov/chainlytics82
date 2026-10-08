@@ -29,13 +29,13 @@ const QuickConversions = ({ options, isPending }: QuickConversionsProps) => {
       </CardHeader>
       <CardContent>
         {isPending ? (
-          <div className="space-y-3" aria-busy="true">
+          <div className="v3-space-y-3" aria-busy="true">
             {ATAJOS.map((item) => (
               <Skeleton key={item.code} className="h-14 w-full" />
             ))}
           </div>
         ) : (
-          <ul className="space-y-3">
+          <ul className="v3-space-y-3">
             {rows.map((row) => (
               <li
                 key={row.code}

@@ -28,7 +28,7 @@ const CurrencySelector = ({
   selected,
 }: CurrencySelectorProps) => {
   return (
-    <div className="w-full space-y-2">
+    <div className="w-full v3-space-y-2">
       <div className="flex items-center justify-between gap-2">
         <Label htmlFor={id}>{label}</Label>
         {selected && (

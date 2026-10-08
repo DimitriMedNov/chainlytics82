@@ -43,7 +43,7 @@ export default function MarketFiltersCard({
       </CardHeader>
       <CardContent>
         <div className="flex flex-col gap-4">
-          <div className="space-y-2">
+          <div className="v3-space-y-2">
             <Label htmlFor="markets-search">Buscar criptomoneda</Label>
             <Input
               id="markets-search"
@@ -51,11 +51,11 @@ export default function MarketFiltersCard({
               placeholder="Bitcoin, BTC…"
               value={searchTerm}
               onChange={(event) => onSearchChange(event.target.value)}
-              className="h-11 w-full"
+              className="h-11 w-full [appearance:textfield] -outline-offset-2"
             />
           </div>
           <div className="flex flex-col gap-4 sm:flex-row">
-            <div className="w-full space-y-2 sm:w-[220px]">
+            <div className="w-full v3-space-y-2 sm:w-[220px]">
               <Label htmlFor="markets-filter">Mostrar</Label>
               <Select value={filter} onValueChange={(value) => onFilterChange(value as MarketFilter)}>
                 <SelectTrigger id="markets-filter" className="h-11 w-full">
@@ -70,7 +70,7 @@ export default function MarketFiltersCard({
                 </SelectContent>
               </Select>
             </div>
-            <div className="w-full space-y-2 sm:w-[220px]">
+            <div className="w-full v3-space-y-2 sm:w-[220px]">
               <Label htmlFor="markets-sort">Ordenar por</Label>
               <Select value={sortBy} onValueChange={(value) => onSortChange(value as MarketSortKey)}>
                 <SelectTrigger id="markets-sort" className="h-11 w-full">

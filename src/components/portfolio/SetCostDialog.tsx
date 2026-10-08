@@ -68,7 +68,7 @@ const SetCostDialog = ({
       <DialogTrigger asChild>
         <button
           type="button"
-          className="min-h-11 rounded-md px-3 text-sm font-medium text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="min-h-11 rounded-md px-3 text-sm font-medium text-primary underline-offset-2 hover:underline focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
         >
           Registrar el coste
         </button>
@@ -83,8 +83,8 @@ const SetCostDialog = ({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
+        <form onSubmit={handleSubmit} className="v3-space-y-4">
+          <div className="v3-space-y-2">
             <Label htmlFor={`coste-${coinId}`}>Precio pagado por unidad</Label>
             <Input
               id={`coste-${coinId}`}

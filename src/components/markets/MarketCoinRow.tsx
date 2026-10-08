@@ -16,7 +16,7 @@ export default function MarketCoinRow({ coin, onViewDetails }: MarketCoinRowProp
   return (
     <li className="flex flex-col gap-4 rounded-lg border p-4 transition-colors hover:bg-muted/50 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
-        <span className="w-8 flex-shrink-0 text-sm font-semibold text-muted-foreground">
+        <span className="w-8 shrink-0 text-sm font-semibold text-muted-foreground">
           #{coin.rank}
         </span>
         <img
@@ -25,7 +25,7 @@ export default function MarketCoinRow({ coin, onViewDetails }: MarketCoinRowProp
           width={40}
           height={40}
           loading="lazy"
-          className="h-10 w-10 flex-shrink-0 rounded-full"
+          className="h-10 w-10 shrink-0 rounded-full"
         />
         <div className="min-w-0 flex-1">
           <h3 className="truncate font-semibold">{coin.name}</h3>
@@ -61,7 +61,7 @@ export default function MarketCoinRow({ coin, onViewDetails }: MarketCoinRowProp
         <Button
           variant="outline"
           onClick={() => onViewDetails(coin)}
-          className="min-h-11 flex-shrink-0"
+          className="min-h-11 shrink-0"
         >
           Ver detalles
           <span className="sr-only"> de {coin.name}</span>

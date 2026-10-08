@@ -56,7 +56,7 @@ const Watchlist = () => {
   };
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:space-y-8 lg:p-8">
+    <div className="mx-auto max-w-7xl v3-space-y-6 p-4 sm:p-6 lg:v3-space-y-8 lg:p-8">
       <WatchlistHeader
         itemCount={entries.length}
         onSort={() => handleSort("name")}
@@ -71,7 +71,7 @@ const Watchlist = () => {
           isRetrying={watchlist.isRefetching}
         />
       ) : watchlist.isPending ? (
-        <div className="space-y-4" aria-busy="true">
+        <div className="v3-space-y-4" aria-busy="true">
           {Array.from({ length: 3 }, (_, index) => `carga-${index}`).map((key) => (
             <Skeleton key={key} className="h-24 w-full" />
           ))}
@@ -86,7 +86,7 @@ const Watchlist = () => {
           isRetrying={isFetching}
         />
       ) : isPending ? (
-        <div className="space-y-4" aria-busy="true">
+        <div className="v3-space-y-4" aria-busy="true">
           <Skeleton className="h-24 w-full" />
           {Array.from({ length: 3 }, (_, index) => `fila-${index}`).map((key) => (
             <Skeleton key={key} className="h-24 w-full" />

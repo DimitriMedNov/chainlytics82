@@ -44,7 +44,7 @@ export function Navbar() {
             }`
           }
         >
-          <item.icon className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+          <item.icon className="h-4 w-4 shrink-0" aria-hidden="true" />
           <span className={alwaysShowLabels ? "" : "sr-only xl:not-sr-only"}>{item.title}</span>
         </NavLink>
       ))}
@@ -58,10 +58,10 @@ export function Navbar() {
   }
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-sm supports-backdrop-filter:bg-background/60">
       <div className="container flex h-16 items-center gap-2 px-4 sm:px-8">
         {/* Logo */}
-        <div className="flex flex-shrink-0 items-center gap-2 sm:mr-4">
+        <div className="flex shrink-0 items-center gap-2 sm:mr-4">
           <BarChart3 className="h-6 w-6 text-primary" />
           <span className="font-semibold text-lg">Chainlytics</span>
         </div>
@@ -101,7 +101,7 @@ export function Navbar() {
                   <span className="font-semibold">Chainlytics</span>
                 </div>
               </div>
-              <div className="flex flex-col space-y-2">
+              <div className="flex flex-col v3-space-y-2">
                 <NavItems alwaysShowLabels />
                 {(session || canSignIn) && (
                   <div className="pt-4 mt-2 border-t">

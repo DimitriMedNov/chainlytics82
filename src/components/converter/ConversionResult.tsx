@@ -13,7 +13,7 @@ export interface ConversionResultProps {
 
 const ConversionResult = ({ id, label, result, copied, onCopy }: ConversionResultProps) => {
   return (
-    <div className="w-full space-y-2">
+    <div className="w-full v3-space-y-2">
       <Label htmlFor={id}>{label}</Label>
       <div className="relative">
         <Input

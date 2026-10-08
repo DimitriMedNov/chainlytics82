@@ -53,7 +53,7 @@ const WatchlistSection = ({
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-0">
-        <ul className="space-y-3 sm:space-y-4">
+        <ul className="v3-space-y-3 sm:v3-space-y-4">
           {items.map((item) => (
             <WatchlistItem
               key={item.id}

@@ -10,7 +10,7 @@ export interface AnalystMessageListProps {
 
 function BotAvatar() {
   return (
-    <div className="mt-1 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
+    <div className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10">
       <Bot className="h-4 w-4 text-primary" aria-hidden="true" />
     </div>
   );
@@ -43,7 +43,7 @@ export default function AnalystMessageList({ messages, loading }: AnalystMessage
             )}
           </div>
           {m.role === "user" && (
-            <div className="mt-1 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-secondary">
+            <div className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary">
               <User className="h-4 w-4" aria-hidden="true" />
             </div>
           )}

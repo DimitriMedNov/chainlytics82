@@ -30,7 +30,7 @@ const TransactionsCard = ({ transactions, onRemove }: TransactionsCardProps) => 
         <CardTitle>Movimientos ({transactions.length})</CardTitle>
       </CardHeader>
       <CardContent>
-        <ul className="space-y-3">
+        <ul className="v3-space-y-3">
           {ordenadas.map((tx) => {
             const esCompra = tx.kind === "compra";
             return (
@@ -41,7 +41,7 @@ const TransactionsCard = ({ transactions, onRemove }: TransactionsCardProps) => 
                 <div className="flex min-w-0 items-center gap-3">
                   <span
                     className={cn(
-                      "flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full",
+                      "flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
                       esCompra ? "bg-success/15 text-success" : "bg-warning/15 text-warning",
                     )}
                   >

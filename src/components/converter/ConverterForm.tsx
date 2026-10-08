@@ -87,13 +87,13 @@ const ConverterForm = ({
             isRetrying={isRetrying}
           />
         ) : isPending ? (
-          <div className="space-y-4" aria-busy="true">
+          <div className="v3-space-y-4" aria-busy="true">
             <Skeleton className="h-[72px] w-full" />
             <Skeleton className="mx-auto h-12 w-12 rounded-full" />
             <Skeleton className="h-[72px] w-full" />
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="v3-space-y-4">
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_220px]">
               <ConversionInput id="convert-amount" label="Cantidad" value={amount} onChange={setAmount} />
               <CurrencySelector

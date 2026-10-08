@@ -71,7 +71,7 @@ export function CoinSearchDialog({ open, onOpenChange, onSelect }: CoinSearchDia
                     alt=""
                     width={24}
                     height={24}
-                    className="h-6 w-6 flex-shrink-0 rounded-full"
+                    className="h-6 w-6 shrink-0 rounded-full"
                   />
                 ) : (
                   <TrendingUp className="h-5 w-5 text-muted-foreground" aria-hidden="true" />

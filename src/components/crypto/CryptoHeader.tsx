@@ -20,7 +20,7 @@ const CryptoHeader = ({ coin, isInWatchlist, onToggleWatchlist, onExchange }: Cr
           alt=""
           width={56}
           height={56}
-          className="h-12 w-12 flex-shrink-0 rounded-full sm:h-14 sm:w-14"
+          className="h-12 w-12 shrink-0 rounded-full sm:h-14 sm:w-14"
         />
         <div className="min-w-0">
           <h2 className="truncate text-xl font-bold sm:text-3xl">{coin.name}</h2>

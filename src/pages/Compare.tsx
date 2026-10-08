@@ -24,7 +24,7 @@ const Compare = () => {
   const cargandoMonedas = markets.isPending;
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:space-y-8 lg:p-8">
+    <div className="mx-auto max-w-7xl v3-space-y-6 p-4 sm:p-6 lg:v3-space-y-8 lg:p-8">
       <header>
         <h1 className="mb-2 text-2xl font-bold sm:text-3xl">Comparar</h1>
         <p className="text-sm text-muted-foreground sm:text-base">
@@ -40,7 +40,7 @@ const Compare = () => {
             Qué comparar
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="v3-space-y-6">
           {markets.isError ? (
             <ErrorState
               title="No se pudo cargar la lista de monedas"
@@ -49,7 +49,7 @@ const Compare = () => {
               isRetrying={markets.isFetching}
             />
           ) : cargandoMonedas ? (
-            <div className="space-y-3" aria-busy="true">
+            <div className="v3-space-y-3" aria-busy="true">
               <Skeleton className="h-8 w-48" />
               <Skeleton className="h-11 w-full sm:w-[280px]" />
             </div>
@@ -64,7 +64,7 @@ const Compare = () => {
             />
           )}
 
-          <div className="space-y-2">
+          <div className="v3-space-y-2">
             <p className="text-sm font-medium">Periodo</p>
             <RangeSelector value={days} onChange={setDays} label="Periodo de la comparación" />
           </div>

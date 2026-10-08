@@ -89,7 +89,7 @@ export default function Auth() {
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="mx-auto h-12 w-12 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center mb-2">
+          <div className="mx-auto h-12 w-12 rounded-full bg-linear-to-br from-primary to-primary/60 flex items-center justify-center mb-2">
             <Sparkles className="h-6 w-6 text-primary-foreground" />
           </div>
           <CardTitle>Accede a Chainlytics</CardTitle>
@@ -103,7 +103,7 @@ export default function Auth() {
             </TabsList>
 
             <TabsContent value="signin">
-              <form onSubmit={handleSignIn} className="space-y-4">
+              <form onSubmit={handleSignIn} className="v3-space-y-4">
                 <Field id="si-email" label="Email" type="email" value={email} onChange={setEmail} />
                 <Field id="si-pass" label="Contraseña" type="password" value={password} onChange={setPassword} />
                 <Button type="submit" className="w-full" disabled={busy}>
@@ -113,7 +113,7 @@ export default function Auth() {
             </TabsContent>
 
             <TabsContent value="signup">
-              <form onSubmit={handleSignUp} className="space-y-4">
+              <form onSubmit={handleSignUp} className="v3-space-y-4">
                 <Field id="su-email" label="Email" type="email" value={email} onChange={setEmail} />
                 <Field id="su-pass" label="Contraseña" type="password" value={password} onChange={setPassword} />
                 <Button type="submit" className="w-full" disabled={busy}>
@@ -133,7 +133,7 @@ function Field({ id, label, type, value, onChange }: {
   value: string; onChange: (v: string) => void;
 }) {
   return (
-    <div className="space-y-2">
+    <div className="v3-space-y-2">
       <Label htmlFor={id}>{label}</Label>
       <Input id={id} type={type} value={value} onChange={(e) => onChange(e.target.value)} required />
     </div>

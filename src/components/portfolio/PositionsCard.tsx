@@ -22,7 +22,7 @@ function PositionItem({ position, onSetCost }: { position: Position } & Pick<Pos
             width={40}
             height={40}
             loading="lazy"
-            className="h-10 w-10 flex-shrink-0 rounded-full"
+            className="h-10 w-10 shrink-0 rounded-full"
           />
           <div className="min-w-0">
             <h3 className="truncate font-semibold">{position.name}</h3>
@@ -97,7 +97,7 @@ export default function PositionsCard({ positions, onSetCost }: PositionsCardPro
         <CardTitle>Mis posiciones</CardTitle>
       </CardHeader>
       <CardContent>
-        <ul className="space-y-4">
+        <ul className="v3-space-y-4">
           {positions.map((position) => (
             <PositionItem key={position.coinId} position={position} onSetCost={onSetCost} />
           ))}

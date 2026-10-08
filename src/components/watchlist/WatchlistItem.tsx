@@ -30,7 +30,7 @@ const WatchlistItem = ({
           width={48}
           height={48}
           loading="lazy"
-          className="h-12 w-12 flex-shrink-0 rounded-full"
+          className="h-12 w-12 shrink-0 rounded-full"
         />
         <div className="min-w-0 flex-1">
           <h3 className="truncate font-bold sm:text-lg">{item.name}</h3>

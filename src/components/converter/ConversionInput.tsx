@@ -17,7 +17,7 @@ const ConversionInput = ({
   placeholder = "0,00",
 }: ConversionInputProps) => {
   return (
-    <div className="w-full space-y-2">
+    <div className="w-full v3-space-y-2">
       <Label htmlFor={id}>{label}</Label>
       <Input
         id={id}

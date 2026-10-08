@@ -20,11 +20,11 @@ export interface AnalystIntroProps {
 export default function AnalystIntro({ variant, userName, onSuggestion, onNavigate }: AnalystIntroProps) {
   if (variant === "unavailable") {
     return (
-      <div className="space-y-4 py-10 text-center">
+      <div className="v3-space-y-4 py-10 text-center">
         <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-muted">
           <CloudOff className="h-6 w-6 text-muted-foreground" aria-hidden="true" />
         </div>
-        <div className="space-y-1">
+        <div className="v3-space-y-1">
           <h3 className="font-semibold">El analista no está disponible</h3>
           <p className="px-4 text-sm text-muted-foreground">
             Se ejecuta en el servidor, y ahora mismo el servicio no responde. Los precios de la
@@ -37,11 +37,11 @@ export default function AnalystIntro({ variant, userName, onSuggestion, onNaviga
 
   if (variant === "signin") {
     return (
-      <div className="space-y-4 py-10 text-center">
+      <div className="v3-space-y-4 py-10 text-center">
         <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
           <LogIn className="h-6 w-6 text-primary" aria-hidden="true" />
         </div>
-        <div className="space-y-1">
+        <div className="v3-space-y-1">
           <h3 className="font-semibold">Inicia sesión para continuar</h3>
           <p className="px-4 text-sm text-muted-foreground">
             El analista IA solo está disponible para usuarios autenticados.
@@ -55,7 +55,7 @@ export default function AnalystIntro({ variant, userName, onSuggestion, onNaviga
   }
 
   return (
-    <div className="space-y-4">
+    <div className="v3-space-y-4">
       <div className="py-6 text-center">
         <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
           <Bot className="h-6 w-6 text-primary" aria-hidden="true" />
@@ -72,7 +72,7 @@ export default function AnalystIntro({ variant, userName, onSuggestion, onNaviga
             key={s}
             type="button"
             onClick={() => onSuggestion(s)}
-            className="min-h-11 rounded-md border bg-card px-3 py-2 text-left text-sm transition-colors hover:border-primary/40 hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="min-h-11 rounded-md border bg-card px-3 py-2 text-left text-sm transition-colors hover:border-primary/40 hover:bg-accent focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
           >
             {s}
           </button>

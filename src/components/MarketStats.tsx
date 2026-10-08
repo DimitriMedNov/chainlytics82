@@ -55,7 +55,7 @@ const MarketStats = () => {
     return (
       <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
         {["cap", "volumen", "dominancia"].map((key) => (
-          <div key={key} className="glass-card space-y-3 rounded-lg p-6">
+          <div key={key} className="glass-card v3-space-y-3 rounded-lg p-6">
             <Skeleton className="h-4 w-24" />
             <Skeleton className="h-8 w-32" />
             <Skeleton className="h-4 w-20" />

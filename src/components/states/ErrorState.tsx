@@ -28,7 +28,7 @@ export function ErrorState({
       )}
     >
       <AlertCircle className="h-8 w-8 text-destructive" aria-hidden="true" />
-      <div className="space-y-1">
+      <div className="v3-space-y-1">
         <h3 className="font-semibold">{title}</h3>
         <p className="mx-auto max-w-md text-sm text-muted-foreground">{message}</p>
       </div>

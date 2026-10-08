@@ -7,7 +7,7 @@ const Converter = () => {
   const { convertibles, isPending, isError, isFetching, errorMessage, refetch } = useConvertibles();
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 p-4 sm:p-6 lg:p-8">
+    <div className="mx-auto max-w-6xl v3-space-y-6 p-4 sm:p-6 lg:p-8">
       <ConverterHeader />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-8">

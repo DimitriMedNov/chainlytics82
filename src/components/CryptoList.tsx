@@ -29,11 +29,11 @@ const CryptoList = () => {
     return (
       <section className="glass-card rounded-lg p-6" aria-busy="true">
         <Skeleton className="mb-6 h-6 w-48" />
-        <div className="space-y-4">
+        <div className="v3-space-y-4">
           {Array.from({ length: VISIBLES }, (_, index) => `fila-${index}`).map((key) => (
             <div key={key} className="flex items-center gap-4">
               <Skeleton className="h-8 w-8 rounded-full" />
-              <div className="flex-1 space-y-2">
+              <div className="flex-1 v3-space-y-2">
                 <Skeleton className="h-4 w-24" />
                 <Skeleton className="h-3 w-16" />
               </div>
@@ -76,16 +76,16 @@ const CryptoList = () => {
           <caption className="sr-only">Las {VISIBLES} criptomonedas con mayor capitalización</caption>
           <thead>
             <tr className="border-b border-border/30 text-left text-sm text-muted-foreground">
-              <th scope="col" className="pb-4 font-medium">Nombre</th>
-              <th scope="col" className="pb-4 font-medium">Precio</th>
-              <th scope="col" className="pb-4 font-medium">Cambio 24 h</th>
-              <th scope="col" className="pb-4 font-medium">Volumen</th>
+              <th scope="col" className="px-px pb-4 pt-px font-medium">Nombre</th>
+              <th scope="col" className="px-px pb-4 pt-px font-medium">Precio</th>
+              <th scope="col" className="px-px pb-4 pt-px font-medium">Cambio 24 h</th>
+              <th scope="col" className="px-px pb-4 pt-px font-medium">Volumen</th>
             </tr>
           </thead>
           <tbody>
             {top.map((crypto) => (
               <tr key={crypto.id} className="border-t border-border/20 transition-colors hover:bg-muted/20">
-                <td className="py-4">
+                <td className="px-px py-4">
                   <div className="flex items-center gap-3">
                     <img
                       src={crypto.image}
@@ -101,8 +101,8 @@ const CryptoList = () => {
                     </div>
                   </div>
                 </td>
-                <td className="py-4 font-semibold">{formatCurrency(crypto.price)}</td>
-                <td className="py-4">
+                <td className="px-px py-4 font-semibold">{formatCurrency(crypto.price)}</td>
+                <td className="px-px py-4">
                   <span
                     className={cn(
                       "flex items-center gap-1 font-medium",
@@ -117,7 +117,7 @@ const CryptoList = () => {
                     {formatPercent(crypto.change24h)}
                   </span>
                 </td>
-                <td className="py-4 font-medium">{formatCompact(crypto.volume24h)}</td>
+                <td className="px-px py-4 font-medium">{formatCompact(crypto.volume24h)}</td>
               </tr>
             ))}
           </tbody>

@@ -12,7 +12,7 @@ const CryptoPriceSection = ({ coin }: CryptoPriceSectionProps) => {
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
-      <div className="space-y-2 sm:space-y-3">
+      <div className="v3-space-y-2 sm:v3-space-y-3">
         <p className="text-sm font-medium text-muted-foreground">Precio actual</p>
         <p className="text-2xl font-bold sm:text-4xl">{formatCurrency(coin.price)}</p>
         <div className="flex items-center gap-2 sm:gap-3">
@@ -34,19 +34,19 @@ const CryptoPriceSection = ({ coin }: CryptoPriceSectionProps) => {
       </div>
 
       <dl className="grid grid-cols-2 gap-3 sm:gap-4">
-        <div className="space-y-1">
+        <div className="v3-space-y-1">
           <dt className="text-sm text-muted-foreground">Máximo 24 h</dt>
           <dd className="font-bold text-success sm:text-xl">{formatCurrency(coin.high24h)}</dd>
         </div>
-        <div className="space-y-1">
+        <div className="v3-space-y-1">
           <dt className="text-sm text-muted-foreground">Mínimo 24 h</dt>
           <dd className="font-bold text-warning sm:text-xl">{formatCurrency(coin.low24h)}</dd>
         </div>
-        <div className="space-y-1">
+        <div className="v3-space-y-1">
           <dt className="text-sm text-muted-foreground">Máximo histórico</dt>
           <dd className="font-semibold sm:text-lg">{formatCurrency(coin.ath)}</dd>
         </div>
-        <div className="space-y-1">
+        <div className="v3-space-y-1">
           <dt className="text-sm text-muted-foreground">Mínimo histórico</dt>
           <dd className="font-semibold sm:text-lg">{formatCurrency(coin.atl)}</dd>
         </div>

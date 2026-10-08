@@ -32,3 +32,6 @@ dist-ssr
 
 # Estado local del CLI de Supabase
 supabase/.temp/
+
+# Caché de typecheck (tsc -b)
+*.tsbuildinfo

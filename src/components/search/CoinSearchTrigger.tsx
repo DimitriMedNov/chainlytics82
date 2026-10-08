@@ -17,7 +17,7 @@ export function CoinSearchTrigger({ onClick }: CoinSearchTriggerProps) {
       type="button"
       onClick={onClick}
       aria-label="Buscar criptomoneda"
-      className="flex h-11 items-center gap-2 rounded-md border border-input bg-background px-3 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="flex h-11 items-center gap-2 rounded-md border border-input bg-background px-3 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
     >
       <Search className="h-4 w-4" aria-hidden="true" />
       <span className="hidden lg:inline">Buscar moneda</span>
