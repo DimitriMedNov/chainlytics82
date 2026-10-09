@@ -63,6 +63,11 @@ export interface AreaChartProps {
   style?: CSSProperties;
   /** Fires when the internal chart phase changes (e.g. OG capture readiness). */
   onPhaseChange?: (phase: ChartPhase) => void;
+  /**
+   * Añadido por el proyecto: dominio fijo del eje Y `[mínimo, máximo]` (por
+   * ejemplo, para que no arranque en cero). Se redondea a marcas limpias.
+   */
+  yDomain?: [number, number];
   /** Child components (Area, Grid, ChartTooltip, etc.) */
   children: ReactNode;
 }
@@ -127,6 +132,7 @@ interface ChartInnerProps {
   xDomain?: [Date, Date];
   xDomainSlotCount?: number;
   tweenYDomainOnXDomainChange?: boolean;
+  yDomain?: [number, number];
   children: ReactNode;
   containerRef: React.RefObject<HTMLDivElement | null>;
   onPhaseChange: (phase: ChartPhase) => void;
@@ -149,6 +155,7 @@ function ChartInner({
   xDomain,
   xDomainSlotCount,
   tweenYDomainOnXDomainChange,
+  yDomain,
   children,
   containerRef,
   onPhaseChange,
@@ -175,6 +182,7 @@ function ChartInner({
       xDataKey={xDataKey}
       xDomain={xDomain}
       xDomainSlotCount={xDomainSlotCount}
+      yDomain={yDomain}
       yDomainTween={yDomainTween}
       yDomainTweenDuration={yDomainTweenDuration}
     >
@@ -202,6 +210,7 @@ export function AreaChart({
   tweenYDomainOnXDomainChange = false,
   style,
   onPhaseChange,
+  yDomain,
   children,
 }: AreaChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -229,7 +238,7 @@ export function AreaChart({
     <div
       className={cn("relative w-full", className)}
       ref={containerRef}
-      style={{ aspectRatio, touchAction: "none", ...style }}
+      style={{ aspectRatio, touchAction: "pan-y", ...style }}
     >
       <ParentSize debounceTime={10}>
         {({ width, height }) => (
@@ -250,6 +259,7 @@ export function AreaChart({
             xDataKey={xDataKey}
             xDomain={xDomain}
             xDomainSlotCount={xDomainSlotCount}
+            yDomain={yDomain}
             yDomainTween={yDomainTween}
             yDomainTweenDuration={yDomainTweenDuration}
           >

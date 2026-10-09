@@ -9,6 +9,17 @@ export const SEARCH_TOO_SHORT = "Escribe al menos dos letras.";
 export const SEARCH_SEARCHING = "Buscando…";
 export const SEARCH_EMPTY = "Ninguna moneda con ese nombre.";
 export const COIN_LOAD_ERROR_TITLE = "No se pudo cargar esa moneda";
+/** Nuevos: botón del estado `error` (`refetch()`) y su texto mientras `isFetching`. */
+export const SEARCH_RETRY = "Reintentar";
+export const SEARCH_RETRYING = "Reintentando…";
+/** Nuevo: espera mientras se carga la moneda elegida (`detail.isLoading`). */
+export const COIN_LOADING = "Cargando la moneda…";
+/** Nuevos de la paleta: cerrar, vaciar la caja y las pistas de teclado del pie. */
+export const SEARCH_CLOSE_LABEL = "Cerrar el buscador";
+export const SEARCH_CLEAR = "Borrar búsqueda";
+export const SEARCH_HINT_NAVIGATE = "Navegar";
+export const SEARCH_HINT_OPEN = "Abrir";
+export const SEARCH_HINT_CLOSE = "Cerrar";
 
 /**
  * El texto de cada estado sin resultados. En `error` es el mensaje del fallo

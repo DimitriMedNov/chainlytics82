@@ -51,3 +51,4 @@ export { ServiceUnavailable, type ServiceUnavailableProps } from "@/ui/shared/se
 export { StorageBadge, type StorageBadgeProps } from "@/ui/shared/storage-badge";
 export { SaveStatus, type SaveStatusProps } from "@/ui/shared/save-status";
 export { UnderConstruction, type UnderConstructionProps } from "@/ui/shared/under-construction";
+export { useReturnFocus, type ReturnFocusEvent, type ReturnFocusHandlers } from "@/ui/shared/use-return-focus";

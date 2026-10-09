@@ -70,13 +70,13 @@ src/
 │  ├─ portfolio/   types.ts · transactions.ts · accumulate.ts · positions.ts · summary.ts
 │  └─ theme/       theme.ts
 ├─ application/
-│  ├─ shared/      errors.ts (ApiError, RepositoryError) · ports.ts · presentation/format.ts
+│  ├─ shared/      errors.ts (ApiError, RepositoryError) · ports.ts · presentation/format.ts · presentation/texts.ts
 │  ├─ market/      ports.ts (MarketDataPort) · useCases.ts · presentation/pricePointLabels.ts
 │  ├─ session/     ports.ts (AuthPort, AccountServicePort) · credentials.ts · useCases.ts
 │  ├─ watchlist/   ports.ts (WatchlistRepository) · useCases.ts
 │  ├─ portfolio/   ports.ts (PortfolioRepository) · useCases.ts
 │  ├─ sync/        migrateLocalData.ts (caso de uso + AccountImportPort)
-│  └─ theme/       ports.ts · themeController.ts
+│  └─ theme/       ports.ts · themeController.ts · watchResolvedTheme.ts
 ├─ infrastructure/
 │  ├─ shared/      localStorageStore.ts · browserStorage.ts · supabaseDb.ts
 │  ├─ market/      CoinGeckoMarketData.ts · httpJson.ts · dto.ts · mappers.ts
@@ -132,12 +132,13 @@ compare/   — Comparar (/comparar) · módulo src/app/modules/compare.ts
   hooks:          useCompareScreen.ts · useCompareSelection.ts · useComparison.ts
 converter/   — Convertidor (/converter) · módulo src/app/modules/converter.ts
   domain:         blocks.ts · conversion.ts · convertible.ts · quick.ts
-  application:    ports.ts · presentation/conversionText.ts · useCases.ts
+  application:    ports.ts · presentation/conversionText.ts · presentation/texts.ts ·
+                  useCases.ts
   infrastructure: NavigatorClipboard.ts
   hooks:          useConverter.ts · useConverterForm.ts · useConvertibles.ts
 analyst/   — Analista IA · módulo src/app/modules/analyst.ts
   domain:         chat.ts · intro.ts · message.ts
-  application:    errors.ts · ports.ts · useCases.ts
+  application:    errors.ts · ports.ts · presentation/texts.ts · useCases.ts
   infrastructure: AnalystStreamClient.ts · sseText.ts
   hooks:          useAnalystChat.ts · useAnalystIntro.ts · useAnalystPanel.ts
 search/   — Buscador global · módulo src/app/modules/search.ts
@@ -196,7 +197,8 @@ Dos hooks hay que llamarlos una vez en el armazón, porque no se montan solos:
 - `useLocalDataSync(onMigrated)` (`@/hooks/sync/useLocalDataSync`): sube a la cuenta los
   datos locales al iniciar sesión. El aviso lo enseña quien llama, con el texto de
   `migratedMessage(n)` de `@/application/sync/migrateLocalData`.
-- `useThemeClass()` (`@/hooks/theme/useThemeClass`): pone `light`/`dark` en `<html>`.
+- `useThemeClass()` (`@/hooks/theme/useThemeClass`): pone `light`/`dark` en `<html>`; con
+  tema «system» sigue al sistema operativo en vivo (`watchResolvedTheme`).
 
 ## 4. Cómo añadir una funcionalidad nueva
 
@@ -234,16 +236,22 @@ Convención de imports: en `domain` y `application`, rutas relativas con extensi
 
 | Qué | Comando |
 |---|---|
-| Regla de dependencias (script, Node puro) | `node scripts/check-architecture.mjs` |
+| Regla de dependencias (script, Node puro) | `npm run check:arch` (`node scripts/check-architecture.mjs`) |
 | Regla de dependencias (lint) + resto de lint | `npm run lint` |
 | Tipos | `npm run typecheck` |
-| Pruebas (`*.prueba.ts`, sin runner) | `node scripts/run-pruebas.mjs` |
+| Pruebas (`*.prueba.ts`, sin runner) | `npm test` (`node scripts/run-pruebas.mjs`) |
 
 - `scripts/check-architecture.mjs` recorre `src/{domain,application,infrastructure,app,ui}`
   y `src/hooks/<f>/`, resuelve cada import (alias `@/` y rutas relativas) y falla con
   código 1 si una capa importa de donde no debe, si usa un paquete que no le toca, o si
   `fetch`, `localStorage`, `sessionStorage` o `import.meta.env` aparecen fuera de
-  `infrastructure` y `app`. Lista cada violación como `archivo:línea  motivo`.
+  `infrastructure` y `app`. Lista cada violación como `archivo:línea  motivo`. Hoy revisa
+  630 archivos (`.ts` y `.tsx`, pruebas incluidas) con 0 violaciones; lo viejo y las
+  utilidades sueltas de `src/lib` y `src/hooks/*.ts` no se revisan.
+- Las cuatro reglas del script: (1) a qué capa apunta cada import; (2) qué paquetes usa
+  cada capa (`domain` ninguno, `application` solo `zod`, `infrastructure` sin React ni
+  react-query, `hooks` y `ui` sin `@supabase/supabase-js`); (3) `fetch`, almacenamiento y
+  entorno solo en `infrastructure` y `app`; (4) URLs literales, abajo.
 - El mismo script falla si hay una URL escrita a mano (`http://` o `https://`) en
   `src/domain` o `src/application`. No cuentan los comentarios ni las pruebas
   (`__pruebas__/`). En `hooks` y `ui` no se busca con este patrón porque los SVG llevan
@@ -268,7 +276,7 @@ Convención de imports: en `domain` y `application`, rutas relativas con extensi
 | DTO + Mapper | `src/infrastructure/market/dto.ts` + `mappers.ts` (`toCoin`, `toGlobalMarket`, `toPricePoints`, `toFiatRates`, `toSearchResults`). `WatchlistRowDto` + `toWatchlistEntry` en `SupabaseWatchlistRepository.ts`. `TransactionRowDto` + `toTransaction` en `SupabasePortfolioRepository.ts`. `toAuthSession` en `SupabaseAuth.ts`. Analista: `AnalystRequestDto` (cuerpo de la petición) en `src/infrastructure/analyst/AnalystStreamClient.ts`, y la lectura de la respuesta por trozos (`deltaDe`, `createSseTextParser`) en `src/infrastructure/analyst/sseText.ts`. |
 | Result | Tipo en `src/domain/shared/result.ts`. **Compartidos:** `parseCredentials` (`src/application/session/credentials.ts`), `signIn`/`signUp`/`signOut` (`session/useCases.ts`), `AuthPort.signInWithPassword`/`signUp`, `AccountImportPort` (`sync/migrateLocalData.ts`), `positiveAmount`/`optionalNonNegativeAmount` (`src/domain/shared/userAmount.ts`). **De pantalla:** `askAnalyst` → `Result<AskAnalystOutcome, AnalystError>` (`src/application/analyst/useCases.ts`); `copyResult` → `Result<void, NoticeText>` (`converter/useCases.ts`); `parseTransactionForm` → `Result<NewTransaction, string>` y `parseCostForm` → `Result<number, string>` (`portfolio-screen/useCases.ts`); `authSubmitOutcome` lo recibe (`auth-screen/submitOutcome.ts`). |
 | Custom Hook | **Compartidos:** `src/hooks/market/useMarketData.ts`, `session/useSession.ts`, `session/useCredentialsAuth.ts`, `watchlist/useWatchlist.ts`, `portfolio/usePortfolio.ts`, `sync/useLocalDataSync.ts`, `theme/useTheme.ts`. **Uno por pantalla como entrada:** `src/hooks/auth-screen/useAuthScreen.ts`, `markets/useMarketFilters.ts`, `portfolio-screen/usePortfolioScreen.ts`, `compare/useCompareScreen.ts`, `converter/useConverter.ts`, `analyst/useAnalystPanel.ts` y `useAnalystChat.ts`, `search/useGlobalSearch.ts`, `watchlist-screen/useWatchlistScreen.ts`, `panel/useMarketStats.ts`, `useTopCoins.ts`, `useBitcoinHistory.ts` y `useTradingViewWidget.ts`, `coin-detail/useCoinDetail.ts`. |
-| Container / Presentational | **Pendiente de interfaz.** En `src/ui/`: un contenedor por pantalla o bloque llama al hook de la pantalla y entrega datos y callbacks a componentes que solo pintan (los que sirven para los 4 estados). |
+| Container / Presentational | En `src/ui/`: un contenedor por pantalla o bloque llama al hook de la pantalla y entrega datos y callbacks a componentes que solo pintan. Contenedores: `src/ui/pages/watchlist/index.tsx` (`useWatchlistScreen`), `src/ui/pages/compare/index.tsx` (`useCompareScreen`), `src/ui/pages/markets/index.tsx` (`useMarketFilters`), `src/ui/analyst/AnalystPanel.tsx` (`useAnalystChat`), `src/ui/search/GlobalSearchPalette.tsx`. Los que solo pintan: `src/ui/pages/watchlist/watchlist-row.tsx`, `src/ui/search/SearchPalette.tsx`, las piezas de `src/ui/shared/`. |
 
 ### Según el caso
 
@@ -277,20 +285,36 @@ Convención de imports: en `domain` y `application`, rutas relativas con extensi
 | Strategy | Una regla con variantes que se eligen por clave, sin `if` ni `switch`. | **Dónde se guarda:** las dos implementaciones de `WatchlistRepository` (`src/infrastructure/watchlist/`) y de `PortfolioRepository` (`src/infrastructure/portfolio/`), usadas sin distinción en `src/hooks/watchlist/useWatchlistMutations.ts` y `src/hooks/portfolio/usePortfolioMutations.ts`. **Orden de Mercados:** `MARKET_COMPARATORS` en `src/domain/markets/sorting.ts` (lo aplica `sortCoins`). **Filtro de Mercados:** `MARKET_FILTER_PREDICATES` en `src/domain/markets/filters.ts` (lo aplica `filterCoins`). **Orden de la Watchlist:** `SORT_COMPARATORS` en `src/domain/watchlist-screen/sort.ts` (lo aplica `sortCoins`, llamado desde `src/application/watchlist-screen/buildView.ts`). |
 | Factory | Un solo sitio decide qué repositorio toca según haya sesión. | `repositoryFor(userId)` en `src/app/modules/watchlist.ts` y `src/app/modules/portfolio.ts`. |
 | State (máquina de estados) | Decisiones de "qué se enseña ahora" que antes eran ternarios repetidos o banderas sueltas. | **Acceso:** `resolveAccess` en `src/domain/session/access.ts`; se calcula en `src/hooks/session/SessionProvider.tsx` y se lee como `useSession().access`. **Chat del analista** (`idle` → `waiting` → `streaming` → `error`): `chatReducer` en `src/domain/analyst/chat.ts`, usado en `src/hooks/analyst/useAnalystChat.ts`. **Intro del analista:** `resolveAnalystIntro` en `src/domain/analyst/intro.ts`, usado en `src/hooks/analyst/useAnalystIntro.ts`. **Pantalla de acceso:** `resolveAuthScreenMode` en `src/domain/auth-screen/mode.ts`, usado en `src/hooks/auth-screen/useAuthScreen.ts`. **Estados de bloque** (cargando, error, vacío, listo) como funciones puras: `src/domain/search/rules.ts` (`resolveSearchStatus`), `src/domain/watchlist-screen/status.ts`, `src/domain/compare/status.ts`, `src/domain/converter/blocks.ts`, `src/domain/panel/blockStatus.ts`, `src/domain/portfolio-screen/screenState.ts`. |
-| Observer | Varias pantallas leen y escriben lo mismo y tienen que verlo igual. | Puerto `ObservableStore` en `src/application/shared/ports.ts`; implementación `src/infrastructure/shared/localStorageStore.ts`; suscripción con `useSyncExternalStore` en `src/hooks/watchlist/useWatchlist.ts` y `src/hooks/portfolio/usePortfolio.ts`. También `src/application/theme/themeController.ts` (leído en `src/hooks/theme/useTheme.ts`) y `AuthPort.onSessionChange`. |
+| Observer | Varias pantallas leen y escriben lo mismo y tienen que verlo igual. | Puerto `ObservableStore` en `src/application/shared/ports.ts`; implementación `src/infrastructure/shared/localStorageStore.ts`; suscripción con `useSyncExternalStore` en `src/hooks/watchlist/useWatchlist.ts` y `src/hooks/portfolio/usePortfolio.ts`. También `src/application/theme/themeController.ts` (leído en `src/hooks/theme/useTheme.ts`), `src/application/theme/watchResolvedTheme.ts` (se suscribe al controlador y, solo con tema «system», a `SystemThemePort`; lo usa `src/hooks/theme/useThemeClass.ts`) y `AuthPort.onSessionChange`. |
 | Facade | Esconder algo de fuera tras una interfaz propia y pequeña. | `MarketDataPort` (`src/application/market/ports.ts`) sobre los seis endpoints de CoinGecko, en `src/infrastructure/market/CoinGeckoMarketData.ts`. `AdvancedChartWidgetPort` (`src/application/panel/ports.ts`) sobre el script de TradingView, en `src/infrastructure/panel/TradingViewAdvancedChart.ts`. |
 | Value Object | Datos con reglas propias que se comprobaban a mano. | **Dinero en USD que puede ser desconocido:** `src/domain/shared/money.ts`, usado en `src/domain/portfolio/positions.ts` y en `src/domain/portfolio-screen/gain.ts`, `series.ts` y `transactionRows.ts`. **Cantidad escrita por el usuario:** `src/domain/shared/userAmount.ts`, usado en `src/domain/converter/conversion.ts`, `src/domain/portfolio-screen/transactionForm.ts` y `src/domain/portfolio-screen/setCost.ts`. **Rango de la gráfica (`RangeDays`):** `src/domain/shared/range.ts`, usado en `src/domain/coin-detail/priceSeries.ts`, `src/domain/panel/bitcoinChart.ts`, `src/hooks/coin-detail/useCoinDetailChart.ts`, `src/hooks/compare/useCompareScreen.ts` y `src/hooks/panel/useBitcoinHistory.ts`. **Credenciales válidas:** `Credentials` en `src/application/session/credentials.ts`, usado en `session/useCases.ts`. |
-| Adapter de componente | Envolver un componente de fuera tras props propias. | **Pendiente de interfaz.** La parte de datos ya está: el widget de TradingView se monta por `AdvancedChartWidgetPort` desde `src/hooks/panel/useTradingViewWidget.ts`. Falta el envoltorio visual en `src/ui/` (el del widget y los de las gráficas de Bklit en `src/ui/charts/`). |
-| Compound Components | Componentes con partes que se combinan. | **Pendiente de interfaz.** Sitio previsto: secciones y filas de la Watchlist y la fila de posición del Portfolio, en `src/ui/`. |
+| Adapter de componente | Envolver un componente de fuera tras props propias. | **Widget de TradingView:** `src/ui/pages/panel/trading-view-panel.tsx`, que lo monta por `AdvancedChartWidgetPort` desde `src/hooks/panel/useTradingViewWidget.ts`. **Gráficas de Bklit** (`src/ui/charts/`) envueltas con eje y tooltip propios: `src/ui/coin-detail/PriceChart.tsx`, `src/ui/pages/panel/charts/bitcoin-area-chart.tsx`, `src/ui/pages/compare/comparison-chart.tsx`. **Avisos:** `src/ui/shared/notify.ts` sobre `sonner`. |
+| Compound Components | Componentes con partes que se combinan. | `Panel` con `Panel.Header`, `.Title`, `.Description`, `.Actions`, `.Body` y `.Footer` en `src/ui/shared/panel.tsx`, usado en todas las pantallas. Las secciones de la Watchlist y la fila de posición del Portfolio, previstas al principio, no se hicieron así. |
 
 No se usa Decorator: el tope de tiempo y la traducción de errores de la API de precios ya
 están en un solo sitio (`src/infrastructure/market/httpJson.ts`).
 
 ## 7. Decisiones
 
+- **Textos visibles**: cada pantalla tiene sus constantes de texto en
+  `src/application/<pantalla>/`; la interfaz los importa de ahí y no escribe textos a mano.
+  Son once archivos: `presentation/texts.ts` en `analyst`, `auth-screen`, `coin-detail`,
+  `compare`, `converter`, `markets`, `panel` y `shared` (`SHARED_TEXTS`, `noDataLabel`, para
+  las piezas compartidas); `texts.ts` en `watchlist-screen`; `messages.ts` en `search` y
+  `portfolio-screen`. Textos que se componen con datos: `converter/presentation/conversionText.ts`
+  y `compare/presentation/labels.ts`.
 - **Formateadores** (`formatCurrency`, `formatCompact`, `formatPercent`...): están en
   `src/application/shared/presentation/format.ts`. No son dominio: fijan idioma (`es-ES`),
   símbolo y textos ("billones", "No disponible"). La interfaz los importa de ahí.
+- **Marcas del eje de precios**: en el mismo `format.ts`. `axisTickStep(dominio, marcas)` da
+  el paso entre dos marcas (la misma cuenta que d3: 1, 2 o 5 por una potencia de diez);
+  `formatAxisPriceForStep(valor, paso)` escribe la marca con los decimales justos para que
+  dos marcas contiguas no salgan con el mismo texto, con coma decimal;
+  `createAxisPriceFormatter(dominio, marcas)` junta las dos. Lo usan los ejes Y de
+  `src/ui/coin-detail/PriceChartYAxis.tsx` y `src/ui/pages/panel/charts/price-y-axis.tsx`,
+  que leen el dominio real de la gráfica (`useYScale().domain()`). `formatAxisPrice` suelto
+  queda para cuando no hay rango y para las etiquetas de barras
+  (`src/ui/pages/panel/charts/top-bars-rows.ts`).
 - **Etiquetas de fecha del histórico**: `PricePoint` de dominio es `{ timestamp, price }`.
   Las etiquetas del eje y del tooltip las pone `labelPricePoints`
   (`src/application/market/presentation/pricePointLabels.ts`); `usePriceHistory` ya las
@@ -317,7 +341,7 @@ una rareza conocida se ha dejado tal cual y está marcado en el código con `// 
 Para verlos todos:
 
 ```bash
-grep -rn "Conservado:" src/domain src/application src/infrastructure src/hooks
+grep -rn "Conservado:" src/domain src/application src/infrastructure src/hooks src/ui
 ```
 
 Único cambio de comportamiento, aprobado: sin sesión, watchlist y portfolio viven en un
@@ -325,7 +349,8 @@ almacén observable compartido, así que todas las pantallas ven los mismos dato
 cada una tenía su copia y se pisaban al escribir). Como consecuencia, al cerrar sesión ya
 no reaparecen en el navegador los datos que se habían subido a la cuenta.
 
-Rutas relativas a `src/`.
+Rutas relativas a `src/`. No todas las filas de abajo llevan la marca `// Conservado:` en el
+código: las que nacen en la interfaz (`ui/`) o en un texto solo están apuntadas aquí.
 
 ### Compartido
 
@@ -338,7 +363,8 @@ Rutas relativas a `src/`.
 | La sincronización cuenta como movidas todas las entradas aunque alguna ya estuviera en la cuenta. | `application/sync/migrateLocalData.ts` |
 | La app, por sí sola, comprueba el servicio de cuentas una vez por carga; se repite a mano con `useSession().recheckService()`. El listener de sesión no mira si el proveedor se desmontó. | `hooks/session/SessionProvider.tsx` |
 | Solo se traducen "Invalid login credentials" y el email repetido; el resto de errores del proveedor salen en inglés. | `application/session/useCases.ts` |
-| Con tema "system", la clase de `<html>` se calcula al elegirlo y no sigue al sistema operativo hasta recargar. | `hooks/theme/useThemeClass.ts` |
+| Los campos de cantidad y precio son `type="number"`: es el navegador quien decide si deja escribir la coma decimal, aunque la regla de dominio sí la acepta (`parseUserAmount`). Igual que en la app anterior. | `ui/pages/converter/converter-fields.tsx`, `ui/pages/portfolio/SetCostDialog.tsx`, `ui/pages/portfolio/transactions/TransactionFormFields.tsx`, `domain/shared/userAmount.ts` |
+| Un cambio en 24 h que la API manda vacío (`null`) se guarda como 0: la moneda sale como «sube 0 %». | `infrastructure/market/dto.ts` (`num`), `infrastructure/market/mappers.ts` (`toCoin`) |
 
 ### Acceso (`auth-screen`)
 
@@ -375,6 +401,8 @@ Rutas relativas a `src/`.
 | La clasificación se pinta en cuanto hay resultados, aunque la gráfica siga cargando o en error. | `domain/compare/status.ts` |
 | Cambiar la selección sustituye todos los parámetros de la URL, sin crear historial. | `hooks/compare/useCompareSelection.ts` |
 | Reintentar relanza todas las consultas, no solo la que falló. | `hooks/compare/useComparison.ts` |
+| El periodo elegido (7, 30, 90 días…) no va en la URL: es estado local y al recargar o compartir el enlace vuelve a 30 días. La app anterior hacía lo mismo (`useState(30)` en `src/pages/Compare.tsx` de `main`). | `hooks/compare/useCompareScreen.ts` (`DEFAULT_COMPARE_DAYS`) |
+| Vacío «Elige al menos una moneda» durante la carga del catálogo: mientras no hay catálogo no hay monedas elegidas, así que la gráfica y la clasificación valen `empty-selection` en vez de cargando. | `domain/compare/status.ts` |
 
 ### Convertidor (`converter`)
 
@@ -385,6 +413,7 @@ Rutas relativas a `src/`.
 | Dos criptos con el mismo símbolo dentro de las 30 darían dos opciones con el mismo código. | `domain/converter/convertible.ts` |
 | Si una moneda de un atajo sale de las 30 mayores, su fila desaparece sin aviso. | `domain/converter/quick.ts` |
 | Basta con que falle una de las dos lecturas (criptos o fiat) para bloquear toda la pantalla; los bloques laterales también esperan a las dos. | `domain/converter/blocks.ts`, `hooks/converter/useConvertibles.ts`, `hooks/converter/useConverter.ts` |
+| La gráfica de cambio en 24 h solo omite la barra si el cambio es `null`, y eso solo pasa en las monedas fiat. En una cripto el cambio vacío ya llega como 0 (fila de «Compartido»), así que sale con barra de 0 % hacia arriba. | `domain/converter/quick.ts` (`rateChangeSeries`), `domain/converter/convertible.ts` |
 
 ### Analista IA (`analyst`)
 
@@ -395,6 +424,8 @@ Rutas relativas a `src/`.
 | Tras un error, la pregunta del usuario se queda en la lista; solo se quita la respuesta a medias. | `domain/analyst/chat.ts` |
 | El texto del 402 habla de «tu workspace». | `application/analyst/errors.ts` |
 | Un 401 del analista cierra la sesión entera. | `application/analyst/errors.ts` (`mustSignOut`) |
+| Cerrar el panel no cancela la respuesta en curso: el panel sigue montado tras abrirse la primera vez y la petición solo se corta al pulsar parar o al desmontarse. | `ui/analyst/index.tsx` (`everOpened`), `hooks/analyst/useAnalystChat.ts` |
+| Las tablas Markdown de una respuesta salen como texto con barras, sin formato de tabla: `react-markdown` va sin el complemento de tablas (`remark-gfm` no está instalado), igual que en la app anterior. | `ui/analyst/AnalystMarkdown.tsx` |
 
 ### Buscador global (`search`)
 
@@ -403,6 +434,7 @@ Rutas relativas a `src/`.
 | La moneda elegida se busca en el top por id **o por símbolo**: un resultado cuyo id coincida con el símbolo de otra moneda abriría esa otra. | `domain/search/rules.ts` (`findLoadedCoin`) |
 | El detalle no se abre hasta que la moneda está cargada. | `hooks/search/useSelectedCoin.ts` |
 | El atajo de teclado solo abre; con la paleta abierta no la cierra. | `hooks/search/SearchProvider.tsx` |
+| El texto `SEARCH_RETRYING` («Reintentando…») no lo importa nadie: está definido pero es inalcanzable. Mientras se reintenta, el mismo texto lo escribe la pieza compartida de error. | `application/search/messages.ts`, `ui/shared/error-state.tsx` |
 
 ### Watchlist (`watchlist-screen`)
 
@@ -411,6 +443,7 @@ Rutas relativas a `src/`.
 | El contador "Sigues N monedas" incluye las que están fuera del top 100 y no se pintan. | `domain/watchlist-screen/counter.ts` |
 | El orden se aplica a "Favoritas" y a "Todas" a la vez. | `application/watchlist-screen/buildView.ts` |
 | Quitar no pide confirmación ni ofrece deshacer, y el aviso sale al pulsar. | `application/watchlist-screen/actions.ts` (`removedNotice`) |
+| El aviso de quitar dice «Eliminada del watchlist» desde la Watchlist y «Eliminado del watchlist» desde el modal de detalle. Ya eran distintos en la app anterior. | `application/watchlist-screen/actions.ts`, `application/coin-detail/useCases.ts` (`removedNotice` en los dos) |
 | "Convertir" lleva al convertidor sin preseleccionar la moneda, aunque el aviso la nombre. | `application/watchlist-screen/actions.ts` (`convertIntent`) |
 | La moneda del modal es una copia tomada al abrir: su precio no se refresca mientras está abierto. | `hooks/watchlist-screen/useWatchlistDetail.ts` |
 
@@ -426,6 +459,7 @@ Rutas relativas a `src/`.
 | Qué se conserva | Dónde |
 |---|---|
 | Un cambio de exactamente 0 cuenta como subida. | `domain/coin-detail/figures.ts` |
+| El eje de precios deja un 2 % de margen por debajo del mínimo y por encima del máximo. En una moneda que apenas se mueve (una stablecoin) ese margen es mucho mayor que su variación y la línea se ve casi plana. | `domain/coin-detail/priceSeries.ts` (`priceAxisDomain`) |
 | El aviso de añadir o quitar de la watchlist sale en el acto, sin saber si se guardó. | `application/coin-detail/useCases.ts` (`toggleCoinWatchlist`) |
 | "Convertir" no preselecciona la moneda, y desde el modal no sale ningún aviso. | `application/coin-detail/useCases.ts` (`convertFromDetail`) |
 | `coin` es la copia de quien abre el modal: su precio no se refresca mientras está abierto. El histórico solo se pide con el modal abierto. | `hooks/coin-detail/useCoinDetail.ts`, `hooks/coin-detail/useCoinDetailChart.ts` |

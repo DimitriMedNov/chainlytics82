@@ -49,16 +49,16 @@ export function CoinPriceChartSection({ chart, coinName }: CoinPriceChartSection
               isRetrying={chart.isRetrying}
             />
           ) : chart.status === "loading" ? (
-            <LoadingRegion label="Cargando el gráfico de precio">
+            <LoadingRegion label={T.chartLoading}>
               <ChartSkeleton height="md" />
             </LoadingRegion>
           ) : chart.status === "empty" ? (
             <EmptyState
               icon={ChartNoAxesColumn}
-              headingLevel="h3"
+              headingLevel="h4"
               size="sm"
-              title="Sin precios para este periodo"
-              description="El servicio de precios no devolvió ningún dato. Elige otro periodo en el selector de arriba o vuelve a pedirlo."
+              title={T.chartEmptyTitle}
+              description={T.chartEmptyDescription}
               action={
                 <Button
                   type="button"
@@ -67,7 +67,7 @@ export function CoinPriceChartSection({ chart, coinName }: CoinPriceChartSection
                   onClick={chart.retry}
                   disabled={chart.isRetrying}
                 >
-                  {chart.isRetrying ? "Pidiendo…" : "Volver a pedirlo"}
+                  {chart.isRetrying ? T.chartRetrying : T.chartEmptyAction}
                 </Button>
               }
             />

@@ -1,10 +1,21 @@
 import { useId } from "react";
+import {
+  AMOUNT_FIELD_LABEL,
+  AMOUNT_FIELD_PLACEHOLDER,
+  COIN_FIELD_LABEL,
+  COIN_FIELD_PLACEHOLDER,
+  coinOptionLabel,
+  DATE_FIELD_LABEL,
+  OPERATION_TOTAL_TERM,
+  UNIT_PRICE_FIELD_LABEL,
+  UNIT_PRICE_FIELD_PLACEHOLDER,
+} from "@/application/portfolio-screen/messages";
 import { formatCurrency } from "@/application/shared/presentation/format";
 import type { Coin } from "@/domain/market/coin";
 import type { TransactionForm } from "@/hooks/portfolio-screen/useTransactionForm";
 import { Input } from "@/ui/base/input";
-import { Label } from "@/ui/base/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/ui/base/select";
+import { LabeledField } from "@/ui/pages/portfolio/LabeledField";
 import { RevealSlot } from "@/ui/pages/portfolio/RevealSlot";
 import { TransactionKindToggle } from "./TransactionKindToggle";
 
@@ -18,6 +29,7 @@ export interface TransactionFormFieldsProps {
  * Campos del formulario «Registrar movimiento». Solo pinta: las reglas están en el hook.
  * El total y el error tienen su hueco reservado (`RevealSlot`): aparecen con un
  * fundido y no empujan el botón. El error ocupa dos líneas en móvil y una desde `sm`.
+ * Cada campo va en un `LabeledField`: su etiqueta responde al foco.
  */
 export function TransactionFormFields({ form, coins }: TransactionFormFieldsProps) {
   const id = useId();
@@ -30,55 +42,51 @@ export function TransactionFormFields({ form, coins }: TransactionFormFieldsProp
     <>
       <TransactionKindToggle value={form.kind} onChange={form.setKind} />
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor={coinId}>Criptomoneda</Label>
+      <LabeledField htmlFor={coinId} label={COIN_FIELD_LABEL}>
         <Select value={form.coinId} onValueChange={form.setCoinId}>
           <SelectTrigger id={coinId} className="w-full data-[size=default]:h-11">
-            <SelectValue placeholder="Elige una moneda" />
+            <SelectValue placeholder={COIN_FIELD_PLACEHOLDER} />
           </SelectTrigger>
           <SelectContent className="max-h-72">
             {coins.map((coin) => (
               <SelectItem key={coin.id} value={coin.id} className="min-h-11">
-                {coin.name} ({coin.symbol})
+                {coinOptionLabel(coin.name, coin.symbol)}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-      </div>
+      </LabeledField>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="flex min-w-0 flex-col gap-2">
-          <Label htmlFor={amountId}>Cantidad</Label>
+        <LabeledField htmlFor={amountId} label={AMOUNT_FIELD_LABEL}>
           <Input
             id={amountId}
             type="number"
             inputMode="decimal"
             min="0"
             step="any"
-            placeholder="0,5"
+            placeholder={AMOUNT_FIELD_PLACEHOLDER}
             value={form.amount}
             onChange={(event) => form.setAmount(event.target.value)}
             className="h-11"
           />
-        </div>
-        <div className="flex min-w-0 flex-col gap-2">
-          <Label htmlFor={priceId}>Precio por unidad</Label>
+        </LabeledField>
+        <LabeledField htmlFor={priceId} label={UNIT_PRICE_FIELD_LABEL}>
           <Input
             id={priceId}
             type="number"
             inputMode="decimal"
             min="0"
             step="any"
-            placeholder="Déjalo vacío si no lo sabes"
+            placeholder={UNIT_PRICE_FIELD_PLACEHOLDER}
             value={form.unitPrice}
             onChange={(event) => form.setUnitPrice(event.target.value)}
             className="h-11"
           />
-        </div>
+        </LabeledField>
       </div>
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor={dateId}>Fecha</Label>
+      <LabeledField htmlFor={dateId} label={DATE_FIELD_LABEL}>
         <Input
           id={dateId}
           type="date"
@@ -87,12 +95,12 @@ export function TransactionFormFields({ form, coins }: TransactionFormFieldsProp
           onChange={(event) => form.setDate(event.target.value)}
           className="h-11"
         />
-      </div>
+      </LabeledField>
 
       <RevealSlot show={form.total !== null} className="min-h-9">
         {form.total !== null ? (
           <p className="rounded-md bg-muted px-3 py-2 text-sm text-muted-foreground">
-            Total de la operación:{" "}
+            {OPERATION_TOTAL_TERM}{" "}
             <span className="type-num font-medium text-foreground">{formatCurrency(form.total)}</span>
           </p>
         ) : null}

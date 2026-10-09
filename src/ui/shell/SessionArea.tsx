@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
+import { SHELL_TEXTS } from "@/application/shared/presentation/texts";
 import { useSession } from "@/hooks/session/useSession";
 import { cn } from "@/lib/utils";
 import { Button } from "@/ui/animate-ui/components/buttons/button";
@@ -14,7 +15,7 @@ import {
 } from "@/ui/animate-ui/components/radix/dropdown-menu";
 import { LogIn } from "@/ui/animate-ui/icons/log-in";
 import { LogOut } from "@/ui/animate-ui/icons/log-out";
-import { Skeleton } from "@/ui/base/skeleton";
+import { Skeleton } from "@/ui/shared/skeletons";
 import { useSignOut } from "@/ui/shell/useSignOut";
 
 export interface SessionAreaProps {
@@ -22,7 +23,7 @@ export interface SessionAreaProps {
 }
 
 /** Texto a enseñar cuando el proveedor de cuentas no da correo. */
-export const NO_EMAIL_LABEL = "Tu cuenta";
+export const NO_EMAIL_LABEL = SHELL_TEXTS.session.noEmail;
 
 /**
  * Zona de sesión de la barra (escritorio), según `useSession().access.kind`:
@@ -40,7 +41,7 @@ export function SessionArea({ className }: SessionAreaProps) {
   if (access.kind === "checking") {
     return (
       <div role="status" className={cn("flex min-h-11 items-center", className)}>
-        <span className="sr-only">Comprobando la sesión</span>
+        <span className="sr-only">{SHELL_TEXTS.session.checking}</span>
         <Skeleton className="h-9 w-28" aria-hidden="true" />
       </div>
     );
@@ -51,7 +52,7 @@ export function SessionArea({ className }: SessionAreaProps) {
       <Button asChild className={cn("min-h-11", className)}>
         <Link to="/auth">
           <LogIn animateOnHover aria-hidden="true" />
-          Iniciar sesión
+          {SHELL_TEXTS.session.signIn}
         </Link>
       </Button>
     );
@@ -69,7 +70,7 @@ export function SessionArea({ className }: SessionAreaProps) {
         <DropdownMenuTrigger asChild>
           <button
             type="button"
-            aria-label={`Cuenta de ${email}`}
+            aria-label={SHELL_TEXTS.session.accountLabel(email)}
             className={cn(
               "inline-flex min-h-11 max-w-56 items-center gap-2 rounded-md border bg-card px-2 text-sm font-medium text-foreground transition-colors hover:bg-accent",
               className,
@@ -87,7 +88,7 @@ export function SessionArea({ className }: SessionAreaProps) {
         </DropdownMenuTrigger>
         <DropdownMenuContent container={menuHost} align="end" className="w-64 rounded-lg p-1.5 shadow-overlay">
           <DropdownMenuLabel className="flex flex-col gap-0.5 px-2 py-1.5">
-            <span className="type-eyebrow text-muted-foreground">Sesión iniciada</span>
+            <span className="type-eyebrow text-muted-foreground">{SHELL_TEXTS.session.signedInEyebrow}</span>
             <span className="truncate text-sm font-medium text-foreground">{email}</span>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
@@ -98,7 +99,7 @@ export function SessionArea({ className }: SessionAreaProps) {
             onSelect={() => void signOut()}
           >
             <LogOut aria-hidden="true" />
-            {isSigningOut ? "Cerrando sesión…" : "Cerrar sesión"}
+            {isSigningOut ? SHELL_TEXTS.session.signingOut : SHELL_TEXTS.session.signOut}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

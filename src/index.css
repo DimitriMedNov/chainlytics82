@@ -19,7 +19,7 @@
   TEXTO
     --foreground (normal) · --muted-foreground (atenuado) · --link (violeta legible como
     TEXTO en los dos temas; `--primary` es para RELLENOS con `--primary-foreground`).
-  SEÑAL: --success (sube) · --destructive (baja / error) · --warning. Nunca solo color:
+  SEÑAL: --success (sube) · --warning (baja / aviso) · --destructive (solo error). Nunca solo color:
     siempre con signo, flecha o texto.
   SERIES: --chart-1..5 (violeta, azul, ámbar, turquesa, rosa). Bklit: var(--bklit-chart-N).
   BORDES: --border (divisores y tarjetas) · --input (campos) · --ring (foco).

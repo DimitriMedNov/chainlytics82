@@ -28,7 +28,7 @@ import {
 } from "./chart-child-passthrough";
 import { ChartProvider, type LineConfig, type Margin } from "./chart-context";
 import { isGradientDefComponent, isPatternDefComponent } from "./chart-defs";
-import { shortDateFmt } from "./chart-formatters";
+import { useChartConfig } from "./chart-config-context";
 import {
   type ChartPhase,
   type ChartStatus,
@@ -71,6 +71,9 @@ import {
   groupLinesByYAxisId,
 } from "./y-axis-scales";
 import { computeYDomainsByAxis } from "./y-domain-utils";
+
+/** Holgura del recorte bajo el área de dibujo, en reposo (px). */
+const REVEAL_CLIP_BOTTOM_SLACK = 20;
 
 function collectNumericExtents(
   data: Record<string, unknown>[],
@@ -170,6 +173,12 @@ export interface TimeSeriesChartInnerProps {
   /** Tween y-domain when the visible x-range changes during the ready phase. */
   tweenYDomainOnXDomainChange?: boolean;
   onPhaseChange?: (phase: ChartPhase) => void;
+  /**
+   * Añadido por el proyecto: dominio fijo del eje Y `[mínimo, máximo]`. Sin
+   * él, Bklit lo calcula solo y, con valores positivos, arranca en cero.
+   * Se redondea a marcas limpias (`nice`). Vale para gráficas de un solo eje.
+   */
+  yDomain?: [number, number];
 }
 
 export function TimeSeriesChartInner(props: TimeSeriesChartInnerProps) {
@@ -210,7 +219,11 @@ const TimeSeriesChartCore = memo(function TimeSeriesChartCore({
   xDomainSlotCount,
   tweenYDomainOnXDomainChange = false,
   onPhaseChange,
+  yDomain,
 }: TimeSeriesChartInnerProps) {
+  const { formatDate } = useChartConfig();
+  const fixedYMin = yDomain?.[0];
+  const fixedYMax = yDomain?.[1];
   // Unique per instance — shared clipPath ids crop later charts (#226).
   const uniqueClipPathId = `${clipPathId}-${useId().replace(/:/g, "")}`;
   const staticPreview = useStaticChartPreview();
@@ -218,7 +231,19 @@ const TimeSeriesChartCore = memo(function TimeSeriesChartCore({
   const innerHeight = height - margin.top - margin.bottom;
 
   const resolveYDomain = useCallback(
-    (sourceData: Record<string, unknown>[], dataKeys: string[]) => {
+    (
+      sourceData: Record<string, unknown>[],
+      dataKeys: string[]
+    ): [number, number] => {
+      if (
+        fixedYMin !== undefined &&
+        fixedYMax !== undefined &&
+        Number.isFinite(fixedYMin) &&
+        Number.isFinite(fixedYMax) &&
+        fixedYMax > fixedYMin
+      ) {
+        return [fixedYMin, fixedYMax];
+      }
       const axisGroups = groupLinesByYAxisId(lines);
       const usesDefaultOnly =
         axisGroups.size === 1 && axisGroups.has(DEFAULT_Y_AXIS_ID);
@@ -228,7 +253,7 @@ const TimeSeriesChartCore = memo(function TimeSeriesChartCore({
           : undefined;
       return resolveTimeSeriesYDomain(sourceData, dataKeys, domainMax);
     },
-    [lines, yScaleDomainMax]
+    [lines, yScaleDomainMax, fixedYMin, fixedYMax]
   );
 
   const skeletonData = useMemo(() => {
@@ -389,6 +414,28 @@ const TimeSeriesChartCore = memo(function TimeSeriesChartCore({
 
   const yDomainsForScales = animatedYDomainsByAxis;
 
+  // Añadido por el proyecto: mientras el eje Y viaja hacia su dominio final
+  // (cambio de rango), la serie nueva se dibuja con la escala vieja y se sale
+  // por abajo. El recorte original deja 20 px de holgura bajo el área de
+  // dibujo, y ahí asomaba el trazado sobre las fechas. Durante ese viaje el
+  // recorte va al ras; en reposo vuelve la holgura (no corta puntos ni trazos
+  // que caen justo en la base).
+  const isYDomainSettled = useMemo(
+    () =>
+      Object.entries(yDomainTargetByAxis).every(([axisId, target]) => {
+        const current = animatedYDomainsByAxis[axisId];
+        return (
+          current !== undefined &&
+          current[0] === target[0] &&
+          current[1] === target[1]
+        );
+      }),
+    [animatedYDomainsByAxis, yDomainTargetByAxis]
+  );
+  const revealClipHeight = isYDomainSettled
+    ? innerHeight + REVEAL_CLIP_BOTTOM_SLACK
+    : innerHeight;
+
   const yScales = useMemo(
     () =>
       buildYScalesFromDomains({
@@ -405,8 +452,8 @@ const TimeSeriesChartCore = memo(function TimeSeriesChartCore({
   );
 
   const dateLabels = useMemo(
-    () => visiblePlotData.map((d) => shortDateFmt.format(xAccessor(d))),
-    [visiblePlotData, xAccessor]
+    () => visiblePlotData.map((d) => formatDate(xAccessor(d))),
+    [visiblePlotData, xAccessor, formatDate]
   );
 
   const canInteract = isLoaded && isChartInteractionPhase(chartPhase);
@@ -661,7 +708,7 @@ const TimeSeriesChartCore = memo(function TimeSeriesChartCore({
                 animating={isRevealAnimating || isRevealConcealing}
                 clipPathId={uniqueClipPathId}
                 enterTransition={effectiveEnterTransition}
-                height={innerHeight + 20}
+                height={revealClipHeight}
                 mode={isRevealConcealing ? "conceal" : "reveal"}
                 onComplete={
                   isRevealConcealing ? notifyRevealConcealComplete : undefined

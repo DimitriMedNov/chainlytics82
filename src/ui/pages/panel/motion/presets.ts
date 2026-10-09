@@ -1,7 +1,7 @@
 import type { MotionProps, Transition } from "motion/react";
 
 /** Curva de salida suave (rápida al empezar, frena al llegar). Sin rebote: es una app de datos. */
-const EASE_OUT: Transition["ease"] = [0.22, 1, 0.36, 1];
+export const EASE_OUT: Transition["ease"] = [0.22, 1, 0.36, 1];
 
 /** Duraciones en segundos. Interacciones 0,15 a 0,25; entradas de sección hasta 0,5. */
 export const DURATION = {
@@ -62,6 +62,12 @@ export const VALUE_REFRESH: EntranceProps = {
   initial: { opacity: REFRESH_FROM_OPACITY },
   animate: { opacity: 1 },
   transition: { duration: DURATION.swap, ease: EASE_OUT },
+};
+
+/** Respuesta al pulsar algo que abre otra cosa: se hunde un poco y vuelve. Solo `transform`. */
+export const PRESS_FEEDBACK: Pick<MotionProps, "whileTap" | "transition"> = {
+  whileTap: { scale: 0.98 },
+  transition: { duration: DURATION.exit, ease: EASE_OUT },
 };
 
 /** Transición de un panel al entrar en la vista (la usa `useScrollReveal`). */

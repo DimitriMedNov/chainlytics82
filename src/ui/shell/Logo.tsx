@@ -1,5 +1,6 @@
 import { BarChart3 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { SHELL_TEXTS } from "@/application/shared/presentation/texts";
 import { cn } from "@/lib/utils";
 
 export interface LogoProps {
@@ -15,7 +16,7 @@ export function Logo({ compact = false, onNavigate, className }: LogoProps) {
     <Link
       to="/"
       onClick={onNavigate}
-      aria-label="Chainlytics, ir al panel"
+      aria-label={SHELL_TEXTS.logo.label}
       className={cn("inline-flex min-h-11 min-w-11 shrink-0 items-center gap-2 rounded-md", className)}
     >
       <span className="flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground shadow-card">
@@ -25,7 +26,7 @@ export function Logo({ compact = false, onNavigate, className }: LogoProps) {
         aria-hidden="true"
         className={cn("text-base font-semibold tracking-tight text-foreground", compact && "hidden xs:inline")}
       >
-        Chainlytics
+        {SHELL_TEXTS.brand}
       </span>
     </Link>
   );

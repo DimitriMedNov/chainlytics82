@@ -16,20 +16,53 @@ export const ENTER: Transition = { duration: 0.32, ease: EASE_OUT };
 /** Respuesta a una acción (aparecer, desaparecer, recolocar). */
 export const QUICK: Transition = { duration: 0.18, ease: "easeOut" };
 
-/** Lista: sus filas entran una tras otra la primera vez. */
-export const listVariants: Variants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.05 } },
-};
+/** Retraso entre una fila y la siguiente al entrar, en segundos. */
+const STAGGER = 0.05;
+/** A partir de la octava fila ya no se añade más retraso. */
+const MAX_STAGGERED = 8;
 
 /**
- * Fila de una lista: entra subiendo 8 px y sale con un fundido corto. Una fila
- * añadida después (un movimiento nuevo) entra sola, sin volver a escalonar.
+ * Fila de una lista: entra subiendo 8 px y sale con un fundido corto. El
+ * escalonado va en la propia fila (`custom={índice}`), no en la lista: una fila
+ * con `exit="exit"` controla sus variantes y Motion ya no le hereda las del
+ * padre, así que `staggerChildren` en la `<ul>` no hacía nada.
  */
 export const itemVariants: Variants = {
   hidden: { opacity: 0, y: 8 },
-  visible: { opacity: 1, y: 0, transition: ENTER },
+  visible: (index: number = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { ...ENTER, delay: Math.min(index, MAX_STAGGERED) * STAGGER },
+  }),
   exit: { opacity: 0, x: -8, transition: QUICK },
+};
+
+/** La misma fila con «reducir movimiento»: solo fundido, sin desplazamiento ni escalonado. */
+export const reducedItemVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: QUICK },
+  exit: { opacity: 0, transition: QUICK },
+};
+
+/**
+ * Lo que tarda en empezar a irse la fila de un movimiento borrado, en segundos:
+ * la marca de «hecho» de su papelera (`RemoveTransactionButton`) termina de
+ * aparecer a los 240 ms y se queda quieta unos 160 ms antes de que la fila
+ * empiece a irse. El borrado y su aviso no esperan; solo la salida.
+ */
+const EXIT_HOLD = 0.4;
+const HELD: Transition = { ...QUICK, delay: EXIT_HOLD };
+
+/** Fila que se queda un instante antes de salir (movimientos). */
+export const heldItemVariants: Variants = {
+  ...itemVariants,
+  exit: { opacity: 0, x: -8, transition: HELD },
+};
+
+/** Lo mismo con «reducir movimiento»: solo fundido. */
+export const reducedHeldItemVariants: Variants = {
+  ...reducedItemVariants,
+  exit: { opacity: 0, transition: HELD },
 };
 
 /** Recolocación de las filas vecinas cuando una entra o sale (solo transform). */

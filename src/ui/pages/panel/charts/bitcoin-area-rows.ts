@@ -1,32 +1,29 @@
 import type { LabeledPricePoint } from "@/application/market/presentation/pricePointLabels";
+import { PANEL_TEXTS } from "@/application/panel/presentation/texts";
 import { formatCurrency } from "@/application/shared/presentation/format";
 import type { AxisDomain } from "@/domain/panel/bitcoinChart";
 
 /**
  * Adaptador entre la serie del Panel y la gráfica de área de Bklit.
  *
- * Bklit calcula solo el eje vertical y, con valores positivos, lo arranca
- * siempre en cero (no admite un dominio propio). Para conservar el eje del
- * Panel (`yDomain`, que arranca en `mínimo × 0,98`) se dibuja la altura sobre
- * la base del eje (`plotted = price - base`) y las marcas vuelven a sumar esa
- * base al escribirse. El precio real viaja intacto en `price`.
+ * El precio se dibuja tal cual: el eje del Panel (`yDomain`, que arranca en
+ * `mínimo × 0,98`) se le pasa a la gráfica con su prop `yDomain`.
  */
 export const BITCOIN_AREA_X_KEY = "timestamp";
-export const BITCOIN_AREA_Y_KEY = "plotted";
+export const BITCOIN_AREA_Y_KEY = "price";
 
+/** Fila que acepta Bklit: el punto de la serie, legible como registro. */
 export interface BitcoinAreaRow extends LabeledPricePoint {
-  /** Altura que dibuja Bklit: precio menos la base del eje. */
-  plotted: number;
   [key: string]: unknown;
 }
 
-/** Valor más bajo del eje vertical; 0 si no hay dominio. */
-export function bitcoinAxisBase(yDomain: AxisDomain | null): number {
-  return yDomain ? yDomain[0] : 0;
+export function toBitcoinAreaRows(points: readonly LabeledPricePoint[]): BitcoinAreaRow[] {
+  return points.map((point) => ({ ...point }));
 }
 
-export function toBitcoinAreaRows(points: readonly LabeledPricePoint[], base: number): BitcoinAreaRow[] {
-  return points.map((point) => ({ ...point, plotted: point.price - base }));
+/** El dominio del hook (solo lectura) como el par que pide la gráfica; sin dominio, lo calcula ella. */
+export function toChartDomain(yDomain: AxisDomain | null): [number, number] | undefined {
+  return yDomain ? [yDomain[0], yDomain[1]] : undefined;
 }
 
 export interface BitcoinTooltipData {
@@ -45,9 +42,11 @@ export function readBitcoinTooltip(point: Record<string, unknown>): BitcoinToolt
 export function describeBitcoinSeries(points: readonly LabeledPricePoint[]): string {
   const first = points[0];
   const last = points[points.length - 1];
-  if (!first || !last) return "Evolución del precio de Bitcoin.";
-  return (
-    `Evolución del precio de Bitcoin: de ${formatCurrency(first.price)} (${first.fullDate}) ` +
-    `a ${formatCurrency(last.price)} (${last.fullDate}).`
-  );
+  if (!first || !last) return PANEL_TEXTS.bitcoin.chartAlt;
+  return PANEL_TEXTS.bitcoin.chartAltRange({
+    firstPrice: formatCurrency(first.price),
+    firstDate: first.fullDate,
+    lastPrice: formatCurrency(last.price),
+    lastDate: last.fullDate,
+  });
 }

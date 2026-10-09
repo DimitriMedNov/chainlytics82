@@ -3,13 +3,16 @@ import { motion } from "motion/react";
 import type { TopCoinRow } from "@/application/panel/presentation/topCoinRows";
 import { cn } from "@/lib/utils";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/ui/base/table";
-import { fadeInStaggered } from "@/ui/pages/panel/motion/presets";
+import { fadeInStaggered, PRESS_FEEDBACK } from "@/ui/pages/panel/motion/presets";
+import { RollingFigure } from "@/ui/pages/panel/motion/rolling-figure";
 import { TrendLabel } from "@/ui/pages/panel/trend-label";
 import { CoinAvatar } from "@/ui/shared";
 
 export interface TopCoinsTableProps {
   /** Filas ya formateadas (`useTopCoins().rows`). */
   rows: readonly TopCoinRow[];
+  /** Precio sin formato de cada moneda, por id. Solo decide hacia dónde rueda la cifra al refrescarse. */
+  prices?: ReadonlyMap<string, number>;
   /** Abre el detalle de la moneda con ese id. */
   onSelect: (coinId: string) => void;
 }
@@ -24,9 +27,10 @@ const CELL = "type-num px-4 py-2 text-right sm:px-5";
  * Tabla del top 5 (funciones 14 a 19). El ancho mínimo (480 px) hace que en
  * móvil se desplace dentro de su caja, sin desbordar la página. Las filas entran
  * con un fundido escalonado al montarse; como su `key` es el id de la moneda,
- * el refresco de cada minuto no repite la entrada.
+ * el refresco de cada minuto no repite la entrada: solo ruedan los dígitos del precio
+ * que cambian. El botón de cada fila se hunde un poco al pulsarlo.
  */
-export function TopCoinsTable({ rows, onSelect }: TopCoinsTableProps) {
+export function TopCoinsTable({ rows, prices, onSelect }: TopCoinsTableProps) {
   const { columns } = PANEL_TEXTS.top;
 
   return (
@@ -57,20 +61,23 @@ export function TopCoinsTable({ rows, onSelect }: TopCoinsTableProps) {
             {...fadeInStaggered(index)}
           >
             <TableHead scope="row" className="h-auto px-2 py-1 font-normal sm:px-3">
-              <button
+              <motion.button
                 type="button"
                 onClick={() => onSelect(row.id)}
                 aria-label={PANEL_TEXTS.top.seeDetail(row.name)}
                 className="flex min-h-11 w-full items-center gap-3 rounded-md px-2 text-left"
+                {...PRESS_FEEDBACK}
               >
                 <CoinAvatar src={row.image} symbol={row.symbol} size="md" />
                 <span className="flex min-w-0 flex-col">
                   <span className="truncate text-sm font-medium text-foreground">{row.name}</span>
                   <span className="text-xs uppercase text-muted-foreground">{row.symbol}</span>
                 </span>
-              </button>
+              </motion.button>
             </TableHead>
-            <TableCell className={cn(CELL, "font-medium text-foreground")}>{row.price}</TableCell>
+            <TableCell className={cn(CELL, "font-medium text-foreground")}>
+              <RollingFigure text={row.price} value={prices?.get(row.id)} />
+            </TableCell>
             <TableCell className={CELL}>
               <TrendLabel text={row.change} rising={row.rising} size="md" />
             </TableCell>

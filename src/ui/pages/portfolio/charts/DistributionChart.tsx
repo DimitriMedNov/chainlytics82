@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { useReducedMotion } from "motion/react";
+import { DISTRIBUTION_CHART_ARIA_LABEL } from "@/application/portfolio-screen/messages";
 import { formatCurrency } from "@/application/shared/presentation/format";
 import type { DistributionSlice } from "@/domain/portfolio-screen/series";
 import { cn } from "@/lib/utils";
@@ -45,7 +46,7 @@ export function DistributionChart({ slices, className }: DistributionChartProps)
     >
       <div
         role="img"
-        aria-label="Gráfica de anillo: valor de cada posición sobre el total"
+        aria-label={DISTRIBUTION_CHART_ARIA_LABEL}
         className="aspect-square h-full max-w-full"
       >
         <PieChart data={data} innerRadius={INNER_RADIUS} padAngle={PAD_ANGLE} cornerRadius={4} className="size-full">

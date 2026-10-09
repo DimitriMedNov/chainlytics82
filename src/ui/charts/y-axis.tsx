@@ -3,8 +3,6 @@
 import { memo, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { useChartStable, useYScale } from "./chart-context";
-import { DEFAULT_Y_DOMAIN_TWEEN_MS } from "./chart-phase";
-import { LINE_LOADING_PULSE_EASE } from "./line-loading-timing";
 import { resolveReferenceDataRange } from "./reference-area-geometry";
 import type { YAxisOrientation } from "./y-axis-scales";
 import { normalizeYAxisId } from "./y-axis-scales";
@@ -13,7 +11,6 @@ import {
   Y_AXIS_DEFAULT_TICK_COUNT,
 } from "./y-axis-ticks";
 
-const Y_AXIS_POSITION_TWEEN_MS = DEFAULT_Y_DOMAIN_TWEEN_MS;
 
 export interface YAxisProps {
   /** Scale group id (Recharts `yAxisId`). Default: `"left"`. */
@@ -144,9 +141,14 @@ const YAxisInner = memo(function YAxisInner({
             className="absolute flex items-center"
             key={tick.value}
             style={{
-              top: tick.y,
-              transform: "translateY(-50%)",
-              transition: `top ${Y_AXIS_POSITION_TWEEN_MS}ms cubic-bezier(${LINE_LOADING_PULSE_EASE.join(", ")})`,
+              // Adaptado al proyecto: la marca se coloca con `transform` (el
+              // original movía `top`) y sin transición CSS propia. La escala
+              // ya llega animada fotograma a fotograma (`useAnimatedYDomains`);
+              // una transición encima hacía que la etiqueta fuera por detrás
+              // de la rejilla y de la línea (hasta 6 px medidos). Así las tres
+              // usan la misma escala en cada fotograma.
+              top: 0,
+              transform: `translateY(calc(${tick.y}px - 50%))`,
               ...(isLeft
                 ? { right: 0, justifyContent: "flex-end", paddingRight: 8 }
                 : { left: 0, justifyContent: "flex-start", paddingLeft: 8 }),

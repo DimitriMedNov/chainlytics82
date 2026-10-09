@@ -1,7 +1,8 @@
-import { Search } from "lucide-react";
 import { PANEL_TEXTS } from "@/application/panel/presentation/texts";
 import { useSearch } from "@/hooks/search";
 import { Button } from "@/ui/animate-ui/components/buttons/button";
+import { AnimateIcon } from "@/ui/animate-ui/icons/icon";
+import { Search } from "@/ui/animate-ui/icons/search";
 import { BitcoinHistoryPanel } from "@/ui/pages/panel/bitcoin-history-panel";
 import { MarketStatsSection } from "@/ui/pages/panel/market-stats-section";
 import { TopCoinsPanel } from "@/ui/pages/panel/top-coins-panel";
@@ -21,10 +22,12 @@ export default function PanelPage() {
         title={PANEL_TEXTS.title}
         description={PANEL_TEXTS.subtitle}
         actions={
-          <Button type="button" variant="outline" className="min-h-11" onClick={openSearch}>
-            <Search aria-hidden="true" />
-            {PANEL_TEXTS.searchCoins}
-          </Button>
+          <AnimateIcon animateOnHover="find" asChild>
+            <Button type="button" variant="outline" className="min-h-11" onClick={openSearch}>
+              <Search aria-hidden="true" />
+              {PANEL_TEXTS.searchCoins}
+            </Button>
+          </AnimateIcon>
         }
       />
       <MarketStatsSection />

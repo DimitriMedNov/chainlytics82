@@ -1,5 +1,6 @@
 import { CloudOff, RefreshCw, Settings } from "lucide-react";
 import { accountServiceNotice } from "@/application/auth-screen/presentation/texts";
+import { SHARED_TEXTS } from "@/application/shared/presentation/texts";
 import { useSession } from "@/hooks/session/useSession";
 import { cn } from "@/lib/utils";
 import { Button } from "@/ui/animate-ui/components/buttons/button";
@@ -57,8 +58,8 @@ export function ServiceUnavailable({ reason, what, onRetry, isRetrying, classNam
         </pre>
       ) : null}
       <Button type="button" variant="outline" className="mt-1 min-h-11" onClick={retry} disabled={retrying}>
-        <RefreshCw className={cn(retrying && "animate-spin")} aria-hidden="true" />
-        {retrying ? "Comprobando…" : "Volver a comprobar"}
+        <RefreshCw className={cn(retrying && "animate-spin motion-reduce:animate-none")} aria-hidden="true" />
+        {retrying ? SHARED_TEXTS.serviceUnavailable.rechecking : SHARED_TEXTS.serviceUnavailable.recheck}
       </Button>
     </section>
   );

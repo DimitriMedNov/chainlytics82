@@ -20,6 +20,10 @@ export const PANEL_TEXTS = {
     sectionLabel: "Cifras del mercado",
     /** Nuevo: etiqueta de carga para lectores de pantalla. */
     loading: "Cargando las cifras del mercado",
+    /** Etiqueta del único tramo del anillo de dominancia. */
+    dominanceRingLabel: "Bitcoin",
+    /** Texto alternativo del anillo; recibe el porcentaje ya formateado (`formatDominance`). */
+    dominanceRingAlt: (percentText: string) => `Bitcoin supone el ${percentText} del mercado`,
   },
 
   tradingView: {
@@ -40,6 +44,12 @@ export const PANEL_TEXTS = {
     emptyTitle: "Sin datos para este periodo",
     emptyDescription: "El servicio de precios no devolvió ningún punto para este periodo.",
     emptyAction: "Volver a intentar",
+    /** Texto alternativo de la gráfica de área sin puntos. */
+    chartAlt: "Evolución del precio de Bitcoin.",
+    /** Texto alternativo con el primer y el último punto; precios y fechas ya formateados. */
+    chartAltRange: (parts: { firstPrice: string; firstDate: string; lastPrice: string; lastDate: string }) =>
+      `Evolución del precio de Bitcoin: de ${parts.firstPrice} (${parts.firstDate}) ` +
+      `a ${parts.lastPrice} (${parts.lastDate}).`,
   },
 
   top: {
@@ -57,6 +67,9 @@ export const PANEL_TEXTS = {
     emptyDescription: "El servicio de precios no devolvió ninguna moneda en este momento.",
     emptyAction: "Volver a intentar",
   },
+
+  /** Sentido de una variación, para lectores de pantalla (`sr-only`). */
+  trend: { rises: "Sube", falls: "Baja" },
 
   retry: "Reintentar",
   retrying: "Reintentando…",

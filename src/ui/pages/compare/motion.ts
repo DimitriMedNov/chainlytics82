@@ -32,4 +32,27 @@ export const CHIP_SCALE = 0.9;
 /** Segundos que tarda una cifra en llegar a su valor nuevo. */
 export const NUMBER_DURATION = 0.4;
 
+/**
+ * Imán del grupo de chips (Bencho «Magnetic select»): todos se inclinan unos píxeles
+ * hacia el cursor con el mismo vector, así los huecos entre ellos no cambian.
+ * `LEAN_MAX` píxeles como mucho (a partir de unos 7 parecería que se arrastra);
+ * `LEAN_FADE` píxeles fuera del grupo en los que el efecto se apaga.
+ */
+export const LEAN_MAX = 4.5;
+export const LEAN_FADE = 44;
+/** Amortigua un valor que cambia en cada fotograma: se lee como freno, no como seguimiento. */
+export const LEAN: Transition = { duration: 0.26, ease: [0.22, 0.9, 0.28, 1] };
+
+/**
+ * Saltito de la etiqueta al enfocar su campo (Bencho «Label input»): cada letra sube
+ * `HOP_OFFSET` píxeles y vuelve, una detrás de otra cada `HOP_STAGGER` segundos.
+ */
+export const HOP_OFFSET = -3;
+export const HOP_STAGGER = 0.024;
+export const HOP: Transition = {
+  duration: 0.46,
+  times: [0, 0.38, 1],
+  ease: [0.3, 0.7, 0.3, 1],
+};
+
 export { EASE_OUT };

@@ -1,6 +1,11 @@
 "use client";
 
 import { createContext, type ReactNode, useContext, useMemo } from "react";
+import {
+  type ChartDateFormatter,
+  formatShortDate,
+  formatWeekdayDate,
+} from "./chart-formatters";
 
 export interface SpringConfig {
   stiffness: number;
@@ -14,12 +19,18 @@ export interface ChartConfigValue {
   tooltipBoxSpring: SpringConfig;
   /** Line/area hover-highlight band (x + width). */
   highlightSpring: SpringConfig;
+  /** Añadido por el proyecto: fecha del eje X, la píldora y las categorías con fecha. Por defecto, es-ES («8 oct»). */
+  formatDate: ChartDateFormatter;
+  /** Añadido por el proyecto: fecha del título del tooltip. Por defecto, es-ES («jue, 8 oct»). */
+  formatTooltipDate: ChartDateFormatter;
 }
 
 export const DEFAULT_CHART_CONFIG: ChartConfigValue = {
   tooltipSpring: { stiffness: 300, damping: 30 },
   tooltipBoxSpring: { stiffness: 100, damping: 20 },
   highlightSpring: { stiffness: 180, damping: 28 },
+  formatDate: formatShortDate,
+  formatTooltipDate: formatWeekdayDate,
 };
 
 const ChartConfigContext = createContext<ChartConfigValue | null>(null);

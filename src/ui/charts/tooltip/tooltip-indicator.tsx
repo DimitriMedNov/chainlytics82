@@ -9,6 +9,7 @@ import {
   indicatorFadeGradientStops,
   resolveVerticalFadeSides,
 } from "../indicator-fade";
+import { useChartReducedMotion } from "../use-chart-reduced-motion";
 
 export type IndicatorWidth =
   | number // Pixel width
@@ -92,18 +93,24 @@ function TooltipIndicatorInner({
   colorMid = chartCssVars.crosshair,
   fadeEdges = "both",
   fadeLength = 10,
-  animate = true,
+  animate: animateProp = true,
   gradientId = "tooltip-indicator-gradient",
   springConfig,
   strokeDasharray,
 }: TooltipIndicatorProps) {
   const { tooltipSpring } = useChartConfig();
   const effectiveSpring = springConfig ?? tooltipSpring;
+  // Con «reducir movimiento» la línea salta al punto, sin muelle.
+  const reduceMotion = useChartReducedMotion();
+  const animate = animateProp && !reduceMotion;
 
-  const pixelWidth =
+  // Nunca negativo: un `columnWidth` de un hueco sin ancho daba `width` < 0.
+  const pixelWidth = Math.max(
+    0,
     span !== undefined && columnWidth !== undefined
       ? span * columnWidth
-      : resolveWidth(width);
+      : resolveWidth(width)
+  );
 
   const rectX = x - pixelWidth / 2;
   const lineX = x;

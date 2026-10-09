@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { CircleDollarSign } from "lucide-react";
 import { useReducedMotion } from "motion/react";
+import { GAINS_CHART_ARIA_LABEL, GAINS_EMPTY_DESCRIPTION, GAINS_EMPTY_TITLE } from "@/application/portfolio-screen/messages";
 import type { PositionGainPoint } from "@/domain/portfolio-screen/series";
 import { cn } from "@/lib/utils";
 import { Bar } from "@/ui/charts/bar";
@@ -48,8 +49,8 @@ export function GainsChart({ points, className }: GainsChartProps) {
         framed={false}
         headingLevel="h3"
         icon={CircleDollarSign}
-        title="Aún no hay ganancia que enseñar"
-        description="Ninguna posición tiene coste. Regístralo en «Mis posiciones» y aquí verás cuánto gana o pierde cada una."
+        title={GAINS_EMPTY_TITLE}
+        description={GAINS_EMPTY_DESCRIPTION}
         className={cn("min-h-64", className)}
       />
     );
@@ -59,7 +60,7 @@ export function GainsChart({ points, className }: GainsChartProps) {
     <div data-slot="gains-chart" className={cn("min-h-64 w-full", className)}>
       <div
         role="img"
-        aria-label="Gráfica de barras: ganancia sobre el papel de cada posición"
+        aria-label={GAINS_CHART_ARIA_LABEL}
         style={{ height: chartHeight(bars.length) }}
       >
         <BarChart

@@ -4,9 +4,11 @@ import { memo, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 import { useChart, useChartStable } from "./chart-context";
-import { shortDateFmt } from "./chart-formatters";
+import { useChartConfig } from "./chart-config-context";
+import { type ChartDateFormatter, formatShortDate } from "./chart-formatters";
 import { DEFAULT_Y_DOMAIN_TWEEN_MS } from "./chart-phase";
 import { LINE_LOADING_PULSE_EASE } from "./line-loading-timing";
+import { useChartReducedMotion } from "./use-chart-reduced-motion";
 
 const X_AXIS_POSITION_TWEEN_MS = DEFAULT_Y_DOMAIN_TWEEN_MS;
 
@@ -20,6 +22,11 @@ export interface XAxisProps {
    * `"domain"` — evenly spaced ticks across the time domain (may not align with hover).
    */
   tickMode?: "domain" | "data";
+  /**
+   * Añadido por el proyecto: cómo se escribe cada fecha del eje. Por defecto,
+   * el de `ChartConfigProvider` (es-ES, «8 oct»).
+   */
+  formatDate?: ChartDateFormatter;
 }
 
 interface AxisTick {
@@ -62,25 +69,31 @@ function XAxisLabel({
     }
   }
 
+  // Adaptado al proyecto: la marca se coloca con `transform` (el original
+  // animaba `left`) y con «reducir movimiento» salta a su sitio.
+  const reduceMotion = useChartReducedMotion();
+
   return (
     <div
       className="absolute"
       style={{
-        left: x,
+        left: 0,
         bottom: 12,
         width: 0,
         display: "flex",
         justifyContent: "center",
-        transition: animatePosition
-          ? `left ${X_AXIS_POSITION_TWEEN_MS}ms cubic-bezier(${LINE_LOADING_PULSE_EASE.join(", ")})`
-          : undefined,
+        transform: `translateX(${x}px)`,
+        transition:
+          animatePosition && !reduceMotion
+            ? `transform ${X_AXIS_POSITION_TWEEN_MS}ms cubic-bezier(${LINE_LOADING_PULSE_EASE.join(", ")})`
+            : undefined,
       }}
     >
       <span
         className={cn("whitespace-nowrap text-chart-label text-xs")}
         style={{
           opacity,
-          transition: "opacity 0.4s ease-in-out",
+          transition: reduceMotion ? undefined : "opacity 0.4s ease-in-out",
         }}
       >
         {label}
@@ -171,7 +184,8 @@ function dedupeIndicesByLabel(
   indices: number[],
   data: Record<string, unknown>[],
   dateLabels: string[],
-  xAccessor: (d: Record<string, unknown>) => Date
+  xAccessor: (d: Record<string, unknown>) => Date,
+  formatDate: ChartDateFormatter = formatShortDate
 ): number[] {
   const seenLabels = new Set<string>();
   const deduped: number[] = [];
@@ -181,7 +195,7 @@ function dedupeIndicesByLabel(
     if (!point) {
       continue;
     }
-    const label = dateLabels[index] ?? shortDateFmt.format(xAccessor(point));
+    const label = dateLabels[index] ?? formatDate(xAccessor(point));
     if (seenLabels.has(label)) {
       continue;
     }
@@ -320,6 +334,8 @@ export function selectEvenlySpacedIndices(
     dateLabels?: string[];
     xAccessor?: (d: Record<string, unknown>) => Date;
     resolveXPx?: (index: number) => number;
+    /** Añadido por el proyecto: formato de reserva cuando falta una etiqueta. */
+    formatDate?: ChartDateFormatter;
   }
 ): number[] {
   if (length <= 0) {
@@ -349,7 +365,8 @@ export function selectEvenlySpacedIndices(
               rawIndices,
               options.data,
               options.dateLabels,
-              options.xAccessor
+              options.xAccessor,
+              options.formatDate
             )
           : rawIndices;
 
@@ -381,6 +398,7 @@ export function selectEvenlySpacedIndices(
 function buildDataAlignedTicks({
   data,
   dateLabels,
+  formatDate,
   marginLeft,
   targetTickCount,
   xAccessor,
@@ -388,6 +406,7 @@ function buildDataAlignedTicks({
 }: {
   data: Record<string, unknown>[];
   dateLabels: string[];
+  formatDate: ChartDateFormatter;
   marginLeft: number;
   targetTickCount: number;
   xAccessor: (d: Record<string, unknown>) => Date;
@@ -407,6 +426,7 @@ function buildDataAlignedTicks({
   for (const index of selectEvenlySpacedIndices(data.length, targetTickCount, {
     data,
     dateLabels,
+    formatDate,
     resolveXPx,
     xAccessor,
   })) {
@@ -415,7 +435,7 @@ function buildDataAlignedTicks({
       continue;
     }
     const date = xAccessor(point);
-    const label = dateLabels[index] ?? shortDateFmt.format(date);
+    const label = dateLabels[index] ?? formatDate(date);
     if (seenLabels.has(label)) {
       continue;
     }
@@ -431,10 +451,12 @@ function buildDataAlignedTicks({
 }
 
 function buildDomainTicks({
+  formatDate,
   marginLeft,
   numTicks,
   xScale,
 }: {
+  formatDate: ChartDateFormatter;
   marginLeft: number;
   numTicks: number;
   xScale: {
@@ -460,7 +482,7 @@ function buildDomainTicks({
   for (let i = 0; i < tickCount; i++) {
     const t = i / (tickCount - 1);
     const date = new Date(startTime + t * timeRange);
-    const label = shortDateFmt.format(date);
+    const label = formatDate(date);
     if (seenLabels.has(label)) {
       continue;
     }
@@ -501,7 +523,8 @@ function appendProjectionTailTicks(
     (date: Date): number | undefined;
   },
   marginLeft: number,
-  maxExtraTicks: number
+  maxExtraTicks: number,
+  formatDate: ChartDateFormatter = formatShortDate
 ): AxisTick[] {
   if (data.length === 0 || maxExtraTicks <= 0) {
     return ticks;
@@ -528,7 +551,7 @@ function appendProjectionTailTicks(
     const date = new Date(
       startTime + (i / (extraCount + 1)) * (endTime - startTime)
     );
-    const label = shortDateFmt.format(date);
+    const label = formatDate(date);
     if (seenLabels.has(label)) {
       continue;
     }
@@ -540,7 +563,7 @@ function appendProjectionTailTicks(
     });
   }
 
-  const endLabel = shortDateFmt.format(domainEnd);
+  const endLabel = formatDate(domainEnd);
   if (!seenLabels.has(endLabel)) {
     extras.push({
       date: domainEnd,
@@ -576,10 +599,28 @@ const XAxisInner = memo(function XAxisInner({
   numTicks = 5,
   tickerHalfWidth = 50,
   tickMode = "data",
+  formatDate: formatDateProp,
   container,
 }: XAxisProps & { container: HTMLDivElement }) {
-  const { xScale, margin, tooltipData, data, xAccessor, dateLabels, xDomain } =
-    useChart();
+  const {
+    xScale,
+    margin,
+    tooltipData,
+    data,
+    xAccessor,
+    dateLabels: chartDateLabels,
+    xDomain,
+  } = useChart();
+  const { formatDate: configFormatDate } = useChartConfig();
+  const formatDate = formatDateProp ?? configFormatDate;
+  // Con formato propio en el eje se reescriben las etiquetas de la gráfica.
+  const dateLabels = useMemo(
+    () =>
+      formatDateProp
+        ? data.map((d) => formatDateProp(xAccessor(d)))
+        : chartDateLabels,
+    [formatDateProp, data, xAccessor, chartDateLabels]
+  );
 
   const labelsToShow = useMemo(() => {
     const projectionExtendsScale =
@@ -587,6 +628,7 @@ const XAxisInner = memo(function XAxisInner({
 
     if (tickMode === "domain") {
       return buildDomainTicks({
+        formatDate,
         marginLeft: margin.left,
         numTicks,
         xScale,
@@ -596,6 +638,7 @@ const XAxisInner = memo(function XAxisInner({
     // No brush: evenly spaced ticks across the full domain (data + projection).
     if (projectionExtendsScale && xDomain == null) {
       return buildDomainTicks({
+        formatDate,
         marginLeft: margin.left,
         numTicks,
         xScale,
@@ -605,6 +648,7 @@ const XAxisInner = memo(function XAxisInner({
     const dataTicks = buildDataAlignedTicks({
       data,
       dateLabels,
+      formatDate,
       marginLeft: margin.left,
       targetTickCount: numTicks,
       xAccessor,
@@ -619,7 +663,8 @@ const XAxisInner = memo(function XAxisInner({
         xAccessor,
         xScale,
         margin.left,
-        Math.max(1, numTicks - dataTicks.length + 1)
+        Math.max(1, numTicks - dataTicks.length + 1),
+        formatDate
       );
     }
 
@@ -629,6 +674,7 @@ const XAxisInner = memo(function XAxisInner({
     xDomain,
     data,
     dateLabels,
+    formatDate,
     xAccessor,
     xScale,
     margin.left,
@@ -640,7 +686,7 @@ const XAxisInner = memo(function XAxisInner({
   const hoveredLabel =
     isHovering && tooltipData
       ? (dateLabels[tooltipData.index] ??
-        shortDateFmt.format(xAccessor(tooltipData.point)))
+        formatDate(xAccessor(tooltipData.point)))
       : null;
 
   return createPortal(

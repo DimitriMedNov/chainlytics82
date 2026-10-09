@@ -3,6 +3,7 @@
 import { motion, useSpring, useTransform } from "motion/react";
 import { type SpringConfig, useChartConfig } from "../chart-config-context";
 import { chartCssVars } from "../chart-context";
+import { useChartReducedMotion } from "../use-chart-reduced-motion";
 
 export interface TooltipDotProps {
   x: number;
@@ -91,9 +92,12 @@ export function TooltipDot({
   variant = "dot",
   cornerRadiusFraction = 0.25,
   springConfig,
-  animate = true,
+  animate: animateProp = true,
 }: TooltipDotProps) {
   const { tooltipSpring } = useChartConfig();
+  // Con «reducir movimiento» el punto salta a su sitio, sin muelle.
+  const reduceMotion = useChartReducedMotion();
+  const animate = animateProp && !reduceMotion;
   const effectiveSpring = springConfig ?? tooltipSpring;
   const animatedX = useSpring(x, effectiveSpring);
   const animatedY = useSpring(y, effectiveSpring);

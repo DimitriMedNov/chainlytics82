@@ -1,3 +1,4 @@
+import { UNKNOWN_AMOUNT, UNKNOWN_GAIN_LABEL } from "@/application/portfolio-screen/messages";
 import { formatCurrency, formatPercent } from "@/application/shared/presentation/format";
 import type { Gain } from "@/domain/portfolio-screen/gain";
 import { cn } from "@/lib/utils";
@@ -19,8 +20,8 @@ export function GainText({ gain, showPct = true, className }: GainTextProps) {
   if (!gain.known) {
     return (
       <span className={cn("type-num text-muted-foreground", className)}>
-        <span aria-hidden="true">—</span>
-        <span className="sr-only">Sin dato</span>
+        <span aria-hidden="true">{UNKNOWN_AMOUNT}</span>
+        <span className="sr-only">{UNKNOWN_GAIN_LABEL}</span>
       </span>
     );
   }

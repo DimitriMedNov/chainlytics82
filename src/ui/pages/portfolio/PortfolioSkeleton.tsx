@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { LOADING_LABEL } from "@/application/portfolio-screen/messages";
 import { cn } from "@/lib/utils";
 import { ListSkeleton, LoadingRegion, Skeleton, StatSkeleton, statGridVariants } from "@/ui/shared";
 
@@ -20,7 +21,7 @@ function PanelSkeleton({ className, children }: { className?: string; children: 
  */
 export function PortfolioSkeleton() {
   return (
-    <LoadingRegion label="Cargando tu portfolio">
+    <LoadingRegion label={LOADING_LABEL}>
       <div className="flex flex-col gap-6">
         <div className={statGridVariants({ columns: 4 })}>
           {STATS.map((key) => (

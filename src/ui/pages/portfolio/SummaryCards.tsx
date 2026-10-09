@@ -1,5 +1,14 @@
 import { TrendingDown, TrendingUp } from "lucide-react";
-import { investedNote } from "@/application/portfolio-screen/messages";
+import {
+  change24hNote,
+  CURRENT_VALUE_LABEL,
+  INVESTED_LABEL,
+  investedNote,
+  REALIZED_GAIN_HINT,
+  REALIZED_GAIN_LABEL,
+  UNREALIZED_GAIN_HINT,
+  UNREALIZED_GAIN_LABEL,
+} from "@/application/portfolio-screen/messages";
 import { formatCurrency, formatPercent } from "@/application/shared/presentation/format";
 import type { SummaryFigures } from "@/domain/portfolio-screen/gain";
 import { cn } from "@/lib/utils";
@@ -27,7 +36,7 @@ export function SummaryCards({ figures, className }: SummaryCardsProps) {
     <StatGrid ref={gridRef} columns={4} className={className} data-slot="portfolio-summary">
       <Stat
         size="lg"
-        label="Valor actual"
+        label={CURRENT_VALUE_LABEL}
         value={formatCurrency(figures.value)}
         hint={
           <span
@@ -37,19 +46,19 @@ export function SummaryCards({ figures, className }: SummaryCardsProps) {
             )}
           >
             <TrendIcon className="size-3.5 shrink-0" aria-hidden="true" />
-            {formatPercent(figures.change24hPct)} en 24 h
+            {change24hNote(formatPercent(figures.change24hPct))}
           </span>
         }
       />
       <Stat
         size="lg"
-        label="Invertido"
+        label={INVESTED_LABEL}
         value={formatCurrency(figures.invested)}
         hint={investedNote(figures.positionsWithoutCost)}
       />
       <Stat
         size="lg"
-        label="Ganancia sobre el papel"
+        label={UNREALIZED_GAIN_LABEL}
         value={<GainText gain={figures.unrealized} showPct={false} className="font-semibold" />}
         hint={
           <>
@@ -58,15 +67,15 @@ export function SummaryCards({ figures, className }: SummaryCardsProps) {
                 ({formatPercent(unrealized.pct)})
               </span>
             ) : null}
-            Si vendieras hoy
+            {UNREALIZED_GAIN_HINT}
           </>
         }
       />
       <Stat
         size="lg"
-        label="Ganancia realizada"
+        label={REALIZED_GAIN_LABEL}
         value={<GainText gain={figures.realized} className="font-semibold" />}
-        hint="De lo que ya vendiste"
+        hint={REALIZED_GAIN_HINT}
       />
     </StatGrid>
   );

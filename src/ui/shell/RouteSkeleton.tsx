@@ -1,3 +1,4 @@
+import { SHELL_TEXTS } from "@/application/shared/presentation/texts";
 import { ChartSkeleton, ListSkeleton, LoadingRegion, PageHeaderSkeleton, StatSkeleton } from "@/ui/shared/skeletons";
 import { PageContainer } from "@/ui/shared/page";
 import { Panel } from "@/ui/shared/panel";
@@ -7,7 +8,7 @@ const STATS = ["a", "b", "c", "d"] as const;
 /** Esqueleto con forma de página mientras se descarga el código de una ruta. */
 export function RouteSkeleton() {
   return (
-    <LoadingRegion label="Cargando la pantalla">
+    <LoadingRegion label={SHELL_TEXTS.routeLoading}>
       <PageContainer>
         <PageHeaderSkeleton />
         <div className="grid grid-cols-1 gap-3 xs:grid-cols-2 sm:gap-4 lg:grid-cols-4">

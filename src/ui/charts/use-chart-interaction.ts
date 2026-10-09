@@ -10,6 +10,9 @@ import { normalizeYAxisId } from "./y-axis-scales";
 type ScaleTime = ReturnType<typeof scaleTime<number>>;
 type ScaleLinear = ReturnType<typeof scaleLinear<number>>;
 
+/** Tiempo tras un toque en el que los eventos de ratón son su repetición (ms). */
+const TOUCH_ECHO_MS = 800;
+
 export interface ChartSelection {
   startX: number;
   endX: number;
@@ -47,6 +50,7 @@ interface ChartInteractionResult {
     onTouchStart?: (event: React.TouchEvent<SVGGElement>) => void;
     onTouchMove?: (event: React.TouchEvent<SVGGElement>) => void;
     onTouchEnd?: () => void;
+    onTouchCancel?: () => void;
   };
   interactionStyle: React.CSSProperties;
 }
@@ -74,6 +78,39 @@ export function useChartInteraction({
   const isDraggingRef = useRef(false);
   const dragStartXRef = useRef<number>(0);
   const lastHoveredXRef = useRef<number | null>(null);
+  // Añadido por el proyecto (tooltip con un toque):
+  // - zona de la gráfica que se tocó, para saber si el siguiente toque cae fuera;
+  // - hora del último toque: tras un toque el navegador repite el gesto como
+  //   ratón (mover, pulsar, soltar) y esa repetición borraba el tooltip.
+  const touchSurfaceRef = useRef<SVGGElement | null>(null);
+  const lastTouchAtRef = useRef(0);
+  // Si la página se desplazó mientras el dedo estaba puesto, el gesto era un
+  // desplazamiento y no una consulta: al soltar no se deja tooltip.
+  const scrolledDuringTouchRef = useRef(false);
+  const stopScrollWatchRef = useRef<(() => void) | null>(null);
+  const stopScrollWatch = useCallback(() => {
+    stopScrollWatchRef.current?.();
+    stopScrollWatchRef.current = null;
+  }, []);
+  const startScrollWatch = useCallback(() => {
+    stopScrollWatch();
+    scrolledDuringTouchRef.current = false;
+    const onScroll = () => {
+      scrolledDuringTouchRef.current = true;
+    };
+    // `capture`: también cuenta el desplazamiento de un panel interior (modal).
+    document.addEventListener("scroll", onScroll, {
+      capture: true,
+      passive: true,
+    });
+    stopScrollWatchRef.current = () =>
+      document.removeEventListener("scroll", onScroll, { capture: true });
+  }, [stopScrollWatch]);
+  useEffect(() => stopScrollWatch, [stopScrollWatch]);
+  const isTouchEcho = useCallback(
+    () => Date.now() - lastTouchAtRef.current < TOUCH_ECHO_MS,
+    []
+  );
 
   const resolveTooltipFromX = useCallback(
     (pixelX: number): TooltipData | null => {
@@ -168,6 +205,9 @@ export function useChartInteraction({
 
   const handleMouseMove = useCallback(
     (event: React.MouseEvent<SVGGElement>) => {
+      if (isTouchEcho()) {
+        return;
+      }
       const chartX = getChartX(event);
       if (chartX === null) {
         return;
@@ -192,20 +232,32 @@ export function useChartInteraction({
         scheduleTooltip(tooltip);
       }
     },
-    [getChartX, resolveTooltipFromX, resolveIndexFromX, scheduleTooltip]
+    [
+      getChartX,
+      resolveTooltipFromX,
+      resolveIndexFromX,
+      scheduleTooltip,
+      isTouchEcho,
+    ]
   );
 
   const handleMouseLeave = useCallback(() => {
+    if (isTouchEcho()) {
+      return;
+    }
     lastHoveredXRef.current = null;
     clearTooltip();
     if (isDraggingRef.current) {
       isDraggingRef.current = false;
     }
     setSelection(null);
-  }, [clearTooltip]);
+  }, [clearTooltip, isTouchEcho]);
 
   const handleMouseDown = useCallback(
     (event: React.MouseEvent<SVGGElement>) => {
+      if (isTouchEcho()) {
+        return;
+      }
       const chartX = getChartX(event);
       if (chartX === null) {
         return;
@@ -215,7 +267,7 @@ export function useChartInteraction({
       clearTooltip();
       setSelection(null);
     },
-    [getChartX, clearTooltip]
+    [getChartX, clearTooltip, isTouchEcho]
   );
 
   const handleMouseUp = useCallback(() => {
@@ -227,8 +279,10 @@ export function useChartInteraction({
 
   const handleTouchStart = useCallback(
     (event: React.TouchEvent<SVGGElement>) => {
+      touchSurfaceRef.current = event.currentTarget;
+      lastTouchAtRef.current = Date.now();
+      startScrollWatch();
       if (event.touches.length === 1) {
-        event.preventDefault();
         const chartX = getChartX(event, 0);
         if (chartX === null) {
           return;
@@ -265,13 +319,14 @@ export function useChartInteraction({
       scheduleTooltip,
       resetTooltipDedupe,
       clearTooltip,
+      startScrollWatch,
     ]
   );
 
   const handleTouchMove = useCallback(
     (event: React.TouchEvent<SVGGElement>) => {
+      lastTouchAtRef.current = Date.now();
       if (event.touches.length === 1) {
-        event.preventDefault();
         const chartX = getChartX(event, 0);
         if (chartX === null) {
           return;
@@ -302,10 +357,51 @@ export function useChartInteraction({
     [getChartX, resolveTooltipFromX, resolveIndexFromX, scheduleTooltip]
   );
 
+  // Adaptado al proyecto: al levantar el dedo el tooltip SE QUEDA en el punto
+  // tocado (el original lo borraba, y con un toque simple no llegaba a verse).
+  // Se quita al tocar fuera de la gráfica o si el navegador se lleva el gesto.
   const handleTouchEnd = useCallback(() => {
+    lastTouchAtRef.current = Date.now();
+    stopScrollWatch();
+    if (scrolledDuringTouchRef.current) {
+      lastHoveredXRef.current = null;
+      clearTooltip();
+    }
+    setSelection(null);
+  }, [clearTooltip, stopScrollWatch]);
+
+  // El navegador se queda el gesto al desplazar en vertical (`pan-y`).
+  const handleTouchCancel = useCallback(() => {
+    lastTouchAtRef.current = Date.now();
+    stopScrollWatch();
+    lastHoveredXRef.current = null;
     clearTooltip();
     setSelection(null);
-  }, [clearTooltip]);
+  }, [clearTooltip, stopScrollWatch]);
+
+  // Tocar fuera de la gráfica quita el tooltip que dejó un toque.
+  useEffect(() => {
+    if (!canInteract) {
+      return;
+    }
+    const handleOutsideTouch = (event: TouchEvent) => {
+      const surface = touchSurfaceRef.current;
+      if (!surface || lastHoveredXRef.current === null) {
+        return;
+      }
+      if (event.target instanceof Node && surface.contains(event.target)) {
+        return;
+      }
+      lastHoveredXRef.current = null;
+      clearTooltip();
+    };
+    document.addEventListener("touchstart", handleOutsideTouch, {
+      passive: true,
+    });
+    return () => {
+      document.removeEventListener("touchstart", handleOutsideTouch);
+    };
+  }, [canInteract, clearTooltip]);
 
   const clearSelection = useCallback(() => {
     setSelection(null);
@@ -333,12 +429,15 @@ export function useChartInteraction({
         onTouchStart: handleTouchStart,
         onTouchMove: handleTouchMove,
         onTouchEnd: handleTouchEnd,
+        onTouchCancel: handleTouchCancel,
       }
     : {};
 
   const interactionStyle: React.CSSProperties = {
     cursor: canInteract ? "crosshair" : "default",
-    touchAction: "none",
+    // Adaptado al proyecto: `pan-y` deja desplazar la página en vertical con
+    // el dedo sobre la gráfica; el arrastre horizontal sigue moviendo el cursor.
+    touchAction: "pan-y",
   };
 
   return {

@@ -11,7 +11,7 @@ import { Line, LineChart } from "@/ui/charts/line-chart";
 import { ChartTooltip } from "@/ui/charts/tooltip";
 import { YAxis } from "@/ui/charts/y-axis";
 import { ChartLegend } from "@/ui/pages/compare/chart-legend";
-import { COMPARE_CHART_TEXTS } from "@/ui/pages/compare/chart-texts";
+import { COMPARE_TEXTS } from "@/application/compare/presentation/texts";
 import { ChartTooltipCard } from "@/ui/pages/compare/chart-tooltip-card";
 import { ComparisonXAxis } from "@/ui/pages/compare/comparison-x-axis";
 import { COMPARISON_CHART_HEIGHT, seriesBgClass } from "@/ui/pages/compare/constants";
@@ -42,7 +42,7 @@ export function ComparisonChart({ rows, series, coins }: ComparisonChartProps) {
   return (
     <div
       role="img"
-      aria-label={COMPARE_CHART_TEXTS.linesLabel(summary)}
+      aria-label={COMPARE_TEXTS.chart.linesLabel(summary)}
       data-slot="comparison-chart"
       className="flex w-full min-w-0 flex-col gap-2"
     >

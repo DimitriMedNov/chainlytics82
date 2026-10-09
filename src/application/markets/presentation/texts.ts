@@ -17,9 +17,25 @@ export const MARKETS_TEXTS = {
   emptyTitle: "Ninguna moneda coincide",
   emptyDescription: "Prueba con otro nombre o quita los filtros para ver el listado completo.",
   clearFilters: "Limpiar filtros",
+  /** Nuevo: estado `empty-api` (el servicio devolvió 0 monedas). La acción llama a `refetch()`. */
+  emptyApiTitle: "Sin monedas que mostrar",
+  emptyApiDescription: "El servicio de precios no devolvió ninguna moneda en este momento.",
+  emptyApiAction: "Volver a intentar",
   marketCapLabel: "Capitalización",
   volumeLabel: "Volumen 24 h",
   viewDetails: "Ver detalles",
+  /** Nuevos: gráficas y textos que solo oyen los lectores de pantalla. */
+  loadingList: "Cargando criptomonedas",
+  rankLabel: "Puesto",
+  priceLabel: "Precio",
+  changePeriod: "en 24 horas",
+  barsTitle: "Cambio en 24 h",
+  barsLoading: "Cargando la gráfica de cambio en 24 h",
+  trendTitle: "Suben y bajan",
+  trendDescription: "Reparto de las monedas de la lista",
+  trendLoading: "Cargando el reparto de suben y bajan",
+  trendCenterLabel: "monedas",
+  chartsEmptyTitle: "Sin monedas que graficar",
 } as const;
 
 const FILTER_LABELS: Readonly<Record<MarketFilter, string>> = {
@@ -58,6 +74,17 @@ export const TREND_LABELS: Readonly<Record<TrendKey, string>> = {
 export function marketListTitle(status: MarketListStatus, visibleCount: number): string {
   if (status === "loading" || status === "error") return MARKETS_TEXTS.listTitleIdle;
   return `${visibleCount} criptomonedas`;
+}
+
+/** Subtítulo de las barras: cuántas monedas de la lista se dibujan. */
+export function barsDescription(shown: number, total: number): string {
+  if (shown >= total) return "Todas las monedas de la lista";
+  return `Las ${shown} primeras de las ${total} de la lista`;
+}
+
+/** Una línea del reparto, escrita: «Suben: 62 monedas (62,0 %)». */
+export function trendSliceText(label: string, count: number, share: string): string {
+  return `${label}: ${count} monedas (${share})`;
 }
 
 /** Texto solo para lectores de pantalla que completa "Ver detalles". */

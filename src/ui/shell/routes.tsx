@@ -1,11 +1,12 @@
 import { lazy, type ComponentType, type LazyExoticComponent } from "react";
-// La ruta `/` va con carga directa; las demás se descargan al entrar.
-import PanelPage from "@/ui/pages/panel";
+// Todas las rutas se descargan al entrar, también el Panel (`/`): así el código
+// de sus gráficas no viaja en el arranque de las demás pantallas.
 
 type PageModule = { default: ComponentType };
 type LazyPage = LazyExoticComponent<ComponentType>;
 
 const LOADERS = {
+  panel: () => import("@/ui/pages/panel"),
   markets: () => import("@/ui/pages/markets"),
   portfolio: () => import("@/ui/pages/portfolio"),
   compare: () => import("@/ui/pages/compare"),
@@ -19,6 +20,7 @@ export type LazyPageName = keyof typeof LOADERS;
 
 function createLazyPages(): Record<LazyPageName, LazyPage> {
   return {
+    panel: lazy(LOADERS.panel),
     markets: lazy(LOADERS.markets),
     portfolio: lazy(LOADERS.portfolio),
     compare: lazy(LOADERS.compare),
@@ -46,13 +48,12 @@ export function resetLazyPages(): void {
 
 export interface AppRoute {
   path: string;
-  /** `null`: carga directa (`PanelPage`). */
-  page: LazyPageName | null;
+  page: LazyPageName;
 }
 
 /** Las 7 rutas de siempre, con sus direcciones, más la 404. */
 export const APP_ROUTES: readonly AppRoute[] = [
-  { path: "/", page: null },
+  { path: "/", page: "panel" },
   { path: "/markets", page: "markets" },
   { path: "/portfolio", page: "portfolio" },
   { path: "/comparar", page: "compare" },
@@ -62,4 +63,18 @@ export const APP_ROUTES: readonly AppRoute[] = [
   { path: "*", page: "notFound" },
 ];
 
-export { PanelPage };
+/**
+ * Empieza a descargar ya el código de la ruta en la que se abrió la app, sin
+ * esperar a que React llegue a pintarla: la descarga corre a la vez que el
+ * arranque. Si falla, no pasa nada aquí: `lazy()` la vuelve a pedir y el error
+ * lo enseña el límite de errores de ruta, con su «Reintentar».
+ */
+export function preloadRoute(pathname: string): void {
+  const route = APP_ROUTES.find((candidate) => candidate.path === pathname);
+  if (!route) return;
+  LOADERS[route.page]().catch(() => undefined);
+}
+
+if (typeof window !== "undefined") {
+  preloadRoute(window.location.pathname);
+}

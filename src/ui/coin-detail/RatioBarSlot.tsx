@@ -1,3 +1,4 @@
+import { COIN_DETAIL_TEXTS as T } from "@/application/coin-detail/presentation/texts";
 import { cn } from "@/lib/utils";
 import { Progress, ProgressIndicator } from "@/ui/animate-ui/primitives/radix/progress";
 import { useBarEntrance } from "@/ui/coin-detail/useCoinDetailMotion";
@@ -50,7 +51,7 @@ export function RatioBarSlot({
         <Progress
           value={percent}
           aria-label={label}
-          aria-valuetext={`${percent} %`}
+          aria-valuetext={T.ratioValueText(percent)}
           className="relative h-2 w-full overflow-hidden rounded-full bg-muted"
         >
           <ProgressIndicator
@@ -62,7 +63,7 @@ export function RatioBarSlot({
       ) : (
         <div
           role="img"
-          aria-label={`${label}: ${percent} % del recorrido entre el mínimo y el máximo`}
+          aria-label={T.ratioMarkerLabel(label, percent)}
           className="relative h-2 w-full rounded-full bg-muted"
         >
           <span

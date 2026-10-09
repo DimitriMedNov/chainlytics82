@@ -1,20 +1,19 @@
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { curveMonotoneX } from "@visx/curve";
 import { useReducedMotion } from "motion/react";
 import type { LabeledPricePoint } from "@/application/market/presentation/pricePointLabels";
-import { formatAxisPrice, formatCurrency } from "@/application/shared/presentation/format";
+import { formatCurrency } from "@/application/shared/presentation/format";
 import type { PriceSeriesSummary } from "@/domain/coin-detail/priceSeries";
 import { cn } from "@/lib/utils";
 import { Grid } from "@/ui/charts/grid";
 import { Line, LineChart } from "@/ui/charts/line-chart";
 import { ChartTooltip } from "@/ui/charts/tooltip";
-import { YAxis } from "@/ui/charts/y-axis";
 import { PriceChartXAxis } from "@/ui/coin-detail/PriceChartXAxis";
+import { PriceChartYAxis } from "@/ui/coin-detail/PriceChartYAxis";
 import {
   PRICE_CHART_X_KEY,
   PRICE_CHART_Y_KEY,
   describePriceSeries,
-  priceAxisBase,
   readPriceTooltip,
   toPriceChartRows,
 } from "@/ui/coin-detail/priceChartRows";
@@ -53,9 +52,7 @@ function PriceTooltip({ point }: { point: Record<string, unknown> }) {
  */
 export function PriceChart({ points, summary, coinName, className }: PriceChartProps) {
   const reducedMotion = useReducedMotion();
-  const base = priceAxisBase(summary);
-  const rows = useMemo(() => toPriceChartRows(points, base), [points, base]);
-  const formatTick = useCallback((plotted: number) => formatAxisPrice(plotted + base), [base]);
+  const rows = useMemo(() => toPriceChartRows(points), [points]);
 
   return (
     <div
@@ -70,12 +67,13 @@ export function PriceChart({ points, summary, coinName, className }: PriceChartP
         data={rows}
         xDataKey={PRICE_CHART_X_KEY}
         margin={MARGIN}
+        yDomain={summary?.axisDomain}
         aspectRatio=""
         className="h-full"
         animationDuration={reducedMotion ? 0 : undefined}
       >
         <Grid horizontal numTicksRows={4} />
-        <YAxis numTicks={4} formatValue={formatTick} />
+        <PriceChartYAxis fitToRange={summary !== null} numTicks={4} />
         <PriceChartXAxis />
         <Line
           dataKey={PRICE_CHART_Y_KEY}

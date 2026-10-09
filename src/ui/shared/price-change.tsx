@@ -1,6 +1,7 @@
 import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { formatPercent } from "@/application/shared/presentation/format";
+import { SHARED_TEXTS, noDataLabel } from "@/application/shared/presentation/texts";
 import { cn } from "@/lib/utils";
 
 const priceChangeVariants = cva("type-num inline-flex items-center gap-0.5 whitespace-nowrap font-medium", {
@@ -48,7 +49,7 @@ export function PriceChange({ value, label, period, appearance, size, className 
     return (
       <span className={cn(priceChangeVariants({ direction: "unknown", appearance, size }), className)}>
         <span aria-hidden="true">—</span>
-        <span className="sr-only">Sin dato{period ? ` ${period}` : ""}</span>
+        <span className="sr-only">{noDataLabel(period)}</span>
       </span>
     );
   }
@@ -59,7 +60,7 @@ export function PriceChange({ value, label, period, appearance, size, className 
   return (
     <span className={cn(priceChangeVariants({ direction: up ? "up" : "down", appearance, size }), className)}>
       <Icon aria-hidden="true" />
-      <span className="sr-only">{up ? "Sube" : "Baja"} </span>
+      <span className="sr-only">{up ? SHARED_TEXTS.priceChange.up : SHARED_TEXTS.priceChange.down} </span>
       {label ?? formatPercent(value)}
       {period ? <span className="sr-only"> {period}</span> : null}
     </span>

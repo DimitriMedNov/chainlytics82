@@ -22,6 +22,9 @@ export const AUTH_FIELD_TEXT: Readonly<
   password: { label: "Contraseña", inputType: "password" },
 };
 
+/** Etiqueta para lectores de pantalla del esqueleto, mientras se comprueba la sesión. */
+export const AUTH_CHECKING_LABEL = "Comprobando tu sesión";
+
 /** Lo que se pierde en /auth cuando no hay servicio de cuentas. */
 export const AUTH_UNAVAILABLE_WHAT = "no puedes iniciar sesión ni usar el analista con IA";
 

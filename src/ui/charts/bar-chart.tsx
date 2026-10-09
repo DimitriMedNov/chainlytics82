@@ -33,8 +33,8 @@ import {
   type Margin,
   type TooltipData,
 } from "./chart-context";
+import { useChartConfig } from "./chart-config-context";
 import { isGradientDefComponent, isPatternDefComponent } from "./chart-defs";
-import { shortDateFmt } from "./chart-formatters";
 import {
   type ChartPhase,
   type ChartStatus,
@@ -43,6 +43,7 @@ import {
 } from "./chart-phase";
 import { BarLoadingSkeleton } from "./loading-sweep";
 import { extractReferenceAreaConfigs } from "./reference-area-config";
+import { useChartReducedMotion } from "./use-chart-reduced-motion";
 import { useScheduledTooltip } from "./use-scheduled-tooltip";
 import {
   buildYScalesForLines,
@@ -205,19 +206,23 @@ const ChartCore = memo(function ChartCore({
   // Extract bar configs synchronously from children
   const lines = useMemo(() => extractBarConfigs(children), [children]);
 
-  const innerWidth = width - margin.left - margin.right;
-  const innerHeight = height - margin.top - margin.bottom;
+  // Nunca negativos: con márgenes mayores que el hueco las escalas daban
+  // anchos < 0 y el SVG los rechazaba.
+  const innerWidth = Math.max(0, width - margin.left - margin.right);
+  const innerHeight = Math.max(0, height - margin.top - margin.bottom);
+  const { formatDate } = useChartConfig();
+  const reduceMotion = useChartReducedMotion();
 
   // Category accessor function - returns string for categorical scale
   const categoryAccessor = useCallback(
     (d: Record<string, unknown>): string => {
       const value = d[xDataKey];
       if (value instanceof Date) {
-        return shortDateFmt.format(value);
+        return formatDate(value);
       }
       return String(value ?? "");
     },
-    [xDataKey]
+    [xDataKey, formatDate]
   );
 
   // For compatibility with ChartContext, provide a Date-based xAccessor
@@ -378,22 +383,27 @@ const ChartCore = memo(function ChartCore({
     if (status === "loading") {
       return;
     }
+    // Con «reducir movimiento» no hay crecimiento: barras fijas e interacción
+    // disponible desde el primer momento.
+    if (reduceMotion) {
+      setIsLoaded(true);
+      return;
+    }
     const staggerMs = data.length > 1 ? animationDuration * 0.4 : 0;
     const timer = setTimeout(() => {
       setIsLoaded(true);
     }, animationDuration + staggerMs);
     return () => clearTimeout(timer);
-  }, [animationDuration, revealSignature, status]);
+  }, [animationDuration, revealSignature, status, reduceMotion]);
 
   useEffect(() => {
     onPhaseChange?.(isLoaded ? "ready" : "revealing");
   }, [isLoaded, onPhaseChange]);
 
-  // Mouse move handler
-  const handleMouseMove = useCallback(
-    (event: React.MouseEvent<SVGGElement>) => {
-      const point = localPoint(event);
-      if (!point) {
+  // Resuelve el tooltip a partir de un punto del SVG (ratón o dedo).
+  const showTooltipAt = useCallback(
+    (point: { x: number; y: number } | null) => {
+      if (!point || columnWidth <= 0) {
         return;
       }
 
@@ -542,9 +552,47 @@ const ChartCore = memo(function ChartCore({
     ]
   );
 
+  const handleMouseMove = useCallback(
+    (event: React.MouseEvent<SVGGElement>) => {
+      showTooltipAt(localPoint(event));
+    },
+    [showTooltipAt]
+  );
+
+  // Añadido por el proyecto: el original solo escuchaba al ratón, así que en
+  // táctil no salía tooltip. Tocar o arrastrar lo muestra y se queda al
+  // levantar el dedo (para poder leerlo); se quita al tocar fuera de la
+  // gráfica o cuando el navegador se queda el gesto para desplazar la página.
+  const handleTouch = useCallback(
+    (event: React.TouchEvent<SVGGElement>) => {
+      const touch = event.touches[0];
+      const svg = event.currentTarget.ownerSVGElement;
+      if (!(touch && svg) || event.touches.length !== 1) {
+        return;
+      }
+      showTooltipAt(localPoint(svg, touch as unknown as MouseEvent));
+    },
+    [showTooltipAt]
+  );
+
   const handleMouseLeave = useCallback(() => {
     clearTooltip();
   }, [clearTooltip]);
+
+  const isTooltipOpen = tooltipData !== null;
+  useEffect(() => {
+    if (!isTooltipOpen) {
+      return;
+    }
+    const onTouchOutside = (event: TouchEvent) => {
+      const container = containerRef.current;
+      if (container && event.target instanceof Node && !container.contains(event.target)) {
+        clearTooltip();
+      }
+    };
+    document.addEventListener("touchstart", onTouchOutside, { passive: true });
+    return () => document.removeEventListener("touchstart", onTouchOutside);
+  }, [isTooltipOpen, containerRef, clearTooltip]);
 
   const canInteract = isLoaded;
 
@@ -637,7 +685,13 @@ const ChartCore = memo(function ChartCore({
         <g
           onMouseLeave={canInteract ? handleMouseLeave : undefined}
           onMouseMove={canInteract ? handleMouseMove : undefined}
-          style={{ cursor: canInteract ? "crosshair" : "default" }}
+          onTouchCancel={canInteract ? handleMouseLeave : undefined}
+          onTouchMove={canInteract ? handleTouch : undefined}
+          onTouchStart={canInteract ? handleTouch : undefined}
+          style={{
+            cursor: canInteract ? "crosshair" : "default",
+            touchAction: "pan-y",
+          }}
           transform={`translate(${margin.left},${margin.top})`}
         >
           {/* Background rect for mouse event detection */}

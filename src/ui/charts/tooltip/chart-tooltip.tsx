@@ -14,7 +14,8 @@ import {
   useChart,
   useChartStable,
 } from "../chart-context";
-import { weekdayDateFmt } from "../chart-formatters";
+import type { ChartDateFormatter } from "../chart-formatters";
+import { useChartReducedMotion } from "../use-chart-reduced-motion";
 import type { IndicatorFadeEdges } from "../indicator-fade";
 import { DateTicker } from "./date-ticker";
 import { TooltipBox } from "./tooltip-box";
@@ -89,6 +90,11 @@ export interface ChartTooltipProps {
    * Default: `var(--chart-tooltip-background)`.
    */
   backgroundColor?: string;
+  /**
+   * Añadido por el proyecto: cómo se escribe la fecha del título del tooltip
+   * y de la píldora. Por defecto, los de `ChartConfigProvider` (es-ES).
+   */
+  formatDate?: ChartDateFormatter;
 }
 
 interface ChartTooltipInnerProps extends ChartTooltipProps {
@@ -120,6 +126,7 @@ const ChartTooltipInner = memo(function ChartTooltipInner({
   boxSpringConfig,
   panelStyle,
   backgroundColor,
+  formatDate: formatDateProp,
 }: ChartTooltipInnerProps) {
   const {
     tooltipData,
@@ -131,16 +138,20 @@ const ChartTooltipInner = memo(function ChartTooltipInner({
     lines,
     xAccessor,
     dateLabels,
+    data,
     containerRef,
     orientation,
     barXAccessor,
     bandWidth,
     squareSnap,
   } = useChart();
-  const { tooltipSpring } = useChartConfig();
+  const { tooltipSpring, formatTooltipDate } = useChartConfig();
+  const reduceMotion = useChartReducedMotion();
 
   const isHorizontal = orientation === "horizontal";
-  const discreteInteraction = dateLabels.length > 60;
+  // Con muchos puntos, o con «reducir movimiento», nada sigue al cursor con
+  // muelle: cursor, punto, panel y píldora saltan a su sitio.
+  const discreteInteraction = dateLabels.length > 60 || reduceMotion;
 
   const resolvedDotSize = useMemo(() => {
     if (dotVariant !== "ring" || !bandWidth || lines.length === 0) {
@@ -171,8 +182,13 @@ const ChartTooltipInner = memo(function ChartTooltipInner({
         springConfig: springConfig ?? tooltipSpring,
       };
     }
-    return resolveTooltipBoxMotion(damping);
+    const boxMotionFromDamping = resolveTooltipBoxMotion(damping);
+    return {
+      ...boxMotionFromDamping,
+      animate: boxMotionFromDamping.animate && !reduceMotion,
+    };
   }, [
+    reduceMotion,
     boxSpringConfig,
     damping,
     discreteInteraction,
@@ -249,8 +265,16 @@ const ChartTooltipInner = memo(function ChartTooltipInner({
       return barXAccessor(tooltipData.point);
     }
     // For line/area charts, use the date
-    return weekdayDateFmt.format(xAccessor(tooltipData.point));
-  }, [tooltipData, barXAccessor, xAccessor]);
+    return (formatDateProp ?? formatTooltipDate)(xAccessor(tooltipData.point));
+  }, [tooltipData, barXAccessor, xAccessor, formatDateProp, formatTooltipDate]);
+
+  // La píldora usa las etiquetas de la gráfica salvo que se pida otro formato.
+  const pillLabels = useMemo(() => {
+    if (!formatDateProp || barXAccessor) {
+      return dateLabels;
+    }
+    return data.map((d) => formatDateProp(xAccessor(d)));
+  }, [formatDateProp, barXAccessor, dateLabels, data, xAccessor]);
 
   const tooltipContent = (
     <>
@@ -345,7 +369,7 @@ const ChartTooltipInner = memo(function ChartTooltipInner({
         currentIndex={tooltipData?.index ?? 0}
         discreteInteraction={discreteInteraction}
         enabled={showDatePill && !isHorizontal}
-        labels={dateLabels}
+        labels={pillLabels}
         springConfig={springConfig}
         visible={visible}
         xWithMargin={xWithMargin}

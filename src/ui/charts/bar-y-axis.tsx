@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "motion/react";
 import { memo, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
@@ -34,23 +33,19 @@ function BarYAxisLabel({
         height: bandHeight,
       }}
     >
-      <motion.span
-        animate={{
-          opacity: isHovered ? 1 : 0.7,
-          color: isHovered
-            ? "hsl(var(--foreground))"
-            : "var(--chart-label, var(--color-zinc-500))",
-        }}
-        className={cn("truncate whitespace-nowrap text-right text-xs")}
-        initial={{
-          opacity: 0.7,
-          color: "var(--chart-label, var(--color-zinc-500))",
-        }}
+      {/* Adaptado al proyecto: el color sale de los tokens (el original caía
+          en `zinc-500`). Sin atenuar: a `opacity: 0.7` el texto medía 3,3:1 en
+          claro y 4,25:1 en oscuro (mínimo 4,5:1); entero mide 6,7 / 7,5. La
+          barra señalada se distingue por el color (`text-foreground`). */}
+      <span
+        className={cn(
+          "truncate whitespace-nowrap text-right text-xs transition-colors",
+          isHovered ? "text-foreground" : "text-chart-label"
+        )}
         style={{ maxWidth: 70 }}
-        transition={{ duration: 0.15 }}
       >
         {label}
-      </motion.span>
+      </span>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
+import { SHELL_TEXTS } from "@/application/shared/presentation/texts";
 import { ErrorState } from "@/ui/shared/error-state";
 import { PageContainer } from "@/ui/shared/page";
 
@@ -58,11 +59,11 @@ export class RouteErrorBoundary extends Component<RouteErrorBoundaryProps, Route
       <PageContainer width="narrow" className="py-12">
         <ErrorState
           headingLevel="h1"
-          title={download ? "No se pudo cargar esta pantalla" : "Esta pantalla ha fallado"}
+          title={download ? SHELL_TEXTS.routeError.downloadTitle : SHELL_TEXTS.routeError.crashTitle}
           message={
             download
-              ? "No se pudo descargar el código de la pantalla: puede que no haya conexión o que haya una versión nueva de la app. Reintenta y, si sigue igual, recarga la página."
-              : `${error.message || "Error inesperado."} Reintenta y, si sigue igual, recarga la página.`
+              ? SHELL_TEXTS.routeError.downloadMessage
+              : SHELL_TEXTS.routeError.crashMessage(error.message)
           }
           onRetry={this.retry}
         />

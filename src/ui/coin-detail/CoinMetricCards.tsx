@@ -1,6 +1,7 @@
 import { ChartPie, Coins, Info } from "lucide-react";
 import { motion } from "motion/react";
 import type { CoinDetailView } from "@/application/coin-detail/presentation/coinDetailView";
+import { COIN_DETAIL_TEXTS as T } from "@/application/coin-detail/presentation/texts";
 import type { CoinDetailFigures } from "@/domain/coin-detail/figures";
 import { MetricCard } from "@/ui/coin-detail/MetricCard";
 import { RatioBarSlot } from "@/ui/coin-detail/RatioBarSlot";
@@ -40,7 +41,7 @@ export function CoinMetricCards({ marketCap, volume, additional, figures }: Coin
         rows={marketCap.rows}
         bar={
           capRatio !== null ? (
-            <RatioBarSlot ratio={capRatio} label="Capitalización respecto a la totalmente diluida" />
+            <RatioBarSlot ratio={capRatio} label={T.marketCapBarLabel} />
           ) : null
         }
       />
@@ -52,7 +53,7 @@ export function CoinMetricCards({ marketCap, volume, additional, figures }: Coin
         rows={volume.rows}
         bar={
           supplyRatio !== null ? (
-            <RatioBarSlot ratio={supplyRatio} label="Oferta circulante respecto a la oferta total" />
+            <RatioBarSlot ratio={supplyRatio} label={T.supplyBarLabel} />
           ) : null
         }
       />

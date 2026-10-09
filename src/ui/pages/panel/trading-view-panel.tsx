@@ -6,6 +6,7 @@ import { useTheme } from "@/hooks/theme/useTheme";
 import { cn } from "@/lib/utils";
 import { DURATION, STATE_SWAP } from "@/ui/pages/panel/motion/presets";
 import { RevealPanel } from "@/ui/pages/panel/motion/reveal-panel";
+import { useDeferredMount } from "@/ui/pages/panel/use-deferred-mount";
 import { ErrorState, LoadingRegion, Panel, Skeleton } from "@/ui/shared";
 
 const TITLE_ID = "panel-tradingview-titulo";
@@ -42,11 +43,21 @@ function LoadingLayer() {
  * El elemento donde se monta está siempre en el árbol y no se anima (es un iframe
  * de terceros); la carga y el error se pintan encima y son lo único que se funde.
  * Al cambiar el tema, el hook lo vuelve a montar.
+ *
+ * Montaje diferido: el widget pesa ~1 MB, así que no se pide hasta que el panel está
+ * cerca de entrar en pantalla y la página ya pintó. Hasta entonces el hook recibe una
+ * referencia vacía (no monta nada y sigue en «cargando»); al llegar el momento recibe
+ * la del hueco real y monta. El hueco mide siempre 400 px: no hay salto.
  */
 export function TradingViewPanel() {
+  const frameRef = useRef<HTMLDivElement>(null);
   const hostRef = useRef<HTMLDivElement>(null);
+  const waitingRef = useRef<HTMLDivElement>(null);
+  const shouldMount = useDeferredMount(frameRef);
   const { resolvedTheme } = useTheme();
-  const { status, retry } = useTradingViewWidget(hostRef, { theme: resolvedTheme });
+  const { status, retry } = useTradingViewWidget(shouldMount ? hostRef : waitingRef, {
+    theme: resolvedTheme,
+  });
 
   return (
     <RevealPanel aria-labelledby={TITLE_ID} data-slot="tradingview-panel">
@@ -54,7 +65,10 @@ export function TradingViewPanel() {
         <Panel.Title id={TITLE_ID}>{PANEL_TEXTS.tradingView.title}</Panel.Title>
       </Panel.Header>
       <Panel.Body>
-        <div className="relative h-100 overflow-hidden rounded-md border bg-elevated">
+        <div
+          ref={frameRef}
+          className="relative h-100 overflow-hidden rounded-md border bg-elevated"
+        >
           <div ref={hostRef} className="h-full w-full" />
           <AnimatePresence initial={false}>
             {status === "error" ? (

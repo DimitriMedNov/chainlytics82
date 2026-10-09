@@ -105,28 +105,28 @@ function ThemeToggler({
         return;
       }
 
+      // Adaptado al proyecto: el tema se guarda aquí, al empezar la transición,
+      // y no al acabar el barrido (700 ms): si se recarga la página a mitad, el
+      // tema elegido ya está guardado. Va dentro de la misma captura de la
+      // transición, así la imagen nueva ya sale con el tema nuevo y no parpadea.
       await document.startViewTransition(() => {
         flushSync(() => {
           setPreview({ effective: theme, resolved });
-          document.documentElement.classList.toggle(
-            'dark',
-            resolved === 'dark',
-          );
+          setTheme(theme);
+          const classes = document.documentElement.classList;
+          classes.toggle('dark', resolved === 'dark');
+          classes.toggle('light', resolved === 'light');
         });
       }).ready;
 
-      document.documentElement
-        .animate(
-          { clipPath: [fromClip, toClip] },
-          {
-            duration: 700,
-            easing: 'ease-in-out',
-            pseudoElement: '::view-transition-new(root)',
-          },
-        )
-        .finished.finally(() => {
-          setTheme(theme);
-        });
+      document.documentElement.animate(
+        { clipPath: [fromClip, toClip] },
+        {
+          duration: 700,
+          easing: 'ease-in-out',
+          pseudoElement: '::view-transition-new(root)',
+        },
+      );
     },
     [onImmediateChange, resolvedTheme, fromClip, toClip, setTheme],
   );

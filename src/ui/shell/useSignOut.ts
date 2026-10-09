@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { SHELL_TEXTS } from "@/application/shared/presentation/texts";
 import { useSession } from "@/hooks/session/useSession";
 import { notify } from "@/ui/shared/notify";
 
@@ -19,7 +20,7 @@ export function useSignOut(onDone?: () => void): SignOutAction {
     setIsSigningOut(true);
     try {
       await endSession();
-      notify.success("Sesión cerrada");
+      notify.success(SHELL_TEXTS.session.signedOutNotice);
       onDone?.();
       navigate("/");
     } finally {

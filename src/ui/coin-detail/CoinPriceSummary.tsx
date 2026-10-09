@@ -1,6 +1,7 @@
 import { useId } from "react";
 import { TrendingDown, TrendingUp } from "lucide-react";
 import type { CoinDetailView, DetailRow } from "@/application/coin-detail/presentation/coinDetailView";
+import { COIN_DETAIL_TEXTS as T } from "@/application/coin-detail/presentation/texts";
 import type { DayRangePosition } from "@/domain/coin-detail/figures";
 import { cn } from "@/lib/utils";
 import { priceChangeVariants } from "@/ui/shared";
@@ -48,7 +49,7 @@ export function CoinPriceSummary({ price, rows, dayRange }: CoinPriceSummaryProp
             className={cn(priceChangeVariants({ direction: up ? "up" : "down", appearance: "badge", size: "md" }), "gap-1")}
           >
             <TrendIcon aria-hidden="true" />
-            <span className="sr-only">{up ? "Sube" : "Baja"} </span>
+            <span className="sr-only">{up ? T.trend.rises : T.trend.falls} </span>
             {price.change24h}
           </span>
           <span>{price.change24hSuffix}</span>
@@ -58,7 +59,7 @@ export function CoinPriceSummary({ price, rows, dayRange }: CoinPriceSummaryProp
           <RatioBarSlot
             variant="marker"
             ratio={dayRange.ratio}
-            label="Precio dentro del rango de 24 h"
+            label={T.dayRangeBarLabel}
             startLabel={rowValue(rows, "low24h")}
             endLabel={rowValue(rows, "high24h")}
             className="mt-2"

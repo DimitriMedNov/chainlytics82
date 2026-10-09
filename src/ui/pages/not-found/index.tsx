@@ -1,5 +1,6 @@
 import { Compass } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import { SHELL_TEXTS } from "@/application/shared/presentation/texts";
 import { Button } from "@/ui/animate-ui/components/buttons/button";
 import { EmptyState } from "@/ui/shared/empty-state";
 import { PageContainer } from "@/ui/shared/page";
@@ -13,21 +14,21 @@ export default function NotFoundPage() {
       <EmptyState
         icon={Compass}
         headingLevel="h1"
-        title="Esta página no existe"
+        title={SHELL_TEXTS.notFound.title}
         description={
           <>
-            No hay nada en{" "}
-            <code className="break-all font-mono text-xs text-foreground">{pathname}</code>. Puede
-            que el enlace esté mal escrito o que la página se haya movido.
+            {SHELL_TEXTS.notFound.descriptionBeforePath}
+            <code className="break-all font-mono text-xs text-foreground">{pathname}</code>
+            {SHELL_TEXTS.notFound.descriptionAfterPath}
           </>
         }
         action={
           <>
             <Button asChild className="min-h-11">
-              <Link to="/">Volver al panel</Link>
+              <Link to="/">{SHELL_TEXTS.notFound.backToPanel}</Link>
             </Button>
             <Button asChild variant="outline" className="min-h-11">
-              <Link to="/markets">Ver mercados</Link>
+              <Link to="/markets">{SHELL_TEXTS.notFound.seeMarkets}</Link>
             </Button>
           </>
         }

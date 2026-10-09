@@ -1,3 +1,10 @@
+import {
+  DISTRIBUTION_DESCRIPTION,
+  DISTRIBUTION_TITLE,
+  GAINS_DESCRIPTION,
+  GAINS_TITLE,
+  WEIGHTS_TITLE,
+} from "@/application/portfolio-screen/messages";
 import type { DistributionSlice, PositionGainPoint } from "@/domain/portfolio-screen/series";
 import { cn } from "@/lib/utils";
 import { Panel } from "@/ui/shared";
@@ -28,8 +35,8 @@ export function DistributionSection({ distribution, gains, className }: Distribu
       <Panel aria-labelledby="portfolio-distribucion-titulo">
         <Panel.Header>
           <div>
-            <Panel.Title id="portfolio-distribucion-titulo">Distribución</Panel.Title>
-            <Panel.Description>Cuánto vale cada posición sobre el total</Panel.Description>
+            <Panel.Title id="portfolio-distribucion-titulo">{DISTRIBUTION_TITLE}</Panel.Title>
+            <Panel.Description>{DISTRIBUTION_DESCRIPTION}</Panel.Description>
           </div>
         </Panel.Header>
         <Panel.Body>
@@ -39,7 +46,7 @@ export function DistributionSection({ distribution, gains, className }: Distribu
 
       <Panel aria-labelledby="portfolio-peso-titulo">
         <Panel.Header>
-          <Panel.Title id="portfolio-peso-titulo">Peso de cada moneda</Panel.Title>
+          <Panel.Title id="portfolio-peso-titulo">{WEIGHTS_TITLE}</Panel.Title>
         </Panel.Header>
         <Panel.Body>
           <WeightList slices={distribution} />
@@ -49,8 +56,8 @@ export function DistributionSection({ distribution, gains, className }: Distribu
       <Panel aria-labelledby="portfolio-ganancia-titulo" className="lg:col-span-2 xl:col-span-1">
         <Panel.Header>
           <div>
-            <Panel.Title id="portfolio-ganancia-titulo">Ganancia por posición</Panel.Title>
-            <Panel.Description>Sobre el papel: si vendieras hoy</Panel.Description>
+            <Panel.Title id="portfolio-ganancia-titulo">{GAINS_TITLE}</Panel.Title>
+            <Panel.Description>{GAINS_DESCRIPTION}</Panel.Description>
           </div>
         </Panel.Header>
         <Panel.Body>

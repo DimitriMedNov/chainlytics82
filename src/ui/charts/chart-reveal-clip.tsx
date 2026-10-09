@@ -3,6 +3,7 @@
 import type { Transition } from "motion/react";
 import { motion } from "motion/react";
 import { clipRevealTransition } from "./animation";
+import { useChartReducedMotion } from "./use-chart-reduced-motion";
 
 export type ChartRevealClipMode = "reveal" | "conceal";
 
@@ -38,7 +39,12 @@ export function ChartRevealClip({
   mode = "reveal",
   onComplete,
 }: ChartRevealClipProps) {
-  const transition = clipRevealTransition(enterTransition);
+  // Con «reducir movimiento» el recorte salta a su estado final (sin barrido);
+  // `onComplete` sigue llegando para que las fases de la gráfica avancen.
+  const reduceMotion = useChartReducedMotion();
+  const transition = reduceMotion
+    ? { duration: 0 }
+    : clipRevealTransition(enterTransition);
   const paddedWidth = Math.max(0, targetWidth + padding * 2);
   const paddedHeight = height + padding * 2;
 

@@ -61,6 +61,11 @@ export interface LineChartProps {
   style?: CSSProperties;
   /** Fires when the internal chart phase changes (e.g. OG capture readiness). */
   onPhaseChange?: (phase: ChartPhase) => void;
+  /**
+   * Añadido por el proyecto: dominio fijo del eje Y `[mínimo, máximo]` (por
+   * ejemplo, para que no arranque en cero). Se redondea a marcas limpias.
+   */
+  yDomain?: [number, number];
   /** Child components (Line, Grid, ChartTooltip, etc.) */
   children: ReactNode;
 }
@@ -154,6 +159,7 @@ interface ChartInnerProps {
   xDomain?: [Date, Date];
   xDomainSlotCount?: number;
   tweenYDomainOnXDomainChange?: boolean;
+  yDomain?: [number, number];
   children: ReactNode;
   containerRef: React.RefObject<HTMLDivElement | null>;
   onPhaseChange: (phase: ChartPhase) => void;
@@ -176,6 +182,7 @@ function ChartInner({
   xDomain,
   xDomainSlotCount,
   tweenYDomainOnXDomainChange,
+  yDomain,
   children,
   containerRef,
   onPhaseChange,
@@ -202,6 +209,7 @@ function ChartInner({
       xDataKey={xDataKey}
       xDomain={xDomain}
       xDomainSlotCount={xDomainSlotCount}
+      yDomain={yDomain}
       yDomainTween={yDomainTween}
       yDomainTweenDuration={yDomainTweenDuration}
     >
@@ -229,6 +237,7 @@ export function LineChart({
   tweenYDomainOnXDomainChange = false,
   style,
   onPhaseChange,
+  yDomain,
   children,
 }: LineChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -258,7 +267,7 @@ export function LineChart({
       ref={containerRef}
       style={{
         ...(aspectRatio ? { aspectRatio } : undefined),
-        touchAction: "none",
+        touchAction: "pan-y",
         ...style,
       }}
     >
@@ -281,6 +290,7 @@ export function LineChart({
             xDataKey={xDataKey}
             xDomain={xDomain}
             xDomainSlotCount={xDomainSlotCount}
+            yDomain={yDomain}
             yDomainTween={yDomainTween}
             yDomainTweenDuration={yDomainTweenDuration}
           >

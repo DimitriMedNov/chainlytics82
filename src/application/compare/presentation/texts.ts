@@ -37,11 +37,22 @@ export const COMPARE_TEXTS = {
     emptyNoCommonTitle: "Sin datos en común",
     emptyNoCommonDescription:
       "Estas monedas no tienen histórico coincidente en el periodo elegido. Prueba con un periodo más amplio.",
+    /** Nombre accesible de la gráfica de líneas; `summary` son los valores finales. */
+    linesLabel: (summary: string) =>
+      `Gráfica de líneas: variación de cada moneda desde el inicio del periodo. Al final del periodo: ${summary}.`,
+    /** Una moneda dentro de un resumen: «BTC +2,45 %». */
+    entry: (symbol: string, percent: string) => `${symbol} ${percent}`,
+    /** Sentido de la variación, para lectores de pantalla y leyendas. */
+    rises: "Sube",
+    falls: "Baja",
   },
 
   ranking: {
     title: "Quién lo ha hecho mejor",
     /** Para lectores de pantalla, mientras se pinta el skeleton. */
     loadingLabel: "Cargando la clasificación",
+    /** Nombre accesible de las barras del ranking. */
+    barsLabel: (summary: string) =>
+      `Gráfica de barras: cuánto ha variado cada moneda en el periodo, de mejor a peor. ${summary}.`,
   },
 } as const;

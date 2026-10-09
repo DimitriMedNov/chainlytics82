@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
+import { SHELL_TEXTS } from "@/application/shared/presentation/texts";
 import { useSession } from "@/hooks/session/useSession";
 import { cn } from "@/lib/utils";
 import { Button } from "@/ui/animate-ui/components/buttons/button";
@@ -16,9 +17,9 @@ import {
 } from "@/ui/animate-ui/components/radix/sheet";
 import { LogIn } from "@/ui/animate-ui/icons/log-in";
 import { LogOut } from "@/ui/animate-ui/icons/log-out";
-import { Skeleton } from "@/ui/base/skeleton";
 import { Logo } from "@/ui/shell/Logo";
 import { NavLinks } from "@/ui/shell/NavLinks";
+import { Skeleton } from "@/ui/shared/skeletons";
 import { NO_EMAIL_LABEL } from "@/ui/shell/SessionArea";
 import { useSignOut } from "@/ui/shell/useSignOut";
 
@@ -43,23 +44,23 @@ export function MobileMenu({ className }: MobileMenuProps) {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <button type="button" aria-label="Abrir el menú de navegación" className={cn(ICON_BUTTON, className)}>
+        <button type="button" aria-label={SHELL_TEXTS.mobileMenu.open} className={cn(ICON_BUTTON, className)}>
           <Menu className="size-5" aria-hidden="true" />
         </button>
       </SheetTrigger>
       <SheetContent side="right" showCloseButton={false} className="w-80 max-w-5/6 gap-0 bg-popover">
         <SheetHeader className="flex-row items-center justify-between border-b px-4 py-2.5">
           <Logo onNavigate={close} />
-          <SheetTitle className="sr-only">Menú de navegación</SheetTitle>
-          <SheetDescription className="sr-only">Secciones de Chainlytics y tu sesión</SheetDescription>
+          <SheetTitle className="sr-only">{SHELL_TEXTS.mobileMenu.title}</SheetTitle>
+          <SheetDescription className="sr-only">{SHELL_TEXTS.mobileMenu.description}</SheetDescription>
           <SheetClose asChild>
-            <button type="button" aria-label="Cerrar el menú" className={ICON_BUTTON}>
+            <button type="button" aria-label={SHELL_TEXTS.mobileMenu.close} className={ICON_BUTTON}>
               <X className="size-5" aria-hidden="true" />
             </button>
           </SheetClose>
         </SheetHeader>
 
-        <nav aria-label="Secciones" className="flex-1 overflow-y-auto p-3">
+        <nav aria-label={SHELL_TEXTS.mobileMenu.navLabel} className="flex-1 overflow-y-auto p-3">
           <NavLinks layout="menu" onNavigate={close} />
         </nav>
 
@@ -67,14 +68,14 @@ export function MobileMenu({ className }: MobileMenuProps) {
           <SheetFooter className="border-t">
             {access.kind === "checking" ? (
               <div role="status">
-                <span className="sr-only">Comprobando la sesión</span>
+                <span className="sr-only">{SHELL_TEXTS.session.checking}</span>
                 <Skeleton className="h-11 w-full" aria-hidden="true" />
               </div>
             ) : null}
             {access.kind === "signed-in" ? (
               <>
                 <p className="flex min-w-0 flex-col gap-0.5">
-                  <span className="type-eyebrow text-muted-foreground">Sesión iniciada</span>
+                  <span className="type-eyebrow text-muted-foreground">{SHELL_TEXTS.session.signedInEyebrow}</span>
                   <span className="truncate text-sm font-medium text-foreground">
                     {user?.email ?? NO_EMAIL_LABEL}
                   </span>
@@ -87,7 +88,7 @@ export function MobileMenu({ className }: MobileMenuProps) {
                   onClick={() => void signOut()}
                 >
                   <LogOut aria-hidden="true" />
-                  {isSigningOut ? "Cerrando sesión…" : "Cerrar sesión"}
+                  {isSigningOut ? SHELL_TEXTS.session.signingOut : SHELL_TEXTS.session.signOut}
                 </Button>
               </>
             ) : null}
@@ -95,7 +96,7 @@ export function MobileMenu({ className }: MobileMenuProps) {
               <Button asChild className="min-h-11 w-full">
                 <Link to="/auth" onClick={close}>
                   <LogIn aria-hidden="true" />
-                  Iniciar sesión
+                  {SHELL_TEXTS.session.signIn}
                 </Link>
               </Button>
             ) : null}

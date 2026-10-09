@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useReducedMotion } from "motion/react";
 import { formatDominance, type MarketStat } from "@/application/panel/presentation/marketStats";
+import { PANEL_TEXTS } from "@/application/panel/presentation/texts";
 import type { DominanceRing } from "@/domain/panel/marketFigures";
 import { Ring } from "@/ui/charts/ring";
 import { RingChart } from "@/ui/charts/ring-chart";
@@ -28,7 +29,7 @@ const RING_COLOR = "var(--bklit-chart-3)";
 export function StatChart({ stat, dominance }: StatChartProps) {
   const reducedMotion = useReducedMotion();
   const data = useMemo(
-    () => (dominance ? [{ label: "Bitcoin", value: dominance.share, maxValue: 1 }] : []),
+    () => (dominance ? [{ label: PANEL_TEXTS.stats.dominanceRingLabel, value: dominance.share, maxValue: 1 }] : []),
     [dominance],
   );
 
@@ -37,7 +38,7 @@ export function StatChart({ stat, dominance }: StatChartProps) {
   return (
     <div
       role="img"
-      aria-label={`Bitcoin supone el ${formatDominance(dominance.percent)} del mercado`}
+      aria-label={PANEL_TEXTS.stats.dominanceRingAlt(formatDominance(dominance.percent))}
       data-slot="dominance-ring"
       className="size-16 shrink-0"
     >

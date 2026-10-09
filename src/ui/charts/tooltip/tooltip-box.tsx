@@ -7,6 +7,7 @@ import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 import { type SpringConfig, useChartConfig } from "../chart-config-context";
 import { chartCssVars } from "../chart-context";
+import { useChartReducedMotion } from "../use-chart-reduced-motion";
 
 export interface TooltipBoxProps {
   /** X position in pixels (relative to container) */
@@ -48,6 +49,23 @@ export interface TooltipBoxProps {
   backgroundColor?: string;
 }
 
+/**
+ * Añadido por el proyecto: el panel va a la derecha del cursor, salta a la
+ * izquierda si no cabe y, si tampoco cabe ahí (gráficas estrechas, 320 px),
+ * se queda dentro del contenedor en vez de salirse y quedar cortado.
+ */
+function resolveTooltipLeft(
+  x: number,
+  panelWidth: number,
+  offset: number,
+  containerWidth: number
+): { left: number; flipped: boolean } {
+  const flipped = x + panelWidth + offset > containerWidth;
+  const wanted = flipped ? x - offset - panelWidth : x + offset;
+  const maxLeft = Math.max(0, containerWidth - panelWidth);
+  return { left: Math.min(Math.max(wanted, 0), maxLeft), flipped };
+}
+
 // Inner-only-on-visible so `useSpring` initializes at the cursor's actual x/y
 // instead of (0, 0) on first hover.
 export function TooltipBox(props: TooltipBoxProps) {
@@ -79,7 +97,7 @@ function TooltipBoxInner({
   top: topOverride,
   flipped: flippedOverride,
   springConfig,
-  animate = true,
+  animate: animateProp = true,
   entrance = true,
   panelStyle,
   backgroundColor = chartCssVars.tooltipBackground,
@@ -88,6 +106,10 @@ function TooltipBoxInner({
   container: HTMLElement;
 }) {
   const { tooltipBoxSpring } = useChartConfig();
+  // Con «reducir movimiento» el panel no sigue al cursor con muelle: salta a
+  // su sitio y solo funde al aparecer.
+  const reduceMotion = useChartReducedMotion();
+  const animate = animateProp && !reduceMotion;
   const effectiveSpring = springConfig ?? tooltipBoxSpring;
 
   const tooltipRef = useRef<HTMLDivElement>(null);
@@ -97,8 +119,12 @@ function TooltipBoxInner({
 
   const tw = tooltipWidthRef.current;
   const th = tooltipHeightRef.current;
-  const shouldFlipX = x + tw + offset > containerWidth;
-  const targetX = shouldFlipX ? x - offset - tw : x + offset;
+  const { left: targetX, flipped: shouldFlipX } = resolveTooltipLeft(
+    x,
+    tw,
+    offset,
+    containerWidth
+  );
   const targetY = Math.max(
     offset,
     Math.min(y - th / 2, containerHeight - th - offset)
@@ -129,8 +155,7 @@ function TooltipBoxInner({
     }
     const w2 = tooltipWidthRef.current;
     const h2 = tooltipHeightRef.current;
-    const flip = x + w2 + offset > containerWidth;
-    const tx = flip ? x - offset - w2 : x + offset;
+    const tx = resolveTooltipLeft(x, w2, offset, containerWidth).left;
     const ty = Math.max(
       offset,
       Math.min(y - h2 / 2, containerHeight - h2 - offset)
@@ -176,7 +201,7 @@ function TooltipBoxInner({
   const transformOrigin = isFlipped ? "right top" : "left top";
 
   const panelClassName = cn(
-    "min-w-[140px] overflow-hidden rounded-lg text-chart-tooltip-foreground shadow-lg",
+    "min-w-36 overflow-hidden rounded-lg text-chart-tooltip-foreground shadow-overlay",
     panelStyle?.backgroundColor === undefined &&
       backgroundColor === chartCssVars.tooltipBackground &&
       "bg-chart-tooltip-background",
@@ -216,12 +241,20 @@ function TooltipBoxInner({
       transition={{ duration: 0.1 }}
     >
       <motion.div
-        animate={{ scale: 1, opacity: 1, x: 0 }}
+        animate={reduceMotion ? { opacity: 1 } : { scale: 1, opacity: 1, x: 0 }}
         className={panelClassName}
-        initial={{ scale: 0.85, opacity: 0, x: isFlipped ? 20 : -20 }}
+        initial={
+          reduceMotion
+            ? { opacity: 0 }
+            : { scale: 0.85, opacity: 0, x: isFlipped ? 20 : -20 }
+        }
         key={flipKey}
         style={panelStyleResolved}
-        transition={{ type: "spring", stiffness: 300, damping: 25 }}
+        transition={
+          reduceMotion
+            ? { duration: 0.1 }
+            : { type: "spring", stiffness: 300, damping: 25 }
+        }
       >
         {children}
       </motion.div>

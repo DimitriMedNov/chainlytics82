@@ -1,5 +1,6 @@
 import { RefreshCw, TriangleAlert } from "lucide-react";
 import { cva, type VariantProps } from "class-variance-authority";
+import { SHARED_TEXTS } from "@/application/shared/presentation/texts";
 import { cn } from "@/lib/utils";
 import { Button } from "@/ui/animate-ui/components/buttons/button";
 
@@ -11,12 +12,41 @@ const errorStateVariants = cva("flex text-sm", {
       /** Una franja dentro de una tarjeta o encima de un formulario. */
       inline:
         "flex-wrap items-center gap-x-3 gap-y-2 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2",
+      /**
+       * Bloque en móvil y franja desde `lg` (1024 px). Para huecos bajos de
+       * escritorio: desde `lg` mide 62 px con una línea de detalle (botón de 44 px).
+       */
+      responsive:
+        "flex-col items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-6 py-10 text-center lg:flex-row lg:flex-wrap lg:gap-x-3 lg:gap-y-2 lg:rounded-md lg:px-3 lg:py-2 lg:text-left",
     },
   },
   defaultVariants: { layout: "block" },
 });
 
-export const DEFAULT_ERROR_TITLE = "No se pudieron cargar los datos";
+type ErrorLayout = NonNullable<VariantProps<typeof errorStateVariants>["layout"]>;
+
+interface ErrorPartClasses {
+  badge: string;
+  icon: string;
+  text: string;
+  heading: string;
+  button: string;
+}
+
+/** Clases de cada parte según la forma (las de `responsive` son las de `block` hasta `lg`). */
+const PART_CLASSES: Record<ErrorLayout, ErrorPartClasses> = {
+  block: { badge: "size-11 bg-destructive/12", icon: "size-5", text: "", heading: "type-section text-balance", button: "mt-1" },
+  inline: { badge: "size-5", icon: "size-4", text: "flex-1", heading: "", button: "" },
+  responsive: {
+    badge: "size-11 bg-destructive/12 lg:size-5 lg:bg-transparent",
+    icon: "size-5 lg:size-4",
+    text: "lg:flex-1",
+    heading: "max-lg:type-section max-lg:text-balance",
+    button: "mt-1 lg:mt-0",
+  },
+};
+
+export const DEFAULT_ERROR_TITLE = SHARED_TEXTS.error.defaultTitle;
 
 export interface ErrorStateProps extends VariantProps<typeof errorStateVariants> {
   /** Qué falló, en una línea. */
@@ -51,38 +81,35 @@ export function ErrorState({
   error,
   onRetry,
   isRetrying = false,
-  retryLabel = "Reintentar",
+  retryLabel = SHARED_TEXTS.error.retry,
   headingLevel: Heading = "p",
   layout,
   className,
 }: ErrorStateProps) {
   const detail = message ?? messageOf(error);
-  const inline = layout === "inline";
+  const parts = PART_CLASSES[layout ?? "block"];
 
   return (
     <div role="alert" data-slot="error-state" className={cn(errorStateVariants({ layout }), className)}>
       <span
-        className={cn(
-          "flex shrink-0 items-center justify-center rounded-full text-destructive",
-          inline ? "size-5" : "size-11 bg-destructive/12",
-        )}
+        className={cn("flex shrink-0 items-center justify-center rounded-full text-destructive", parts.badge)}
       >
-        <TriangleAlert className={cn(inline ? "size-4" : "size-5")} aria-hidden="true" />
+        <TriangleAlert className={parts.icon} aria-hidden="true" />
       </span>
-      <div className={cn("flex min-w-0 flex-col gap-1", inline && "flex-1")}>
-        <Heading className={cn("font-semibold text-foreground", !inline && "type-section text-balance")}>{title}</Heading>
+      <div className={cn("flex min-w-0 flex-col gap-1", parts.text)}>
+        <Heading className={cn("font-semibold text-foreground", parts.heading)}>{title}</Heading>
         {detail ? <p className="max-w-md text-pretty text-muted-foreground">{detail}</p> : null}
       </div>
       {onRetry ? (
         <Button
           type="button"
           variant="outline"
-          className={cn("min-h-11", !inline && "mt-1")}
+          className={cn("min-h-11", parts.button)}
           onClick={onRetry}
           disabled={isRetrying}
         >
-          <RefreshCw className={cn(isRetrying && "animate-spin")} aria-hidden="true" />
-          {isRetrying ? "Reintentando…" : retryLabel}
+          <RefreshCw className={cn(isRetrying && "animate-spin motion-reduce:animate-none")} aria-hidden="true" />
+          {isRetrying ? SHARED_TEXTS.error.retrying : retryLabel}
         </Button>
       ) : null}
     </div>

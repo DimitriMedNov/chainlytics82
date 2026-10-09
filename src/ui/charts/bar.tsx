@@ -13,6 +13,7 @@ import {
 } from "./chart-context";
 import { useChartLegendHover } from "./chart-legend-hover";
 import { transitionWithDelay } from "./motion-utils";
+import { useChartReducedMotion } from "./use-chart-reduced-motion";
 
 type ScaleBand<Domain extends { toString(): string }> = ReturnType<
   typeof scaleBand<Domain>
@@ -64,7 +65,7 @@ export interface BarProps {
   lineCap?: BarLineCap;
   /** Whether to animate the bars. Default: true */
   animate?: boolean;
-  /** Animation type: "grow" (height) or "fade" (opacity + blur). Default: "grow" */
+  /** Animation type: "grow" (scale from the baseline) or "fade" (opacity). Default: "grow" */
   animationType?: BarAnimationType;
   /** Opacity when not hovered (when another bar is hovered). Default: 0.3 */
   fadedOpacity?: number;
@@ -121,7 +122,6 @@ function AnimatedBar({
   index,
   isFaded,
   animationType,
-  innerHeight,
   fadedOpacity,
   staggerDelay,
   enterTransition,
@@ -133,13 +133,11 @@ function AnimatedBar({
   if (animationType === "fade") {
     return (
       <motion.rect
-        animate={{
-          opacity: isFaded ? fadedOpacity : 1,
-          filter: "blur(0px)",
-        }}
+        // Adaptado al proyecto: solo `opacity` (el original añadía `filter: blur()`).
+        animate={{ opacity: isFaded ? fadedOpacity : 1 }}
         fill={fill}
         height={height}
-        initial={{ opacity: 0, filter: "blur(2px)" }}
+        initial={{ opacity: 0 }}
         key={`fade-${index}-${revealEpoch}`}
         rx={rx}
         ry={ry}
@@ -151,12 +149,12 @@ function AnimatedBar({
     );
   }
 
-  const initial = isHorizontal
-    ? { width: 0, height, x: 0, y }
-    : { width, height: 0, x, y: innerHeight };
-  const target = isHorizontal
-    ? { width, height, x: 0, y }
-    : { width, height, x, y };
+  // Adaptado al proyecto: la barra crece con `transform` (scaleX / scaleY
+  // desde su base) en vez de animar `width` / `height`, que obligaba a
+  // recalcular la geometría en cada fotograma. El rectángulo ya tiene su
+  // tamaño final; solo cambia la escala.
+  const initial = isHorizontal ? { scaleX: 0 } : { scaleY: 0 };
+  const target = isHorizontal ? { scaleX: 1 } : { scaleY: 1 };
 
   return (
     <g
@@ -166,11 +164,19 @@ function AnimatedBar({
       <motion.rect
         animate={target}
         fill={fill}
+        height={height}
         initial={initial}
         key={`grow-${index}-${revealEpoch}`}
         rx={rx}
         ry={ry}
+        style={{
+          originX: isHorizontal ? 0 : 0.5,
+          originY: isHorizontal ? 0.5 : 1,
+        }}
         transition={enterAnim}
+        width={width}
+        x={x}
+        y={y}
       />
     </g>
   );
@@ -216,6 +222,7 @@ const BarInner = memo(function BarInner({
   const calculatedStaggerDelay =
     staggerDelay ?? (data.length > 1 ? staggerSpread / 1000 / data.length : 0);
   const uniqueId = useId();
+  const reduceMotion = useChartReducedMotion();
 
   const isHorizontal = orientation === "horizontal";
 
@@ -396,7 +403,12 @@ const BarInner = memo(function BarInner({
         const effectiveRx = applyRounding ? cornerRadius : 0;
         const effectiveRy = applyRounding ? cornerRadius : 0;
 
-        if (animate && !isLoaded) {
+        // Nunca un tamaño negativo: un margen mayor que el hueco o un valor
+        // por debajo de la base daban `width`/`height` < 0 (error de SVG).
+        barW = Math.max(0, barW);
+        barHeight = Math.max(0, barHeight);
+
+        if (animate && !isLoaded && !reduceMotion) {
           return (
             <AnimatedBar
               animationType={animationType}

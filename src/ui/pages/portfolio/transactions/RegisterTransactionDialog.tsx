@@ -1,5 +1,6 @@
 import type { JSX } from "react";
 import { X } from "lucide-react";
+import { CLOSE_LABEL, REGISTER_TRANSACTION_LABEL, TRANSACTION_DIALOG_DESCRIPTION } from "@/application/portfolio-screen/messages";
 import type { Coin } from "@/domain/market/coin";
 import type { NewTransaction } from "@/domain/portfolio/types";
 import { useTransactionForm } from "@/hooks/portfolio-screen/useTransactionForm";
@@ -24,7 +25,11 @@ export interface RegisterTransactionDialogProps {
   onRegister: (tx: NewTransaction) => null;
 }
 
-/** Diálogo «Registrar movimiento». El disparador y el estado `open` son del contenedor. */
+/**
+ * Diálogo «Registrar movimiento». El disparador y el estado `open` son del
+ * contenedor; al cerrar, el `Dialog` de Animate UI devuelve el foco al botón
+ * que lo abrió (cabecera o estado vacío).
+ */
 export function RegisterTransactionDialog({
   open,
   onOpenChange,
@@ -47,11 +52,8 @@ export function RegisterTransactionDialog({
         className="max-h-dvh overflow-y-auto rounded-xl bg-popover text-popover-foreground shadow-overlay sm:max-w-md"
       >
         <DialogHeader className="pr-10 text-left">
-          <DialogTitle>Registrar movimiento</DialogTitle>
-          <DialogDescription>
-            El precio es el que pagaste o cobraste por unidad. Si no lo recuerdas, déjalo vacío: la
-            posición quedará sin coste en vez de con un coste inventado.
-          </DialogDescription>
+          <DialogTitle>{REGISTER_TRANSACTION_LABEL}</DialogTitle>
+          <DialogDescription>{TRANSACTION_DIALOG_DESCRIPTION}</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={form.handleSubmit} className="flex flex-col gap-4">
@@ -64,7 +66,7 @@ export function RegisterTransactionDialog({
         <DialogClose asChild>
           <button
             type="button"
-            aria-label="Cerrar"
+            aria-label={CLOSE_LABEL}
             className="absolute right-2 top-2 inline-flex size-11 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
           >
             <X className="size-5" aria-hidden="true" />

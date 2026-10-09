@@ -1,10 +1,14 @@
 import type { JSX } from "react";
 import { ReceiptText } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import type { Notice } from "@/application/portfolio-screen/messages";
+import {
+  TRANSACTIONS_EMPTY_DESCRIPTION,
+  TRANSACTIONS_EMPTY_TITLE,
+  transactionsTitle,
+  type Notice,
+} from "@/application/portfolio-screen/messages";
 import type { TransactionRow } from "@/domain/portfolio-screen/transactionRows";
 import { EmptyState, Panel, notify } from "@/ui/shared";
-import { listVariants } from "@/ui/pages/portfolio/motion";
 import { TransactionItem } from "./TransactionItem";
 
 export interface TransactionsPanelProps {
@@ -33,7 +37,7 @@ export function TransactionsPanel({ rows, count, onRemove }: TransactionsPanelPr
   return (
     <Panel aria-labelledby={TITLE_ID}>
       <Panel.Header>
-        <Panel.Title id={TITLE_ID}>Movimientos ({count})</Panel.Title>
+        <Panel.Title id={TITLE_ID}>{transactionsTitle(count)}</Panel.Title>
       </Panel.Header>
       {rows.length === 0 ? (
         <Panel.Body>
@@ -41,22 +45,19 @@ export function TransactionsPanel({ rows, count, onRemove }: TransactionsPanelPr
             icon={ReceiptText}
             size="sm"
             headingLevel="h3"
-            title="Aún no hay movimientos"
-            description="Usa «Registrar movimiento», en la cabecera, para apuntar tu primera compra."
+            title={TRANSACTIONS_EMPTY_TITLE}
+            description={TRANSACTIONS_EMPTY_DESCRIPTION}
           />
         </Panel.Body>
       ) : (
         <Panel.Body padding="flush">
           <motion.ul
             layoutRoot
-            variants={listVariants}
-            initial="hidden"
-            animate="visible"
             className="divide-y divide-border border-t border-border"
           >
             <AnimatePresence>
-              {rows.map((row) => (
-                <TransactionItem key={row.id} row={row} onRemove={remove} />
+              {rows.map((row, index) => (
+                <TransactionItem key={row.id} row={row} index={index} onRemove={remove} />
               ))}
             </AnimatePresence>
           </motion.ul>

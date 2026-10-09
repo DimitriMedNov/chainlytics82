@@ -1,8 +1,9 @@
+import { SHELL_TEXTS } from "@/application/shared/presentation/texts";
 import { ThemeTogglerButton } from "@/ui/animate-ui/components/buttons/theme-toggler";
-import { SearchTrigger } from "@/ui/search";
 import { Logo } from "@/ui/shell/Logo";
 import { MobileMenu } from "@/ui/shell/MobileMenu";
 import { NavLinks } from "@/ui/shell/NavLinks";
+import { SearchButton } from "@/ui/shell/SearchButton";
 import { SessionArea } from "@/ui/shell/SessionArea";
 
 /**
@@ -17,12 +18,12 @@ export function Navbar() {
       <div className="mx-auto flex h-16 w-full max-w-page items-center gap-2 px-4 sm:px-6 lg:gap-4 lg:px-8">
         <Logo compact />
 
-        <nav aria-label="Principal" className="hidden min-w-0 lg:block">
+        <nav aria-label={SHELL_TEXTS.nav.label} className="hidden min-w-0 lg:block">
           <NavLinks layout="bar" />
         </nav>
 
         <div className="ml-auto flex items-center gap-1 sm:gap-2">
-          <SearchTrigger />
+          <SearchButton />
           <ThemeTogglerButton
             variant="ghost"
             modes={["dark", "light", "system"]}

@@ -8,7 +8,7 @@ import { BarChart } from "@/ui/charts/bar-chart";
 import { BarYAxis } from "@/ui/charts/bar-y-axis";
 import { ChartTooltip } from "@/ui/charts/tooltip";
 import { ChartLegend, type ChartLegendItem } from "@/ui/pages/compare/chart-legend";
-import { COMPARE_CHART_TEXTS } from "@/ui/pages/compare/chart-texts";
+import { COMPARE_TEXTS } from "@/application/compare/presentation/texts";
 import { ChartTooltipCard } from "@/ui/pages/compare/chart-tooltip-card";
 import { RANKING_BARS_HEIGHT } from "@/ui/pages/compare/constants";
 import { BAR_KEYS, barGapFor, barsSummary, barTooltip, toBarPoints } from "@/ui/pages/compare/ranking-bars-data";
@@ -23,8 +23,8 @@ const RISE_COLOR = "hsl(var(--success))";
 const FALL_COLOR = "hsl(var(--warning))";
 const MARGIN = { top: 0, right: 16, bottom: 0, left: 56 };
 const LEGEND: ChartLegendItem[] = [
-  { id: BAR_KEYS.rises, label: COMPARE_CHART_TEXTS.rises, dotClassName: "bg-success" },
-  { id: BAR_KEYS.falls, label: COMPARE_CHART_TEXTS.falls, dotClassName: "bg-warning" },
+  { id: BAR_KEYS.rises, label: COMPARE_TEXTS.chart.rises, dotClassName: "bg-success" },
+  { id: BAR_KEYS.falls, label: COMPARE_TEXTS.chart.falls, dotClassName: "bg-warning" },
 ];
 /**
  * Bklit solo redondea la última serie de un apilado salvo que haya separación entre
@@ -44,7 +44,7 @@ export function RankingBars({ bars }: RankingBarsProps) {
   return (
     <div
       role="img"
-      aria-label={COMPARE_CHART_TEXTS.barsLabel(barsSummary(bars))}
+      aria-label={COMPARE_TEXTS.ranking.barsLabel(barsSummary(bars))}
       data-slot="ranking-bars"
       className="flex w-full min-w-0 flex-col gap-2"
     >
@@ -73,7 +73,7 @@ export function RankingBars({ bars }: RankingBarsProps) {
                 rows={[
                   {
                     id: bar.label,
-                    label: bar.value >= 0 ? COMPARE_CHART_TEXTS.rises : COMPARE_CHART_TEXTS.falls,
+                    label: bar.value >= 0 ? COMPARE_TEXTS.chart.rises : COMPARE_TEXTS.chart.falls,
                     value: formatPercent(bar.value),
                     dotClassName: bar.value >= 0 ? "bg-success" : "bg-warning",
                   },

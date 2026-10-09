@@ -2,7 +2,12 @@
 
 import * as React from 'react';
 import { Toggle as TogglePrimitive } from 'radix-ui';
-import { motion, AnimatePresence, type HTMLMotionProps } from 'motion/react';
+import {
+  motion,
+  AnimatePresence,
+  useReducedMotion,
+  type HTMLMotionProps,
+} from 'motion/react';
 
 import { getStrictContext } from '@/lib/get-strict-context';
 import { useControlledState } from '@/hooks/use-controlled-state';
@@ -34,6 +39,8 @@ function Toggle({
     defaultValue: defaultPressed,
     onChange: onPressedChange,
   });
+  // Adaptado al proyecto: con «reducir movimiento» no se encoge al pulsar.
+  const reduceMotion = useReducedMotion() === true;
 
   return (
     <ToggleProvider value={{ isPressed, setIsPressed, disabled }}>
@@ -46,7 +53,7 @@ function Toggle({
       >
         <motion.button
           data-slot="toggle"
-          whileTap={{ scale: 0.95 }}
+          whileTap={reduceMotion ? undefined : { scale: 0.95 }}
           {...props}
         />
       </TogglePrimitive.Root>

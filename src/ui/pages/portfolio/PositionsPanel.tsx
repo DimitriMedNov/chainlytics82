@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from "motion/react";
+import { POSITIONS_TITLE } from "@/application/portfolio-screen/messages";
 import type { Position } from "@/domain/portfolio/types";
 import { Panel } from "@/ui/shared";
-import { listVariants } from "@/ui/pages/portfolio/motion";
 import { PositionItem } from "@/ui/pages/portfolio/PositionItem";
 
 export interface PositionsPanelProps {
@@ -21,20 +21,17 @@ export function PositionsPanel({ positions, onSetCost, className }: PositionsPan
   return (
     <Panel aria-labelledby="portfolio-posiciones-titulo" className={className}>
       <Panel.Header>
-        <Panel.Title id="portfolio-posiciones-titulo">Mis posiciones</Panel.Title>
+        <Panel.Title id="portfolio-posiciones-titulo">{POSITIONS_TITLE}</Panel.Title>
       </Panel.Header>
       <Panel.Body padding="flush">
         <motion.ul
           layoutRoot
-          variants={listVariants}
-          initial="hidden"
-          animate="visible"
           className="divide-y"
           data-slot="position-list"
         >
           <AnimatePresence>
-            {positions.map((position) => (
-              <PositionItem key={position.coinId} position={position} onSetCost={onSetCost} />
+            {positions.map((position, index) => (
+              <PositionItem key={position.coinId} position={position} index={index} onSetCost={onSetCost} />
             ))}
           </AnimatePresence>
         </motion.ul>

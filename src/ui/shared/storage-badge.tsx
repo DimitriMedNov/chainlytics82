@@ -1,5 +1,6 @@
 import { Cloud, MonitorSmartphone } from "lucide-react";
 import { Link } from "react-router-dom";
+import { SHARED_TEXTS } from "@/application/shared/presentation/texts";
 import { useSession } from "@/hooks/session/useSession";
 import { cn } from "@/lib/utils";
 
@@ -21,7 +22,7 @@ export function StorageBadge({ isSynced, className }: StorageBadgeProps) {
     return (
       <p data-slot="storage-badge" className={base}>
         <Cloud className="size-3.5 shrink-0" aria-hidden="true" />
-        Guardado en tu cuenta
+        {SHARED_TEXTS.storage.synced}
       </p>
     );
   }
@@ -29,13 +30,13 @@ export function StorageBadge({ isSynced, className }: StorageBadgeProps) {
   return (
     <p data-slot="storage-badge" className={base}>
       <MonitorSmartphone className="size-3.5 shrink-0" aria-hidden="true" />
-      Solo en este navegador.
+      {SHARED_TEXTS.storage.localOnly}
       {access.kind === "signed-out" ? (
         <Link
           to="/auth"
           className="inline-flex min-h-11 items-center rounded-sm font-medium text-link underline underline-offset-2 hover:text-foreground"
         >
-          Inicia sesión para sincronizar
+          {SHARED_TEXTS.storage.signInToSync}
         </Link>
       ) : null}
     </p>

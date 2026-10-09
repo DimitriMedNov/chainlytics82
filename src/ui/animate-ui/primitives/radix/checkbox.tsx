@@ -2,7 +2,12 @@
 
 import * as React from 'react';
 import { Checkbox as CheckboxPrimitive } from 'radix-ui';
-import { motion, SVGMotionProps, type HTMLMotionProps } from 'motion/react';
+import {
+  motion,
+  useReducedMotion,
+  SVGMotionProps,
+  type HTMLMotionProps,
+} from 'motion/react';
 
 import { getStrictContext } from '@/lib/get-strict-context';
 import { useControlledState } from '@/hooks/use-controlled-state';
@@ -33,6 +38,8 @@ function Checkbox({
     defaultValue: defaultChecked,
     onChange: onCheckedChange,
   });
+  // Adaptado al proyecto: con «reducir movimiento» no cambia de tamaño.
+  const reduceMotion = useReducedMotion() === true;
 
   return (
     <CheckboxProvider value={{ isChecked, setIsChecked }}>
@@ -48,8 +55,8 @@ function Checkbox({
       >
         <motion.button
           data-slot="checkbox"
-          whileTap={{ scale: 0.95 }}
-          whileHover={{ scale: 1.05 }}
+          whileTap={reduceMotion ? undefined : { scale: 0.95 }}
+          whileHover={reduceMotion ? undefined : { scale: 1.05 }}
           {...props}
         />
       </CheckboxPrimitive.Root>

@@ -18,10 +18,17 @@ const [ToggleGroupProvider, useToggleGroup] =
   getStrictContext<VariantProps<typeof toggleVariants>>('ToggleGroupContext');
 
 type ToggleGroupProps = ToggleGroupPrimitiveProps &
-  VariantProps<typeof toggleVariants>;
+  VariantProps<typeof toggleVariants> & {
+    /**
+     * Añadido por el proyecto: clases del fondo de selección que se desliza
+     * (solo `type="single"`). Se suman a `bg-accent rounded-md`.
+     */
+    highlightClassName?: string;
+  };
 
 function ToggleGroup({
   className,
+  highlightClassName,
   variant,
   size,
   children,
@@ -39,7 +46,9 @@ function ToggleGroup({
     >
       <ToggleGroupProvider value={{ variant, size }}>
         {props.type === 'single' ? (
-          <ToggleGroupHighlightPrimitive className="bg-accent rounded-md">
+          <ToggleGroupHighlightPrimitive
+            className={cn('bg-accent rounded-md', highlightClassName)}
+          >
             {children}
           </ToggleGroupHighlightPrimitive>
         ) : (
@@ -51,10 +60,19 @@ function ToggleGroup({
 }
 
 type ToggleGroupItemProps = ToggleGroupItemPrimitiveProps &
-  VariantProps<typeof toggleVariants>;
+  VariantProps<typeof toggleVariants> & {
+    /**
+     * Añadido por el proyecto: clases del envoltorio de la opción (el `div`
+     * que rodea al botón y mide el fondo de selección; es el hijo directo del
+     * grupo, p. ej. `flex-1`). Con `type="multiple"` no hay envoltorio y las
+     * clases van al fondo propio de la opción.
+     */
+    wrapperClassName?: string;
+  };
 
 function ToggleGroupItem({
   className,
+  wrapperClassName,
   children,
   variant,
   size,
@@ -66,7 +84,10 @@ function ToggleGroupItem({
   return (
     <ToggleGroupHighlightItemPrimitive
       value={props.value}
-      className={cn(type === 'multiple' && 'bg-accent rounded-md')}
+      className={cn(
+        type === 'multiple' && 'bg-accent rounded-md',
+        wrapperClassName,
+      )}
     >
       <ToggleGroupItemPrimitive
         data-variant={contextVariant || variant}

@@ -1,6 +1,6 @@
 import { formatPercent } from "@/application/shared/presentation/format";
 import type { RankingBar } from "@/domain/compare/charts";
-import { COMPARE_CHART_TEXTS } from "@/ui/pages/compare/chart-texts";
+import { COMPARE_TEXTS } from "@/application/compare/presentation/texts";
 
 /** Claves de cada barra tal como las lee Bklit. */
 export const BAR_KEYS = { label: "label", rises: "sube", falls: "baja", value: "value" } as const;
@@ -20,7 +20,7 @@ export function toBarPoints(bars: RankingBar[]): Record<string, unknown>[] {
 
 /** «BTC +2,45 %, ETH -1,20 %», en el orden del ranking. */
 export function barsSummary(bars: RankingBar[]): string {
-  return bars.map((bar) => COMPARE_CHART_TEXTS.entry(bar.label, formatPercent(bar.value))).join(", ");
+  return bars.map((bar) => COMPARE_TEXTS.chart.entry(bar.label, formatPercent(bar.value))).join(", ");
 }
 
 /** Separación entre barras (fracción de su hueco) para que ninguna pase de ~20 px de grosor. */

@@ -1,5 +1,6 @@
 import { Construction } from "lucide-react";
 import { Link } from "react-router-dom";
+import { SHARED_TEXTS } from "@/application/shared/presentation/texts";
 import { Button } from "@/ui/animate-ui/components/buttons/button";
 import { EmptyState } from "@/ui/shared/empty-state";
 import { PageContainer, PageHeader } from "@/ui/shared/page";
@@ -19,16 +20,17 @@ export function UnderConstruction({ title, description, file }: UnderConstructio
       <PageHeader title={title} description={description} />
       <EmptyState
         icon={Construction}
-        title="Pantalla en construcción"
+        title={SHARED_TEXTS.underConstruction.title}
         description={
           <>
-            Esta pantalla del rediseño todavía no está escrita. Sustituye{" "}
-            <code className="font-mono text-xs text-foreground">{file}</code>.
+            {SHARED_TEXTS.underConstruction.descriptionBeforeFile}
+            <code className="font-mono text-xs text-foreground">{file}</code>
+            {SHARED_TEXTS.underConstruction.descriptionAfterFile}
           </>
         }
         action={
           <Button asChild variant="outline" className="min-h-11">
-            <Link to="/">Volver al panel</Link>
+            <Link to="/">{SHARED_TEXTS.underConstruction.backToPanel}</Link>
           </Button>
         }
       />

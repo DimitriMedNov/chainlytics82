@@ -1,4 +1,4 @@
-import { ArrowRightLeft, Heart, X } from "lucide-react";
+import { ArrowRightLeft, X } from "lucide-react";
 import type { CoinDetailView } from "@/application/coin-detail/presentation/coinDetailView";
 import { COIN_DETAIL_TEXTS as T } from "@/application/coin-detail/presentation/texts";
 import { cn } from "@/lib/utils";
@@ -6,6 +6,8 @@ import { Button } from "@/ui/animate-ui/components/buttons/button";
 import { DialogClose, DialogDescription, DialogTitle } from "@/ui/animate-ui/components/radix/dialog";
 import { Badge } from "@/ui/base/badge";
 import { CoinAvatar, SaveStatus } from "@/ui/shared";
+import { FollowHeart } from "@/ui/coin-detail/FollowHeart";
+import { useFollowBeat } from "@/ui/coin-detail/useFollowBeat";
 
 export interface CoinDetailHeaderProps {
   header: CoinDetailView["header"];
@@ -25,7 +27,7 @@ export interface CoinDetailCloseButtonProps {
 export function CoinDetailCloseButton({ className }: CoinDetailCloseButtonProps) {
   return (
     <DialogClose
-      aria-label="Cerrar el detalle"
+      aria-label={T.close}
       data-slot="coin-detail-close"
       className={cn(
         "inline-flex size-11 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground",
@@ -39,7 +41,8 @@ export function CoinDetailCloseButton({ className }: CoinDetailCloseButtonProps)
 
 /**
  * Cabecera fija del modal: logo de 56 px, nombre (título accesible del diálogo,
- * solo el nombre), símbolo, ranking y las dos acciones.
+ * solo el nombre), símbolo, ranking y las dos acciones. Al pulsar «Seguir»,
+ * el corazón confirma con el efecto del bloque «Like» de Bencho (`FollowHeart`).
  */
 export function CoinDetailHeader({
   header,
@@ -50,20 +53,19 @@ export function CoinDetailHeader({
   onToggleWatchlist,
   onConvert,
 }: CoinDetailHeaderProps) {
+  const follow = useFollowBeat(header.symbol, isInWatchlist, onToggleWatchlist);
+
   return (
     <header data-slot="coin-detail-header" className="flex flex-col gap-3 border-b px-4 py-3 sm:px-5 sm:py-4">
       <div className="flex items-start gap-3">
-        {/* 56 px: `CoinAvatar` llega a 40, se amplía con la clase del proyecto. */}
-        <CoinAvatar src={header.image} symbol={header.symbol} size="lg" priority className="size-14 text-base" />
+        <CoinAvatar src={header.image} symbol={header.symbol} size="xl" priority />
         <div className="flex min-w-0 flex-1 flex-col gap-1 self-center">
           <DialogTitle className="type-title truncate text-foreground">{header.name}</DialogTitle>
-          <DialogDescription className="sr-only">
-            Precio, evolución y cifras de mercado de {header.name}.
-          </DialogDescription>
+          <DialogDescription className="sr-only">{T.dialogDescription(header.name)}</DialogDescription>
           <p className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
             <span className="font-medium uppercase">{header.symbol}</span>
             <Badge variant="outline" className="type-num">
-              <span className="sr-only">Puesto </span>
+              <span className="sr-only">{T.rankPrefix}</span>
               {header.rankLabel}
             </Badge>
           </p>
@@ -78,9 +80,10 @@ export function CoinDetailHeader({
           className="min-h-11 flex-1 sm:flex-none"
           data-slot="coin-detail-follow"
           data-following={isInWatchlist}
-          onClick={onToggleWatchlist}
+          aria-pressed={isInWatchlist}
+          onClick={follow.press}
         >
-          <Heart className={cn(isInWatchlist && "fill-current")} aria-hidden="true" />
+          <FollowHeart active={isInWatchlist} celebrate={follow.celebrate} beat={follow.beat} />
           {isInWatchlist ? T.following : T.follow}
         </Button>
         <Button

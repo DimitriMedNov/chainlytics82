@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { Progress as ProgressPrimitive } from 'radix-ui';
-import { motion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 
 import { getStrictContext } from '@/lib/get-strict-context';
 
@@ -34,12 +34,14 @@ function ProgressIndicator({
   ...props
 }: ProgressIndicatorProps) {
   const { value } = useProgress();
+  // Adaptado al proyecto: con «reducir movimiento» la barra salta a su valor.
+  const reduceMotion = useReducedMotion();
 
   return (
     <MotionProgressIndicator
       data-slot="progress-indicator"
       animate={{ x: `-${100 - (value || 0)}%` }}
-      transition={transition}
+      transition={reduceMotion ? { duration: 0 } : transition}
       {...props}
     />
   );

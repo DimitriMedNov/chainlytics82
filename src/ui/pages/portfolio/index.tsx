@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
+import { PAGE_DESCRIPTION, PAGE_TITLE, REGISTER_TRANSACTION_LABEL } from "@/application/portfolio-screen/messages";
 import type { Position } from "@/domain/portfolio/types";
 import { usePortfolioScreen } from "@/hooks/portfolio-screen/usePortfolioScreen";
 import { Button } from "@/ui/animate-ui/components/buttons/button";
@@ -26,8 +27,8 @@ export default function PortfolioPage() {
   return (
     <PageContainer>
       <PageHeader
-        title="Mi portfolio"
-        description="Valorado a precio de mercado, con tu coste real de compra"
+        title={PAGE_TITLE}
+        description={PAGE_DESCRIPTION}
         actions={
           <Button
             type="button"
@@ -36,7 +37,7 @@ export default function PortfolioPage() {
             disabled={!screen.canRegister}
           >
             <Plus aria-hidden="true" />
-            Registrar movimiento
+            {REGISTER_TRANSACTION_LABEL}
           </Button>
         }
       >

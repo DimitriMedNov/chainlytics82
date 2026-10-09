@@ -1,3 +1,4 @@
+import { COIN_DETAIL_TEXTS as T } from "@/application/coin-detail/presentation/texts";
 import { DialogDescription, DialogTitle } from "@/ui/animate-ui/components/radix/dialog";
 import { ChartSkeleton, LoadingRegion, Skeleton } from "@/ui/shared";
 import { CoinDetailCloseButton } from "@/ui/coin-detail/CoinDetailHeader";
@@ -13,9 +14,9 @@ export function CoinDetailSkeleton() {
   return (
     <>
       <header data-slot="coin-detail-header" className="flex items-start gap-3 border-b px-4 py-3 sm:px-5 sm:py-4">
-        <DialogTitle className="sr-only">Detalle de moneda</DialogTitle>
-        <DialogDescription className="sr-only">Cargando los datos de la moneda.</DialogDescription>
-        <LoadingRegion label="Cargando la moneda" className="min-w-0 flex-1">
+        <DialogTitle className="sr-only">{T.skeletonTitle}</DialogTitle>
+        <DialogDescription className="sr-only">{T.skeletonDescription}</DialogDescription>
+        <LoadingRegion label={T.skeletonLoading} className="min-w-0 flex-1">
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-3">
               <Skeleton className="size-14 shrink-0 rounded-full" />

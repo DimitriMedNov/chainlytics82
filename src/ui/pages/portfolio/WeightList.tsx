@@ -1,3 +1,4 @@
+import { weightAriaLabel } from "@/application/portfolio-screen/messages";
 import { formatPercentShare } from "@/application/shared/presentation/format";
 import type { DistributionSlice } from "@/domain/portfolio-screen/series";
 import { cn } from "@/lib/utils";
@@ -36,7 +37,7 @@ export function WeightList({ slices, className }: WeightListProps) {
           </div>
           <Progress
             value={slice.weightPct}
-            aria-label={`Peso de ${slice.name}`}
+            aria-label={weightAriaLabel(slice.name)}
             aria-valuetext={formatPercentShare(slice.weightPct)}
             className="relative h-2 w-full overflow-hidden rounded-full bg-muted"
           >

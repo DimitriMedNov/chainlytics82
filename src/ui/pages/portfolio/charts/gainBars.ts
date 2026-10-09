@@ -1,3 +1,4 @@
+import { NO_COST_LABEL } from "@/application/portfolio-screen/messages";
 import { formatCurrency } from "@/application/shared/presentation/format";
 import { gainOf, type Gain } from "@/domain/portfolio-screen/gain";
 import type { PositionGainPoint } from "@/domain/portfolio-screen/series";
@@ -7,9 +8,6 @@ export const RISES_KEY = "sube";
 export const FALLS_KEY = "baja";
 /** Clave de la categoría (una fila por posición). */
 export const CATEGORY_KEY = "symbol";
-
-/** Lo que se escribe en la fila de una posición sin coste (mismo texto que su etiqueta). */
-export const NO_COST_LABEL = "Sin coste";
 
 /** Alto de cada fila, en rem: la gráfica crece con el número de posiciones. */
 const ROW_HEIGHT_REM = 2;

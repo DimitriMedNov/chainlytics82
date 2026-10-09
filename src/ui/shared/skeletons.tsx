@@ -1,6 +1,15 @@
 import type { ComponentProps } from "react";
+import { SHARED_TEXTS } from "@/application/shared/presentation/texts";
 import { cn } from "@/lib/utils";
-import { Skeleton } from "@/ui/base/skeleton";
+import { Skeleton as BaseSkeleton } from "@/ui/base/skeleton";
+
+/**
+ * `Skeleton` del catálogo, quieto cuando el sistema pide reducir movimiento
+ * (el latido de `animate-pulse` no para nunca: no es un fundido).
+ */
+function Skeleton({ className, ...props }: ComponentProps<typeof BaseSkeleton>) {
+  return <BaseSkeleton className={cn("motion-reduce:animate-none", className)} {...props} />;
+}
 
 /** Cuántos elementos pintar: claves estables para una lista que nunca se reordena. */
 function slots(count: number): number[] {
@@ -13,7 +22,7 @@ export interface LoadingRegionProps extends ComponentProps<"div"> {
 }
 
 /** Envuelve cualquier esqueleto: lo anuncia como «cargando» y lo esconde del árbol accesible. */
-export function LoadingRegion({ label = "Cargando", children, ...props }: LoadingRegionProps) {
+export function LoadingRegion({ label = SHARED_TEXTS.loading.defaultLabel, children, ...props }: LoadingRegionProps) {
   return (
     <div role="status" aria-busy="true" data-slot="loading" {...props}>
       <span className="sr-only">{label}</span>
@@ -62,12 +71,32 @@ export function RowSkeleton({ columns = 2, className }: RowSkeletonProps) {
 
 export interface ListSkeletonProps extends RowSkeletonProps {
   rows?: number;
+  /**
+   * Reserva la fila de cabecera de la tabla (40 px, como `<thead>` con
+   * `type-eyebrow`) para que el contenido no baje al terminar la carga.
+   * Por defecto, sin cabecera.
+   */
+  header?: boolean;
+  /** Clases de la cabecera, si la tabla real usa otra altura o relleno. */
+  headerClassName?: string;
 }
 
 /** Varias `RowSkeleton` con divisores: tablas y listas. */
-export function ListSkeleton({ rows = 5, columns, className }: ListSkeletonProps) {
+export function ListSkeleton({ rows = 5, columns = 2, header = false, headerClassName, className }: ListSkeletonProps) {
   return (
     <div className={cn("divide-y", className)}>
+      {header ? (
+        <div
+          data-slot="list-skeleton-header"
+          className={cn("flex h-10 items-center gap-3 bg-elevated px-4 sm:px-5", headerClassName)}
+        >
+          <Skeleton className="h-3 w-20" />
+          <div className="flex-1" />
+          {slots(columns).map((column) => (
+            <Skeleton key={column} className={cn("h-3 w-16 shrink-0", column > 0 && "hidden sm:block")} />
+          ))}
+        </div>
+      ) : null}
       {slots(rows).map((row) => (
         <RowSkeleton key={row} columns={columns} />
       ))}

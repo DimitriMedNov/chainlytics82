@@ -1,21 +1,21 @@
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { useReducedMotion } from "motion/react";
 import type { LabeledPricePoint } from "@/application/market/presentation/pricePointLabels";
-import { formatAxisPrice, formatCurrency } from "@/application/shared/presentation/format";
+import { formatCurrency } from "@/application/shared/presentation/format";
 import type { AxisDomain } from "@/domain/panel/bitcoinChart";
 import { Area, AreaChart } from "@/ui/charts/area-chart";
 import { Grid } from "@/ui/charts/grid";
 import { ChartTooltip } from "@/ui/charts/tooltip";
-import { YAxis } from "@/ui/charts/y-axis";
 import {
   BITCOIN_AREA_X_KEY,
   BITCOIN_AREA_Y_KEY,
-  bitcoinAxisBase,
   describeBitcoinSeries,
   readBitcoinTooltip,
   toBitcoinAreaRows,
+  toChartDomain,
 } from "@/ui/pages/panel/charts/bitcoin-area-rows";
 import { DateLabelAxis } from "@/ui/pages/panel/charts/date-label-axis";
+import { PriceYAxis } from "@/ui/pages/panel/charts/price-y-axis";
 
 export interface BitcoinAreaChartProps {
   /** Serie del precio: `date` es la etiqueta del eje X y `fullDate` la fecha del tooltip. */
@@ -49,10 +49,9 @@ function BitcoinTooltip({ point }: { point: Record<string, unknown> }) {
  */
 export function BitcoinAreaChart({ points, yDomain }: BitcoinAreaChartProps) {
   const reducedMotion = useReducedMotion();
-  const base = bitcoinAxisBase(yDomain);
-  const rows = useMemo(() => toBitcoinAreaRows(points, base), [points, base]);
+  const rows = useMemo(() => toBitcoinAreaRows(points), [points]);
+  const chartDomain = useMemo(() => toChartDomain(yDomain), [yDomain]);
   const label = useMemo(() => describeBitcoinSeries(points), [points]);
-  const formatTick = useCallback((plotted: number) => formatAxisPrice(plotted + base), [base]);
 
   return (
     <div
@@ -66,12 +65,13 @@ export function BitcoinAreaChart({ points, yDomain }: BitcoinAreaChartProps) {
         data={rows}
         xDataKey={BITCOIN_AREA_X_KEY}
         margin={MARGIN}
+        yDomain={chartDomain}
         aspectRatio=""
         className="h-full"
         animationDuration={reducedMotion ? 0 : undefined}
       >
         <Grid horizontal numTicksRows={4} />
-        <YAxis numTicks={4} formatValue={formatTick} />
+        <PriceYAxis fitToRange={chartDomain !== undefined} numTicks={4} />
         <DateLabelAxis />
         <Area
           dataKey={BITCOIN_AREA_Y_KEY}

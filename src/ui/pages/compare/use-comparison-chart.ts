@@ -3,7 +3,7 @@ import type { LabeledComparisonRow } from "@/application/compare/presentation/la
 import { formatPercent } from "@/application/shared/presentation/format";
 import { tooltipEntries, type LineSeries } from "@/domain/compare/charts";
 import type { Coin } from "@/domain/market/coin";
-import { COMPARE_CHART_TEXTS } from "@/ui/pages/compare/chart-texts";
+import { COMPARE_TEXTS } from "@/application/compare/presentation/texts";
 
 /** Clave del instante en cada punto. Lleva `$` para no chocar con el id de una moneda. */
 export const COMPARISON_X_KEY = "$timestamp";
@@ -45,7 +45,7 @@ export function useComparisonChart(
       },
       summary: last
         ? tooltipEntries(last, coins)
-            .map((entry) => COMPARE_CHART_TEXTS.entry(entry.symbol, formatPercent(entry.changePct)))
+            .map((entry) => COMPARE_TEXTS.chart.entry(entry.symbol, formatPercent(entry.changePct)))
             .join(", ")
         : "",
     };

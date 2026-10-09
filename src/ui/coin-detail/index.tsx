@@ -16,7 +16,6 @@ import {
   useDialogEntrance,
 } from "@/ui/coin-detail/useCoinDetailMotion";
 import { useDisplayedCoin } from "@/ui/coin-detail/useDisplayedCoin";
-import { useReturnFocus } from "@/ui/coin-detail/useReturnFocus";
 
 export interface CoinDetailDialogProps {
   /** La moneda a enseñar. Con `null` y el modal abierto se pinta el esqueleto. */
@@ -45,15 +44,12 @@ export function CoinDetailDialog({ coin, open, onOpenChange }: CoinDetailDialogP
   const actions = useCoinDetailActions(detail, onOpenChange);
   const { view, figures } = detail;
   const entrance = useDialogEntrance();
-  const returnFocus = useReturnFocus();
   const arrivedAfterSkeleton = useArrivedAfterSkeleton(open, view !== null && figures !== null);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         {...entrance}
-        onOpenAutoFocus={returnFocus.onOpenAutoFocus}
-        onCloseAutoFocus={returnFocus.onCloseAutoFocus}
         showCloseButton={false}
         data-slot="coin-detail-dialog"
         className="flex max-h-[95dvh] flex-col gap-0 overflow-hidden rounded-xl bg-popover p-0 shadow-overlay sm:max-h-[90dvh] sm:max-w-4xl"

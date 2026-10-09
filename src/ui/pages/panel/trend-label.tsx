@@ -1,4 +1,5 @@
 import { ArrowDownRight, ArrowUpRight } from "lucide-react";
+import { PANEL_TEXTS } from "@/application/panel/presentation/texts";
 import { cn } from "@/lib/utils";
 import { FadeOnChange } from "@/ui/pages/panel/motion/fade-on-change";
 import { priceChangeVariants } from "@/ui/shared";
@@ -27,7 +28,7 @@ export function TrendLabel({ text, rising, size = "sm", className }: TrendLabelP
       className={cn(priceChangeVariants({ direction: rising ? "up" : "down", size }), className)}
     >
       <Icon aria-hidden="true" />
-      <span className="sr-only">{rising ? "Sube" : "Baja"} </span>
+      <span className="sr-only">{rising ? PANEL_TEXTS.trend.rises : PANEL_TEXTS.trend.falls} </span>
       {text}
     </FadeOnChange>
   );

@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { DISTRIBUTION_TOTAL_LABEL } from "@/application/portfolio-screen/messages";
 import { formatCurrency } from "@/application/shared/presentation/format";
 import { usePie } from "@/ui/charts/pie-context";
 
@@ -18,7 +19,7 @@ export interface DistributionCenterProps {
  * Movimiento (Motion): al cambiar entre el total y una porción, el texto
  * nuevo entra con un fundido de 150 ms (sin salida, para no solapar dos textos).
  */
-export function DistributionCenter({ totalLabel = "Total" }: DistributionCenterProps) {
+export function DistributionCenter({ totalLabel = DISTRIBUTION_TOTAL_LABEL }: DistributionCenterProps) {
   const { data, hoveredIndex, totalValue, innerRadius } = usePie();
   const hovered = hoveredIndex === null ? undefined : data[hoveredIndex];
 

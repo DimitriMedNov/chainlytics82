@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { ArrowUpRight, Coins } from "lucide-react";
 import { Link } from "react-router-dom";
 import { PANEL_TEXTS } from "@/application/panel/presentation/texts";
@@ -17,6 +18,7 @@ const SPLIT = "grid grid-cols-1 lg:grid-cols-3 lg:divide-x";
 export function TopCoinsPanel() {
   const top = useTopCoins();
   const detail = useSelectedCoin();
+  const prices = useMemo(() => new Map(top.coins.map((coin) => [coin.id, coin.price])), [top.coins]);
 
   return (
     <RevealPanel aria-labelledby={TITLE_ID} data-slot="top-coins-panel">
@@ -44,7 +46,7 @@ export function TopCoinsPanel() {
         <Panel.Body padding="flush">
           <LoadingRegion label={PANEL_TEXTS.top.loading}>
             <div className={SPLIT}>
-              <ListSkeleton rows={top.skeletonRows} columns={3} className="lg:col-span-2" />
+              <ListSkeleton rows={top.skeletonRows} columns={3} header className="border-t lg:col-span-2" />
               <TopCoinsChartsSkeleton />
             </div>
           </LoadingRegion>
@@ -67,7 +69,7 @@ export function TopCoinsPanel() {
         <Panel.Body padding="flush">
           <div className={SPLIT}>
             <div className="min-w-0 border-t lg:col-span-2">
-              <TopCoinsTable rows={top.rows} onSelect={detail.select} />
+              <TopCoinsTable rows={top.rows} prices={prices} onSelect={detail.select} />
             </div>
             <TopCoinsCharts changeBars={top.changeBars} volumeBars={top.volumeBars} />
           </div>

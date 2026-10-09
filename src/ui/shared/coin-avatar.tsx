@@ -11,6 +11,8 @@ const coinAvatarVariants = cva(
         sm: "size-6 text-2xs",
         md: "size-8 text-xs",
         lg: "size-10 text-sm",
+        /** 48 px: entre `lg` (40) y `xl` (56). El nombre dice la medida. */
+        px48: "size-12 text-sm",
         xl: "size-14 text-base",
       },
     },
@@ -18,7 +20,7 @@ const coinAvatarVariants = cva(
   },
 );
 
-const PIXELS = { xs: 20, sm: 24, md: 32, lg: 40, xl: 56 } as const;
+const PIXELS = { xs: 20, sm: 24, md: 32, lg: 40, px48: 48, xl: 56 } as const;
 
 export interface CoinAvatarProps extends VariantProps<typeof coinAvatarVariants> {
   /** URL de la imagen. Vacía o rota: se pinta la reserva con el símbolo. */

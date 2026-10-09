@@ -1,4 +1,5 @@
 import { LoaderCircle, TriangleAlert, X } from "lucide-react";
+import { SHARED_TEXTS } from "@/application/shared/presentation/texts";
 import { cn } from "@/lib/utils";
 
 export interface SaveStatusProps {
@@ -24,20 +25,20 @@ export function SaveStatus({ isSaving, errorMessage = "", onDismissError, classN
       <span role="status" aria-live="polite" className="inline-flex items-center gap-1.5 text-muted-foreground">
         {isSaving ? (
           <>
-            <LoaderCircle className="size-3.5 shrink-0 animate-spin" aria-hidden="true" />
-            Guardando…
+            <LoaderCircle className="size-3.5 shrink-0 animate-spin motion-reduce:animate-none" aria-hidden="true" />
+            {SHARED_TEXTS.saveStatus.saving}
           </>
         ) : null}
       </span>
       {hasError && !isSaving ? (
         <span role="alert" className="inline-flex min-w-0 items-center gap-1.5 text-destructive">
           <TriangleAlert className="size-3.5 shrink-0" aria-hidden="true" />
-          <span className="min-w-0 text-pretty">No se pudo guardar: {errorMessage}</span>
+          <span className="min-w-0 text-pretty">{SHARED_TEXTS.saveStatus.error(errorMessage)}</span>
           {onDismissError ? (
             <button
               type="button"
               onClick={onDismissError}
-              aria-label="Descartar el aviso de error"
+              aria-label={SHARED_TEXTS.saveStatus.dismissError}
               className="-my-3 inline-flex size-11 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:text-foreground"
             >
               <X className="size-4" aria-hidden="true" />

@@ -5,6 +5,7 @@ import { motion, useSpring, useTransform } from "motion/react";
 import { memo, useEffect } from "react";
 import { usePieHover, usePieStable } from "./pie-context";
 import { useEnterComplete } from "./use-enter-complete";
+import { useChartReducedMotion } from "./use-chart-reduced-motion";
 import { useMountProgress } from "./use-mount-progress";
 
 // Helper to generate arc path using d3 arc generator
@@ -242,9 +243,17 @@ function AnimatedSliceGrow({
     damping: 25,
   });
 
+  // Con «reducir movimiento» el sector salta a su tamaño, sin muelle.
+  const reduceMotion = useChartReducedMotion();
+
   useEffect(() => {
-    growSpring.set(isHovered ? outerRadius + hoverOffset : outerRadius);
-  }, [isHovered, hoverOffset, outerRadius, growSpring]);
+    const radius = isHovered ? outerRadius + hoverOffset : outerRadius;
+    if (reduceMotion) {
+      growSpring.jump(radius);
+      return;
+    }
+    growSpring.set(radius);
+  }, [isHovered, hoverOffset, outerRadius, growSpring, reduceMotion]);
 
   const animatedPath = useTransform(
     [mountProgress, growSpring],

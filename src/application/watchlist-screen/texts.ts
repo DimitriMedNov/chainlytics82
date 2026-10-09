@@ -26,6 +26,15 @@ export const WATCHLIST_TEXTS = {
   outsideTopDescription:
     "Aquí solo hay precios en vivo de las 100 monedas con mayor capitalización. Las que sigues continúan guardadas.",
   outsideTopAction: "Explorar mercados",
+  // Textos NUEVOS: gráfica de cambio y etiquetas para lectores de pantalla.
+  chartTitle: "Cambio en 24 h",
+  chartDescription: "Cuánto sube o baja cada moneda de la lista.",
+  loadingList: "Cargando tu watchlist",
+  loadingChart: "Cargando la gráfica de cambio en 24 h",
+  sortGroupLabel: "Ordenar la lista",
+  ascending: "ascendente",
+  descending: "descendente",
+  changePeriod: "en 24 horas",
 } as const;
 
 export function favoritesTitle(count: number): string {
@@ -34,6 +43,16 @@ export function favoritesTitle(count: number): string {
 
 export function othersTitle(count: number): string {
   return `Todas (${count})`;
+}
+
+/**
+ * Nuevo: aviso en `ready` cuando `hiddenCount > 0` (monedas seguidas que no
+ * están entre las 100 primeras y por eso no salen en la lista).
+ */
+export function hiddenNotice(hiddenCount: number): string {
+  return hiddenCount === 1
+    ? "1 moneda que sigues no aparece aquí porque no está entre las 100 primeras."
+    : `${hiddenCount} monedas que sigues no aparecen aquí porque no están entre las 100 primeras.`;
 }
 
 /** Flecha que acompaña al botón de orden activo. */

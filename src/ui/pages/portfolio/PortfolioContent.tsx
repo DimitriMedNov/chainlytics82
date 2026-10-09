@@ -3,6 +3,7 @@ import {
   EMPTY_DESCRIPTION,
   EMPTY_TITLE,
   PRICES_ERROR_TITLE,
+  REGISTER_TRANSACTION_LABEL,
   TRANSACTIONS_ERROR_TITLE,
 } from "@/application/portfolio-screen/messages";
 import type { Position } from "@/domain/portfolio/types";
@@ -58,7 +59,7 @@ export function PortfolioContent({ screen, onRegister, onSetCost }: PortfolioCon
           action={
             <Button type="button" className="min-h-11" onClick={onRegister}>
               <Plus aria-hidden="true" />
-              Registrar movimiento
+              {REGISTER_TRANSACTION_LABEL}
             </Button>
           }
         />

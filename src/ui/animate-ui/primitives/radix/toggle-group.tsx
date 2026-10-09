@@ -2,7 +2,12 @@
 
 import * as React from 'react';
 import { ToggleGroup as ToggleGroupPrimitive } from 'radix-ui';
-import { AnimatePresence, motion, type HTMLMotionProps } from 'motion/react';
+import {
+  AnimatePresence,
+  motion,
+  useReducedMotion,
+  type HTMLMotionProps,
+} from 'motion/react';
 
 import {
   Highlight,
@@ -22,9 +27,18 @@ type ToggleGroupContextType = {
 const [ToggleGroupProvider, useToggleGroup] =
   getStrictContext<ToggleGroupContextType>('ToggleGroupContext');
 
-type ToggleGroupProps = React.ComponentProps<typeof ToggleGroupPrimitive.Root>;
+type ToggleGroupProps = React.ComponentProps<
+  typeof ToggleGroupPrimitive.Root
+> & {
+  /**
+   * Añadido por el proyecto. Solo cuenta con `type="single"`: con `false`,
+   * pulsar la opción ya elegida no la desmarca (siempre queda una elegida y el
+   * fondo de selección no desaparece). Por defecto `true`, como Radix.
+   */
+  allowDeselect?: boolean;
+};
 
-function ToggleGroup(props: ToggleGroupProps) {
+function ToggleGroup({ allowDeselect = true, ...props }: ToggleGroupProps) {
   const [value, setValue] = useControlledState<string | string[] | undefined>({
     value: props.value,
     defaultValue: props.defaultValue,
@@ -32,6 +46,23 @@ function ToggleGroup(props: ToggleGroupProps) {
       value: string | string[] | undefined,
     ) => void,
   });
+
+  if (props.type === 'single' && !allowDeselect) {
+    // Radix avisa con '' al pulsar la opción elegida: se ignora, y el valor se
+    // le pasa siempre controlado para que tampoco la desmarque por dentro.
+    return (
+      <ToggleGroupProvider value={{ value, setValue, type: props.type }}>
+        <ToggleGroupPrimitive.Root
+          data-slot="toggle-group"
+          {...props}
+          value={typeof value === 'string' ? value : ''}
+          onValueChange={(next: string) => {
+            if (next !== '') setValue(next);
+          }}
+        />
+      </ToggleGroupProvider>
+    );
+  }
 
   return (
     <ToggleGroupProvider value={{ value, setValue, type: props.type }}>
@@ -51,11 +82,14 @@ type ToggleGroupItemProps = Omit<
   HTMLMotionProps<'button'>;
 
 function ToggleGroupItem({ value, disabled, ...props }: ToggleGroupItemProps) {
+  // Adaptado al proyecto: con «reducir movimiento» no se encoge al pulsar.
+  const reduceMotion = useReducedMotion() === true;
+
   return (
     <ToggleGroupPrimitive.Item value={value} disabled={disabled} asChild>
       <motion.button
         data-slot="toggle-group-item"
-        whileTap={{ scale: 0.95 }}
+        whileTap={reduceMotion ? undefined : { scale: 0.95 }}
         {...props}
       />
     </ToggleGroupPrimitive.Item>

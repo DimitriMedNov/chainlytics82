@@ -11,6 +11,7 @@ import {
 
 import { useControlledState } from '@/hooks/use-controlled-state';
 import { getStrictContext } from '@/lib/get-strict-context';
+import { useReturnFocus } from '@/ui/shared/use-return-focus';
 
 type DialogContextType = {
   isOpen: boolean;
@@ -81,9 +82,11 @@ function DialogOverlay({
     <DialogPrimitive.Overlay data-slot="dialog-overlay" asChild forceMount>
       <motion.div
         key="dialog-overlay"
-        initial={{ opacity: 0, filter: 'blur(4px)' }}
-        animate={{ opacity: 1, filter: 'blur(0px)' }}
-        exit={{ opacity: 0, filter: 'blur(4px)' }}
+        // Adaptado al proyecto: el velo solo funde (`opacity`). El original
+        // animaba además `filter: blur()`, que no se compone en la GPU.
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
         transition={transition}
         {...props}
       />
@@ -119,18 +122,31 @@ function DialogContent({
   // solo un fundido corto (`MotionConfig` no neutraliza un `transform` escrito
   // como cadena, así que se decide aquí).
   const reduceMotion = useReducedMotion();
+  // Adaptado al proyecto: un diálogo abierto por estado (sin `DialogTrigger`)
+  // dejaba el foco en `<body>` al cerrar. Se recuerda quién tenía el foco al
+  // abrir y se le devuelve al terminar la salida. Los manejadores del
+  // consumidor se llaman antes y mandan: si cancelan el evento, no se toca.
+  const returnFocus = useReturnFocus();
+  const handleOpenAutoFocus: typeof onOpenAutoFocus = (event) => {
+    returnFocus.onOpenAutoFocus();
+    onOpenAutoFocus?.(event);
+  };
+  const handleCloseAutoFocus: typeof onCloseAutoFocus = (event) => {
+    onCloseAutoFocus?.(event);
+    returnFocus.onCloseAutoFocus(event);
+  };
+  // La entrada anima solo `opacity` y `transform` (el original añadía
+  // `filter: blur()`).
   const hidden = reduceMotion
     ? { opacity: 0 }
     : {
         opacity: 0,
-        filter: 'blur(4px)',
         transform: `perspective(500px) ${rotateAxis}(${initialRotation}) scale(0.8)`,
       };
   const visible = reduceMotion
     ? { opacity: 1 }
     : {
         opacity: 1,
-        filter: 'blur(0px)',
         transform: `perspective(500px) ${rotateAxis}(0deg) scale(1)`,
       };
 
@@ -138,8 +154,8 @@ function DialogContent({
     <DialogPrimitive.Content
       asChild
       forceMount
-      onOpenAutoFocus={onOpenAutoFocus}
-      onCloseAutoFocus={onCloseAutoFocus}
+      onOpenAutoFocus={handleOpenAutoFocus}
+      onCloseAutoFocus={handleCloseAutoFocus}
       onEscapeKeyDown={onEscapeKeyDown}
       onPointerDownOutside={onPointerDownOutside}
       onInteractOutside={onInteractOutside}
