@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { DURATION, EASE_OUT, STAGGER } from "@/ui/pages/panel/motion/presets";
 
 export interface RollingFigureProps {
@@ -61,14 +61,18 @@ function useRollsUp(value: number | undefined): boolean {
  *
  * - No anima al montar: la entrada es cosa de la tarjeta o de la fila.
  * - Quien usa lector de pantalla recibe el texto entero, no dígito a dígito.
- * - Con «reducir movimiento» el dígito no se desplaza, solo se funde (lo resuelve el
- *   `MotionConfig reducedMotion="user"` de la app, que anula los `transform`).
+ * - Con «reducir movimiento» el dígito no se desplaza, solo se funde: no se le pasa
+ *   ningún `y` (el `MotionConfig` de la app no lo quita, lo aplicaría de golpe).
  * - Cada rueda ocupa el ancho de su dígito (cifras tabulares): no hay salto de layout.
  */
 export function RollingFigure({ text, value, className }: RollingFigureProps) {
   const rollsUp = useRollsUp(value);
+  const reducedMotion = useReducedMotion();
   const enterFrom = rollsUp ? "100%" : "-100%";
   const exitTo = rollsUp ? "-100%" : "100%";
+  const initial = reducedMotion ? { opacity: 0 } : { y: enterFrom, opacity: 0 };
+  const animate = reducedMotion ? { opacity: 1 } : { y: "0%", opacity: 1 };
+  const exit = reducedMotion ? { opacity: 0 } : { y: exitTo, opacity: 0 };
 
   return (
     <span data-slot="rolling-figure" className={className}>
@@ -81,9 +85,9 @@ export function RollingFigure({ text, value, className }: RollingFigureProps) {
                 <motion.span
                   key={piece.text}
                   className="inline-block"
-                  initial={{ y: enterFrom, opacity: 0 }}
-                  animate={{ y: "0%", opacity: 1 }}
-                  exit={{ y: exitTo, opacity: 0 }}
+                  initial={initial}
+                  animate={animate}
+                  exit={exit}
                   transition={{ duration: DURATION.item, ease: EASE_OUT, delay: piece.place * STAGGER.row }}
                 >
                   {piece.text}

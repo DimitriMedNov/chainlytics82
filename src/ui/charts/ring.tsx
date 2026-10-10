@@ -4,6 +4,7 @@ import { arc as arcGenerator } from "@visx/shape";
 import { type MotionValue, motion, useTransform } from "motion/react";
 import { memo, useCallback } from "react";
 import { ringCssVars, useRingHover, useRingStable } from "./ring-context";
+import { useChartReducedMotion } from "./use-chart-reduced-motion";
 import { useEnterComplete } from "./use-enter-complete";
 import { useMountProgress } from "./use-mount-progress";
 
@@ -123,6 +124,10 @@ export const Ring = memo(function Ring({
 
   const enterScale = useTransform(expandProgress, [0, 1], [0, 1]);
 
+  // Adaptado al proyecto: con «reducir movimiento» el anillo señalado no
+  // escala (ni empuja a los de fuera); se conserva el atenuado por opacidad.
+  const reduceMotion = useChartReducedMotion();
+
   const handleMouseEnter = useCallback(
     () => setHoveredIndex(index),
     [index, setHoveredIndex]
@@ -164,7 +169,9 @@ export const Ring = memo(function Ring({
           cornerRadius
         );
 
-  const hoverScale = ringHoverScale(isHovered, isPushedOut);
+  const hoverScale = reduceMotion
+    ? 1
+    : ringHoverScale(isHovered, isPushedOut);
   const layerOpacity = isFaded ? 0.35 : 1;
   const enterDone = !animate || (expandComplete && progressComplete);
 

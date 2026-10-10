@@ -1,6 +1,7 @@
 import { weightAriaLabel } from "@/application/portfolio-screen/messages";
 import { formatPercentShare } from "@/application/shared/presentation/format";
 import type { DistributionSlice } from "@/domain/portfolio-screen/series";
+import { useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { Progress, ProgressIndicator } from "@/ui/animate-ui/primitives/radix/progress";
 import { weightBarTransition } from "@/ui/pages/portfolio/motion";
@@ -16,9 +17,15 @@ export interface WeightListProps {
  * «Peso de cada moneda»: símbolo, porcentaje y barra con el color de su porción.
  * Movimiento (Motion, vía `ProgressIndicator` de Animate UI): la barra crece
  * desde cero hasta su valor en medio segundo, en vez del muelle lento de origen
- * que partía de la barra llena. Con «reducir movimiento» sale ya en su valor.
+ * que partía de la barra llena. Con «reducir movimiento» no se monta la barra
+ * animada: va una barra quieta con el ancho ya calculado, pintada en su valor
+ * desde el primer fotograma y sin ningún `transform` (la de Animate UI nace
+ * vacía y salta a su sitio). `role="progressbar"`, valor y nombre accesible los
+ * pone el mismo `Progress` en los dos casos.
  */
 export function WeightList({ slices, className }: WeightListProps) {
+  const reduceMotion = useReducedMotion() === true;
+
   return (
     <ul className={cn("flex flex-col gap-4", className)} data-slot="weight-list">
       {slices.map((slice, index) => (
@@ -41,11 +48,20 @@ export function WeightList({ slices, className }: WeightListProps) {
             aria-valuetext={formatPercentShare(slice.weightPct)}
             className="relative h-2 w-full overflow-hidden rounded-full bg-muted"
           >
-            <ProgressIndicator
-              initial={{ x: "-100%" }}
-              transition={weightBarTransition(index)}
-              className={cn("h-full w-full rounded-full", seriesColorClass(index))}
-            />
+            {reduceMotion ? (
+              <div
+                data-slot="progress-indicator"
+                className={cn("h-full rounded-full", seriesColorClass(index))}
+                // Ancho calculado con el dato: no es una animación.
+                style={{ width: `${Math.min(100, Math.max(0, slice.weightPct))}%` }}
+              />
+            ) : (
+              <ProgressIndicator
+                initial={{ x: "-100%" }}
+                transition={weightBarTransition(index)}
+                className={cn("h-full w-full rounded-full", seriesColorClass(index))}
+              />
+            )}
           </Progress>
         </li>
       ))}

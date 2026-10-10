@@ -33,7 +33,9 @@ export default function AnalystPanel({ open, onOpenChange, onClose }: AnalystPan
         aria-describedby={ANALYST_BADGE_ID}
         onOpenAutoFocus={returnFocus.onOpenAutoFocus}
         onCloseAutoFocus={returnFocus.onCloseAutoFocus}
-        className="w-full gap-0 bg-popover shadow-overlay sm:max-w-md"
+        // La hoja de Animate UI entra deslizándose (`x: 100%`) y no admite otra entrada por
+        // props. Con «reducir movimiento» se le anula el `transform` y queda su fundido.
+        className="w-full gap-0 bg-popover shadow-overlay motion-reduce:transform-none! sm:max-w-md"
       >
         <AnalystHeader />
         <AnalystConversation

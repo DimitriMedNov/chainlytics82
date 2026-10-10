@@ -3,7 +3,15 @@ import { unitPriceText } from "@/application/converter/presentation/conversionTe
 import type { Convertible } from "@/domain/converter/convertible";
 import { Badge } from "@/ui/base/badge";
 import { Label } from "@/ui/base/label";
+import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/ui/base/select";
+
+/**
+ * Con «reducir movimiento» el desplegable aparece y se va sin animación: la del
+ * Select base lleva escala 0,95 y 8 px de desplazamiento dentro del mismo fotograma clave.
+ */
+const LIST_REDUCED_MOTION =
+  "motion-reduce:data-[state=open]:animate-none motion-reduce:data-[state=closed]:animate-none";
 
 export interface CurrencyFieldProps {
   /** `id` del selector, al que apunta su etiqueta. */
@@ -30,7 +38,7 @@ export function CurrencyField({ id, label, value, selected, options, onChange }:
         <SelectTrigger id={id} className="w-full min-w-0 bg-card data-[size=default]:h-11">
           <SelectValue placeholder={CONVERTER_TEXTS.form.currencyPlaceholder} />
         </SelectTrigger>
-        <SelectContent position="popper" className="max-h-72 bg-popover shadow-overlay">
+        <SelectContent position="popper" className={cn("max-h-72 bg-popover shadow-overlay", LIST_REDUCED_MOTION)}>
           {options.map((option) => (
             // Conservado: la clave es el código (inventario: dos criptos con el mismo símbolo la repetirían).
             <SelectItem key={option.code} value={option.code} className="min-h-11">

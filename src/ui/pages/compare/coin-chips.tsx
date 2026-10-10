@@ -14,6 +14,8 @@ export interface CoinChipProps extends SelectedCoin {
   /** Inclinación hacia el cursor, la misma para todos los chips del grupo. */
   leanX: MotionValue<number>;
   leanY: MotionValue<number>;
+  /** `true` con «reducir movimiento»: el chip solo se funde. */
+  reduced: boolean;
   /** Lo pone `AnimatePresence` para sacar del flujo al chip que se va. */
   ref?: Ref<HTMLLIElement>;
 }
@@ -25,21 +27,22 @@ export interface CoinChipProps extends SelectedCoin {
  * no se vuelven a montar, solo cambian de color, así que nada parpadea.
  * La inclinación hacia el cursor va en un elemento de dentro: el `li` ya lleva la
  * transformación de entrada, salida y recolocación, y dos en el mismo se pelearían.
+ * Con «reducir movimiento» solo se funde: sin `scale` y sin `layout` (que se aplicarían
+ * de golpe, dejando un fotograma con `transform`); los vecinos se recolocan sin animación.
  */
-function CoinChip({ coin, colorIndex, onRemove, leanX, leanY, ref }: CoinChipProps) {
+function CoinChip({ coin, colorIndex, onRemove, leanX, leanY, reduced, ref }: CoinChipProps) {
   const isPresent = useIsPresent();
-  /** Con «reducir movimiento» el chip solo se funde: sin esto, al salir saltaría de golpe a la escala pequeña. */
-  const scale = useReducedMotion() ? 1 : CHIP_SCALE;
   return (
     <motion.li
       ref={ref}
-      layout="position"
+      layout={reduced ? undefined : "position"}
       inert={!isPresent}
-      initial={{ opacity: 0, scale }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale, transition: EXIT }}
-      transition={{ ...ENTER, layout: REORDER }}
+      initial={reduced ? { opacity: 0 } : { opacity: 0, scale: CHIP_SCALE }}
+      animate={reduced ? { opacity: 1 } : { opacity: 1, scale: 1 }}
+      exit={reduced ? { opacity: 0, transition: EXIT } : { opacity: 0, scale: CHIP_SCALE, transition: EXIT }}
+      transition={reduced ? ENTER : { ...ENTER, layout: REORDER }}
       data-slot="coin-chip"
+      data-coin-id={coin.id}
     >
       <motion.div style={{ x: leanX, y: leanY }} data-slot="coin-chip-skin">
         <Badge
@@ -54,6 +57,7 @@ function CoinChip({ coin, colorIndex, onRemove, leanX, leanY, ref }: CoinChipPro
             size="icon"
             className="size-11 rounded-full text-muted-foreground hover:text-foreground"
             aria-label={COMPARE_TEXTS.picker.removeLabel(coin.name)}
+            data-action="remove"
             onClick={() => onRemove(coin.id)}
           >
             <X aria-hidden="true" />
@@ -76,6 +80,7 @@ export interface CoinChipsProps {
 /** Monedas elegidas: punto del color de su línea, símbolo y botón para quitarla. */
 export function CoinChips({ selected, onRemove, labelledBy, animateInitial = false }: CoinChipsProps) {
   const lean = useGroupLean<HTMLUListElement>();
+  const reduced = useReducedMotion() === true;
   return (
     <ul
       ref={lean.ref}
@@ -83,7 +88,9 @@ export function CoinChips({ selected, onRemove, labelledBy, animateInitial = fal
       data-slot="coin-chips"
       className="relative flex flex-wrap items-center gap-2"
     >
-      <AnimatePresence mode="popLayout" initial={animateInitial}>
+      {/* `popLayout` saca del flujo al chip que se va para que los vecinos se deslicen a su
+          hueco. Con «reducir movimiento» nadie se desliza: el chip se funde en su sitio. */}
+      <AnimatePresence mode={reduced ? "sync" : "popLayout"} initial={animateInitial}>
         {selected.map(({ coin, colorIndex }) => (
           <CoinChip
             key={coin.id}
@@ -92,6 +99,7 @@ export function CoinChips({ selected, onRemove, labelledBy, animateInitial = fal
             onRemove={onRemove}
             leanX={lean.x}
             leanY={lean.y}
+            reduced={reduced}
           />
         ))}
       </AnimatePresence>

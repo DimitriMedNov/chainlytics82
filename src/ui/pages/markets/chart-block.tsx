@@ -11,6 +11,13 @@ import { EmptyState, ErrorState, LoadingRegion, Panel } from "@/ui/shared";
 const MotionPanel = motion.create(Panel);
 /** Un espacio que no se parte: guarda la línea de la descripción cuando aún no hay texto. */
 const RESERVED_LINE = "\u00A0";
+/**
+ * El error en su forma compacta (`inline`), llenando el hueco reservado en vez de estirarlo:
+ * en una tarjeta estrecha va en columna y centrado; desde 448 px de tarjeta (`@md`), en fila.
+ * Así la tarjeta mide lo mismo que con la gráfica, sea corto o largo el mensaje.
+ */
+const ERROR_FILL =
+  "grid flex-1 content-center justify-items-center text-center @md:flex @md:flex-nowrap @md:px-4 @md:text-left";
 
 export interface ChartBlockProps {
   /** Id del título (lo enlaza `aria-labelledby`). */
@@ -78,12 +85,14 @@ export function ChartBlock({
           <motion.div
             key={status}
             data-slot="markets-chart-state"
-            // En vacío el mensaje llena el alto reservado, para que no quede un hueco debajo.
-            className={cn(bodyClassName, isEmpty && "flex flex-col")}
+            // Vacío y error llenan el alto reservado: ni queda un hueco debajo ni crece la tarjeta.
+            className={cn(bodyClassName, (isEmpty || status === "error") && "@container flex flex-col")}
             {...STATE_SWAP}
           >
             {status === "error" ? (
               <ErrorState
+                layout="inline"
+                className={ERROR_FILL}
                 title={MARKETS_TEXTS.errorTitle}
                 message={errorMessage}
                 onRetry={onRetry}

@@ -31,10 +31,14 @@ type ProgressIndicatorProps = React.ComponentProps<
 
 function ProgressIndicator({
   transition = { type: 'spring', stiffness: 100, damping: 30 },
+  initial,
   ...props
 }: ProgressIndicatorProps) {
   const { value } = useProgress();
-  // Adaptado al proyecto: con «reducir movimiento» la barra salta a su valor.
+  // Adaptado al proyecto: con «reducir movimiento» el relleno se pinta ya en
+  // su valor desde el primer fotograma. `initial={false}` hace que Motion
+  // escriba el `animate` en el primer render, así que se ignora el `initial`
+  // que pase quien lo usa (una barra vacía que luego saltaría a su sitio).
   const reduceMotion = useReducedMotion();
 
   return (
@@ -42,6 +46,7 @@ function ProgressIndicator({
       data-slot="progress-indicator"
       animate={{ x: `-${100 - (value || 0)}%` }}
       transition={reduceMotion ? { duration: 0 } : transition}
+      initial={reduceMotion ? false : initial}
       {...props}
     />
   );

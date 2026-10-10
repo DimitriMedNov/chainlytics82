@@ -9,10 +9,33 @@ import { useEffect } from "react"
 import { Toaster as Sonner, type ToasterProps } from "sonner"
 import { SHARED_TEXTS } from "@/application/shared/presentation/texts"
 import { useTheme } from "@/hooks/theme/useTheme"
+import { cn } from "@/lib/utils"
 
 const CONTAINER_LABEL = SHARED_TEXTS.toast.region
 /** Nombre accesible del botón que cierra un aviso. */
 const CLOSE_LABEL = SHARED_TEXTS.toast.close
+
+/**
+ * Con «reducir movimiento» el aviso solo se funde. sonner coloca y anima cada
+ * aviso con `transform` (entra deslizando, se encoge al apilarse, sube al
+ * abrir la pila) y su propia regla de reduced-motion solo quita la
+ * transición: el transform sigue saltando de un valor a otro. Aquí se anula
+ * el transform y la misma colocación se hace con `bottom`/`top`, usando las
+ * variables que sonner ya escribe en cada aviso:
+ * - pila cerrada: cada aviso anterior asoma un `--gap` por detrás del último;
+ * - pila abierta (ratón encima o foco): cada aviso en su `--offset`.
+ * Los valores entre corchetes son cálculos sobre variables de sonner, no
+ * medidas fijas. Los `!` ganan a las reglas `!important` de sonner porque las
+ * utilidades de Tailwind van en una capa y las de sonner no.
+ * Arrastrar un aviso para descartarlo sigue funcionando, pero sin seguir al dedo.
+ */
+const REDUCED_MOTION_TOAST = cn(
+  "motion-reduce:!transform-none motion-reduce:!transition-opacity motion-reduce:!duration-200",
+  "motion-reduce:data-[y-position=bottom]:data-[expanded=false]:!bottom-[calc(var(--toasts-before)*var(--gap))]",
+  "motion-reduce:data-[y-position=bottom]:data-[expanded=true]:!bottom-(--offset)",
+  "motion-reduce:data-[y-position=top]:data-[expanded=false]:!top-[calc(var(--toasts-before)*var(--gap))]",
+  "motion-reduce:data-[y-position=top]:data-[expanded=true]:!top-(--offset)"
+)
 
 /**
  * sonner 1.6 escribe «Close toast» en el botón de cierre y su `Toaster` no
@@ -70,7 +93,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }
       toastOptions={{
         classNames: {
-          toast: "shadow-overlay",
+          toast: cn("shadow-overlay", REDUCED_MOTION_TOAST),
           description: "!text-muted-foreground",
           // El botón de cierre de sonner mide 20 px. Aquí el botón ocupa
           // 44 px (área táctil) y es transparente; el círculo de 20 px que se

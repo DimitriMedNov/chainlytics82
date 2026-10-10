@@ -170,6 +170,17 @@ function DialogContent({
           reduceMotion ? { duration: 0.2, ease: 'easeInOut' } : transition
         }
         {...props}
+        // Con «reducir movimiento» manda el fundido de arriba aunque la
+        // pantalla pase su propia entrada (p. ej. `scale: 0.97`):
+        // `MotionConfig` aplicaría esa escala de golpe y dejaría un fotograma
+        // con el diálogo encogido. `initial={false}` se sigue respetando.
+        {...(reduceMotion
+          ? {
+              initial: props.initial === false ? false : hidden,
+              animate: visible,
+              exit: hidden,
+            }
+          : null)}
       />
     </DialogPrimitive.Content>
   );

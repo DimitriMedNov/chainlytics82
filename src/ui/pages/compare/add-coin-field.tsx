@@ -38,7 +38,11 @@ export function AddCoinField({ available, max, isFull, onAdd, className }: AddCo
         >
           <SelectValue placeholder={isFull ? TEXTS.fullPlaceholder : TEXTS.addPlaceholder} />
         </SelectTrigger>
-        <SelectContent position="popper" className="max-h-72 shadow-overlay">
+        {/* El desplegable base entra con zoom y deslizamiento también con «reducir movimiento»: aquí se apagan. */}
+        <SelectContent
+          position="popper"
+          className="max-h-72 shadow-overlay motion-reduce:data-[state=closed]:animate-none motion-reduce:data-[state=open]:animate-none"
+        >
           {available.map((coin) => (
             <SelectItem key={coin.id} value={coin.id} className="min-h-11">
               {TEXTS.optionLabel(coin.name, coin.symbol)}

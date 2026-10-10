@@ -8,6 +8,7 @@ import { COMPARE_IDS } from "@/ui/pages/compare/constants";
 import { ENTER } from "@/ui/pages/compare/motion";
 import { RevealPanel } from "@/ui/pages/compare/reveal-panel";
 import { StateSwap } from "@/ui/pages/compare/state-swap";
+import { useChipFocus } from "@/ui/pages/compare/use-chip-focus";
 import { useWasEver } from "@/ui/pages/compare/use-was-ever";
 
 export interface CoinPickerPanelProps {
@@ -42,6 +43,8 @@ export function CoinPickerPanel({ picker }: CoinPickerPanelProps) {
   const wasEmpty = useWasEver(picker.status === "empty");
   /** Vacío y con monedas comparten estado: el selector no se desmonta (ni pierde el foco). */
   const stateKey = picker.status === "error" || picker.status === "loading" ? picker.status : "content";
+  /** Al quitar un chip, el foco pasa al vecino o al selector (no se queda en `<body>`). */
+  const chipFocus = useChipFocus(picker.selected, picker.remove);
 
   return (
     <RevealPanel order={0} aria-labelledby={COMPARE_IDS.picker} data-slot="compare-picker">
@@ -60,7 +63,7 @@ export function CoinPickerPanel({ picker }: CoinPickerPanelProps) {
           ) : picker.status === "loading" ? (
             <CoinPickerSkeleton />
           ) : (
-            <div className={LAYOUT}>
+            <div ref={chipFocus.regionRef} className={LAYOUT}>
               {picker.status === "empty" ? (
                 <motion.p
                   initial={{ opacity: 0 }}
@@ -73,7 +76,7 @@ export function CoinPickerPanel({ picker }: CoinPickerPanelProps) {
               ) : (
                 <CoinChips
                   selected={picker.selected}
-                  onRemove={picker.remove}
+                  onRemove={chipFocus.onRemove}
                   labelledBy={COMPARE_IDS.picker}
                   animateInitial={wasEmpty}
                 />

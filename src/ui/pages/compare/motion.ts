@@ -3,8 +3,10 @@ import type { Transition } from "motion/react";
 /**
  * Tiempos del movimiento de la pantalla Comparar (un solo motor: Motion).
  * Interacciones 150-250 ms; entrada de sección hasta 500 ms. Solo `transform` y `opacity`.
- * Con «reducir movimiento», `MotionConfig reducedMotion="user"` (en `AppRoot`) quita
- * desplazamientos, escalados y animaciones de layout; quedan los fundidos.
+ * Con «reducir movimiento» solo quedan fundidos. `MotionConfig reducedMotion="user"` (en
+ * `AppRoot`) NO basta: no quita `y`, `scale` ni `layout`, los aplica de golpe y deja un
+ * fotograma con `transform`. Por eso cada componente pregunta `useReducedMotion()` y, si
+ * está activo, no pasa ninguna de esas props.
  */
 const EASE_OUT = [0.22, 1, 0.36, 1] as const;
 

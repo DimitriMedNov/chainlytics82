@@ -1,5 +1,5 @@
 import { Loader2 } from "lucide-react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { Button } from "@/ui/animate-ui/components/buttons/button";
 import {
   FADE_HIDDEN,
@@ -9,9 +9,8 @@ import {
   PULSE_TRANSITION,
   SPIN,
   SPIN_TRANSITION,
-  SPINNER_HIDDEN,
-  SPINNER_VISIBLE,
   SWAP_TRANSITION,
+  useAuthMotion,
 } from "@/ui/pages/auth/auth-motion";
 
 export interface AuthSubmitButtonProps {
@@ -28,7 +27,8 @@ export interface AuthSubmitButtonProps {
  * poco: en un botón a todo el ancho, las escalas de fábrica (1,05 / 0,95) son demasiado.
  */
 export function AuthSubmitButton({ label, labelKey, busy }: AuthSubmitButtonProps) {
-  const reduceMotion = useReducedMotion() === true;
+  const authMotion = useAuthMotion();
+  const reduceMotion = authMotion.reduced;
 
   return (
     <Button
@@ -46,9 +46,9 @@ export function AuthSubmitButton({ label, labelKey, busy }: AuthSubmitButtonProp
               key="spinner"
               data-slot="auth-submit-spinner"
               className="absolute inset-y-0 right-full mr-2 flex items-center"
-              initial={SPINNER_HIDDEN}
-              animate={SPINNER_VISIBLE}
-              exit={SPINNER_HIDDEN}
+              initial={authMotion.spinnerHidden}
+              animate={authMotion.spinnerVisible}
+              exit={authMotion.spinnerHidden}
               transition={FADE_TRANSITION}
             >
               <motion.span

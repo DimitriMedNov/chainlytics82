@@ -2,7 +2,12 @@
 
 import * as React from 'react';
 import { Dialog as SheetPrimitive } from 'radix-ui';
-import { AnimatePresence, motion, type HTMLMotionProps } from 'motion/react';
+import {
+  AnimatePresence,
+  motion,
+  useReducedMotion,
+  type HTMLMotionProps,
+} from 'motion/react';
 
 import { getStrictContext } from '@/lib/get-strict-context';
 import { useControlledState } from '@/hooks/use-controlled-state';
@@ -71,14 +76,24 @@ function SheetOverlay({
   transition = { duration: 0.2, ease: 'easeInOut' },
   ...props
 }: SheetOverlayProps) {
+  // Adaptado al proyecto: con «reducir movimiento» el velo solo funde
+  // (`opacity`), sin animar `filter: blur()`.
+  const reduceMotion = useReducedMotion() === true;
+  const hidden = reduceMotion
+    ? { opacity: 0 }
+    : { opacity: 0, filter: 'blur(4px)' };
+  const visible = reduceMotion
+    ? { opacity: 1 }
+    : { opacity: 1, filter: 'blur(0px)' };
+
   return (
     <SheetPrimitive.Overlay asChild forceMount>
       <motion.div
         key="sheet-overlay"
         data-slot="sheet-overlay"
-        initial={{ opacity: 0, filter: 'blur(4px)' }}
-        animate={{ opacity: 1, filter: 'blur(0px)' }}
-        exit={{ opacity: 0, filter: 'blur(4px)' }}
+        initial={hidden}
+        animate={visible}
+        exit={hidden}
         transition={transition}
         {...props}
       />
@@ -101,6 +116,12 @@ function SheetContent({
   ...props
 }: SheetContentProps) {
   const axis = side === 'left' || side === 'right' ? 'x' : 'y';
+  // Adaptado al proyecto: con «reducir movimiento» la hoja solo funde.
+  // `MotionConfig reducedMotion="user"` no quita el `x`/`y`: lo aplica de golpe
+  // y deja un fotograma con la hoja fuera de sitio al abrir y al cerrar. Por eso
+  // aquí no se le pasa ningún desplazamiento.
+  const reduceMotion = useReducedMotion() === true;
+  const faded = { opacity: 0 };
 
   const offscreen: Record<Side, { x?: string; y?: string; opacity: number }> = {
     right: { x: '100%', opacity: 0 },
@@ -122,15 +143,17 @@ function SheetContent({
         key="sheet-content"
         data-slot="sheet-content"
         data-side={side}
-        initial={offscreen[side]}
-        animate={{ [axis]: 0, opacity: 1 }}
-        exit={offscreen[side]}
+        initial={reduceMotion ? faded : offscreen[side]}
+        animate={reduceMotion ? { opacity: 1 } : { [axis]: 0, opacity: 1 }}
+        exit={reduceMotion ? faded : offscreen[side]}
         style={{
           position: 'fixed',
           ...positionStyle[side],
           ...style,
         }}
-        transition={transition}
+        transition={
+          reduceMotion ? { duration: 0.2, ease: 'easeInOut' } : transition
+        }
       >
         {children}
       </motion.div>

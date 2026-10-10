@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Check, Trash2 } from "lucide-react";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { Button } from "@/ui/animate-ui/components/buttons/button";
 
 /** Cara que se va: fundido corto (el `exit` de 80 ms de Bencho). */
@@ -21,10 +21,12 @@ export interface RemoveTransactionButtonProps {
  * Bencho: una sola pulsación borra al momento (sin paso de confirmación) y el
  * propio botón, sin moverse de sitio, cambia la papelera por una marca de
  * «hecho»; la fila espera a que se vea antes de irse (`useItemMotion`). El «Deshacer» del original no se trae: la
- * pantalla no tiene acción para restaurar un movimiento. Motor: Motion.
+ * pantalla no tiene acción para restaurar un movimiento. Motor: Motion. Con
+ * «reducir movimiento» la marca solo se funde: sin el crecimiento del 70 % al 100 %.
  */
 export function RemoveTransactionButton({ label, onRemove, className }: RemoveTransactionButtonProps) {
   const [done, setDone] = useState(false);
+  const reduceMotion = useReducedMotion() === true;
 
   const handleClick = () => {
     // La fila sigue montada mientras sale: un segundo clic no borra otra vez.
@@ -55,7 +57,7 @@ export function RemoveTransactionButton({ label, onRemove, className }: RemoveTr
         <motion.span
           className="absolute inset-0 flex items-center justify-center text-muted-foreground"
           initial={false}
-          animate={{ opacity: done ? 1 : 0, scale: done ? 1 : 0.7 }}
+          animate={reduceMotion ? { opacity: done ? 1 : 0 } : { opacity: done ? 1 : 0, scale: done ? 1 : 0.7 }}
           transition={FACE_IN}
         >
           <Check aria-hidden="true" />

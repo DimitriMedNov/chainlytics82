@@ -2,9 +2,11 @@ import type { Transition, Variants } from "motion/react";
 
 /*
  * Movimiento de la pantalla Portfolio (motor: Motion, el de Animate UI).
- * Solo `opacity` y desplazamientos con `x` / `y` / `scale` (transform), nunca
- * una cadena `transform`: así `MotionConfig reducedMotion="user"` (en
- * `AppRoot`) quita el desplazamiento y deja únicamente el fundido.
+ * Solo `opacity` y desplazamientos con `x` / `y` / `scale` (transform).
+ * `MotionConfig reducedMotion="user"` (en `AppRoot`) NO quita esos
+ * desplazamientos: los aplica de golpe y deja un fotograma movido. Por eso cada
+ * componente pregunta `useReducedMotion()` y, con «reducir movimiento», no pasa
+ * ningún `x` / `y` / `scale` / `layout`: solo el fundido.
  */
 
 /** Curva de salida suave: arranca rápido y frena. */

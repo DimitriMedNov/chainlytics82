@@ -7,7 +7,7 @@ import { ErrorState } from "@/ui/shared";
 import { AnalystIntro } from "@/ui/analyst/AnalystIntro";
 import { AnalystMessageList } from "@/ui/analyst/AnalystMessageList";
 import { AnalystThinking } from "@/ui/analyst/AnalystThinking";
-import { RISE_HIDDEN, RISE_VISIBLE } from "@/ui/analyst/analystMotion";
+import { useAnalystMotion } from "@/ui/analyst/analystMotion";
 import { useStickToBottom } from "@/ui/analyst/useStickToBottom";
 
 export interface AnalystConversationProps {
@@ -41,6 +41,7 @@ export function AnalystConversation({
   onSuggestion,
   onNavigate,
 }: AnalystConversationProps) {
+  const m = useAnalystMotion();
   const scrollRef = useStickToBottom<HTMLDivElement>(`${messages.length}:${messages.at(-1)?.content.length ?? 0}:${status}`);
 
   return (
@@ -65,7 +66,7 @@ export function AnalystConversation({
       <AnalystMessageList messages={messages} />
       {status === "waiting" ? <AnalystThinking /> : null}
       {status === "error" && errorMessage ? (
-        <motion.div data-slot="analyst-error" initial={RISE_HIDDEN} animate={RISE_VISIBLE}>
+        <motion.div data-slot="analyst-error" initial={m.riseHidden} animate={m.riseVisible}>
           <ErrorState layout="inline" title={errorMessage} onRetry={onRetry} retryLabel={ANALYST_TEXTS.retry} />
         </motion.div>
       ) : null}

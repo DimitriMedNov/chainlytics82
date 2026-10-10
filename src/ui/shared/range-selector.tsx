@@ -55,7 +55,9 @@ export function RangeSelector({
           >
             {selected ? (
               <motion.span
-                layoutId={indicatorId}
+                // Con «reducir movimiento» no hay `layoutId`: Motion lo aplicaría
+                // al instante y dejaría un fotograma con `transform`.
+                layoutId={reduceMotion ? undefined : indicatorId}
                 aria-hidden="true"
                 data-slot="range-indicator"
                 className="absolute inset-0 rounded-sm bg-card shadow-card"

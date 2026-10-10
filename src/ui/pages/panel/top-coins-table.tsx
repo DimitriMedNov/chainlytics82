@@ -3,7 +3,8 @@ import { motion } from "motion/react";
 import type { TopCoinRow } from "@/application/panel/presentation/topCoinRows";
 import { cn } from "@/lib/utils";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/ui/base/table";
-import { fadeInStaggered, PRESS_FEEDBACK } from "@/ui/pages/panel/motion/presets";
+import { fadeInStaggered } from "@/ui/pages/panel/motion/presets";
+import { usePressFeedback } from "@/ui/pages/panel/motion/use-press-feedback";
 import { RollingFigure } from "@/ui/pages/panel/motion/rolling-figure";
 import { TrendLabel } from "@/ui/pages/panel/trend-label";
 import { CoinAvatar } from "@/ui/shared";
@@ -28,10 +29,11 @@ const CELL = "type-num px-4 py-2 text-right sm:px-5";
  * móvil se desplace dentro de su caja, sin desbordar la página. Las filas entran
  * con un fundido escalonado al montarse; como su `key` es el id de la moneda,
  * el refresco de cada minuto no repite la entrada: solo ruedan los dígitos del precio
- * que cambian. El botón de cada fila se hunde un poco al pulsarlo.
+ * que cambian. El botón de cada fila se hunde un poco al pulsarlo (no con «reducir movimiento»).
  */
 export function TopCoinsTable({ rows, prices, onSelect }: TopCoinsTableProps) {
   const { columns } = PANEL_TEXTS.top;
+  const pressFeedback = usePressFeedback();
 
   return (
     <Table className="min-w-120">
@@ -66,7 +68,7 @@ export function TopCoinsTable({ rows, prices, onSelect }: TopCoinsTableProps) {
                 onClick={() => onSelect(row.id)}
                 aria-label={PANEL_TEXTS.top.seeDetail(row.name)}
                 className="flex min-h-11 w-full items-center gap-3 rounded-md px-2 text-left"
-                {...PRESS_FEEDBACK}
+                {...pressFeedback}
               >
                 <CoinAvatar src={row.image} symbol={row.symbol} size="md" />
                 <span className="flex min-w-0 flex-col">

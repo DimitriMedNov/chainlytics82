@@ -4,7 +4,7 @@ import type { AnalystMessage } from "@/domain/analyst/message";
 import { ANALYST_TEXTS } from "@/application/analyst/presentation/texts";
 import { AnalystBubble } from "@/ui/analyst/AnalystBubble";
 import { AnalystMarkdown } from "@/ui/analyst/AnalystMarkdown";
-import { FADE_HIDDEN, FADE_VISIBLE, RISE_HIDDEN, RISE_VISIBLE } from "@/ui/analyst/analystMotion";
+import { FADE_HIDDEN, FADE_VISIBLE, useAnalystMotion } from "@/ui/analyst/analystMotion";
 
 export interface AnalystMessageListProps {
   messages: readonly AnalystMessage[];
@@ -22,6 +22,8 @@ export interface AnalystMessageListProps {
  *   de golpe y la franja de error ocupa su sitio.
  */
 export function AnalystMessageList({ messages }: AnalystMessageListProps) {
+  const m = useAnalystMotion();
+
   // La lista existe aunque esté vacía (oculta): así la primera pregunta también
   // entra animada, porque `AnimatePresence` ya estaba montado cuando llega.
   return (
@@ -37,7 +39,7 @@ export function AnalystMessageList({ messages }: AnalystMessageListProps) {
               </AnalystBubble>
             </li>
           ) : (
-            <motion.li key={message.id} initial={RISE_HIDDEN} animate={RISE_VISIBLE}>
+            <motion.li key={message.id} initial={m.riseHidden} animate={m.riseVisible}>
               <AnalystBubble role="user">
                 <p className="whitespace-pre-wrap">{message.content}</p>
               </AnalystBubble>

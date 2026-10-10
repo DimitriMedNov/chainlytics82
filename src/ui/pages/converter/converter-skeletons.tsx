@@ -2,34 +2,52 @@ import { Skeleton } from "@/ui/shared";
 
 const ROWS = [0, 1, 2, 3] as const;
 
-function FieldSkeleton() {
+export interface FieldSkeletonProps {
+  /** Alto de la línea de ayuda bajo el control, la del campo real: sin ella, una línea o dos. */
+  hint: "none" | "line" | "two-lines";
+}
+
+/** Con la forma de un campo: etiqueta, control de 44 px y su línea de ayuda. */
+function FieldSkeleton({ hint }: FieldSkeletonProps) {
   return (
     <div className="flex min-w-0 flex-col gap-2">
       <Skeleton className="h-6 w-20" />
       <Skeleton className="h-11 w-full rounded-md" />
-      <Skeleton className="h-4 w-32 max-w-full" />
+      {hint === "none" ? null : (
+        <div className={hint === "line" ? "h-4" : "h-8"}>
+          <Skeleton className="h-4 w-32 max-w-full" />
+        </div>
+      )}
     </div>
   );
 }
 
-function BlockSkeleton() {
+export interface BlockSkeletonProps {
+  /** Ayuda del primer campo: «Cantidad» no lleva; «Resultado» reserva dos líneas. */
+  firstHint: FieldSkeletonProps["hint"];
+}
+
+function BlockSkeleton({ firstHint }: BlockSkeletonProps) {
   return (
     <div className="grid gap-4 rounded-lg bg-elevated p-4 sm:grid-cols-2 sm:p-5">
-      <FieldSkeleton />
-      <FieldSkeleton />
+      <FieldSkeleton hint={firstHint} />
+      <FieldSkeleton hint="line" />
     </div>
   );
 }
 
-/** Con la forma del formulario: dos bloques de dos campos, el botón redondo entre ellos y la línea resumen. */
+/**
+ * Con la forma del formulario y su mismo alto en cada ancho: dos bloques de dos campos, el botón
+ * redondo entre ellos y la línea resumen.
+ */
 export function ConverterFormSkeleton() {
   return (
     <div className="flex flex-col">
-      <BlockSkeleton />
+      <BlockSkeleton firstHint="none" />
       <div className="relative z-10 -my-3 flex justify-center">
         <Skeleton className="size-11 rounded-full" />
       </div>
-      <BlockSkeleton />
+      <BlockSkeleton firstHint="two-lines" />
       <Skeleton className="mx-auto mt-4 h-5 w-56 max-w-full" />
     </div>
   );

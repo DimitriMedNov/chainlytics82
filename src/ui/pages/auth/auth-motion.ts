@@ -1,9 +1,11 @@
-import type { TargetAndTransition, Transition } from "motion/react";
+import { useReducedMotion, type TargetAndTransition, type Transition } from "motion/react";
 
 /**
  * Movimiento de la pantalla de acceso. Un solo motor: Motion (el de Animate UI).
- * Solo `transform` y `opacity`. Con «reducir movimiento» el `MotionConfig` del
- * armazón quita desplazamientos, escalados y giros: queda, como mucho, el fundido.
+ * Solo `transform` y `opacity`. Con «reducir movimiento» queda, como mucho, el
+ * fundido: `MotionConfig reducedMotion="user"` no quita `y`, `scale`, `rotate` ni
+ * `layout` (los aplica de golpe y deja un fotograma con `transform`), así que
+ * `useAuthMotion` directamente no los pasa.
  *
  * Duraciones en segundos (unidad de Motion): 120–250 ms en lo que responde a
  * una acción y 400 ms en la entrada de la tarjeta.
@@ -56,4 +58,59 @@ export const HOP: TargetAndTransition = { y: [0, -3, 0] };
 export const HOP_REST: TargetAndTransition = { y: 0 };
 export function hopTransition(index: number): Transition {
   return { duration: 0.46, times: [0, 0.38, 1], ease: "easeOut", delay: index * 0.024 };
+}
+
+/** Lo que cada pieza de la pantalla pasa a Motion, ya resuelto según «reducir movimiento». */
+export interface AuthMotion {
+  /** `true` con «reducir movimiento»: solo fundidos, ningún `transform`. */
+  reduced: boolean;
+  /** Valor de `layout` para lo que cambia de tamaño (marco y tarjeta). */
+  layoutSize: true | undefined;
+  /** Valor de `layout` para lo que solo se recoloca (campos, error, botón). */
+  layoutPosition: "position" | undefined;
+  frameHidden: TargetAndTransition;
+  frameVisible: TargetAndTransition;
+  errorHidden: TargetAndTransition;
+  errorVisible: TargetAndTransition;
+  iconHidden: TargetAndTransition;
+  iconVisible: TargetAndTransition;
+  iconTransition: Transition;
+  spinnerHidden: TargetAndTransition;
+  spinnerVisible: TargetAndTransition;
+}
+
+const FULL_MOTION: AuthMotion = {
+  reduced: false,
+  layoutSize: true,
+  layoutPosition: "position",
+  frameHidden: FRAME_HIDDEN,
+  frameVisible: FRAME_VISIBLE,
+  errorHidden: ERROR_HIDDEN,
+  errorVisible: ERROR_VISIBLE,
+  iconHidden: ICON_HIDDEN,
+  iconVisible: ICON_VISIBLE,
+  iconTransition: ICON_TRANSITION,
+  spinnerHidden: SPINNER_HIDDEN,
+  spinnerVisible: SPINNER_VISIBLE,
+};
+
+/** Sin `layout` y sin `transform`: lo que cambia de sitio lo hace de una vez, por el flujo normal. */
+const REDUCED_MOTION: AuthMotion = {
+  reduced: true,
+  layoutSize: undefined,
+  layoutPosition: undefined,
+  frameHidden: FADE_HIDDEN,
+  frameVisible: FADE_VISIBLE,
+  errorHidden: FADE_HIDDEN,
+  errorVisible: FADE_VISIBLE,
+  iconHidden: FADE_HIDDEN,
+  iconVisible: FADE_VISIBLE,
+  iconTransition: FADE_TRANSITION,
+  spinnerHidden: FADE_HIDDEN,
+  spinnerVisible: FADE_VISIBLE,
+};
+
+/** Movimiento de la pantalla de acceso según la preferencia «reducir movimiento» del sistema. */
+export function useAuthMotion(): AuthMotion {
+  return useReducedMotion() === true ? REDUCED_MOTION : FULL_MOTION;
 }

@@ -41,7 +41,9 @@ export function TrendRingChart({ slices }: TrendRingChartProps) {
       <div
         role="img"
         aria-label={`${MARKETS_TEXTS.trendTitle}. ${summary}.`}
-        className="aspect-square h-48 max-w-full shrink-0 touch-none"
+        // Bklit agranda el anillo señalado y no deja apagarlo: con «reducir movimiento» se anula
+        // ese escalado (cada anillo es un `g` hijo del grupo centrado) y queda el atenuado del resto.
+        className="aspect-square h-48 max-w-full shrink-0 touch-none motion-reduce:[&_svg>g>g]:transform-none!"
       >
         <RingChart data={data} strokeWidth={12} ringGap={6} baseInnerRadius={52} className="size-full">
           {slices.map((slice, index) => (

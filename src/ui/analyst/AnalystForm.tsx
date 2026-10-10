@@ -1,20 +1,13 @@
 import { useState, type FocusEvent, type FormEvent } from "react";
-import { Liquid } from "liquid-gooey";
+import { useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { ANALYST_TEXTS } from "@/application/analyst/presentation/texts";
+import { AnalystFormBar } from "@/ui/analyst/AnalystFormBar";
 import { AnalystSendButton } from "@/ui/analyst/AnalystSendButton";
 import { useRefocusWhenIdle } from "@/ui/analyst/useRefocusWhenIdle";
 import { useLiquidOutOfTabOrder } from "@/ui/analyst/useLiquidOutOfTabOrder";
 
 const INPUT_ID = "analyst-input";
-
-/** Lado del botón (44 px, `size-11`) y hueco con la barra (8 px, `gap-2`). */
-const BUTTON_SIZE = 44;
-const GAP = 8;
-/** Lo que retrocede el botón para quedar fundido en el extremo derecho de la barra. */
-const TUCK = BUTTON_SIZE + GAP;
-/** La curva de Bencho (se pasa un poco y vuelve), acortada a 250 ms. */
-const MORPH = { duration: 250, ease: "cubic-bezier(0.22, 1.3, 0.71, 1)" } as const;
 
 export interface AnalystFormProps {
   value: string;
@@ -34,13 +27,15 @@ export interface AnalystFormProps {
  * y el botón son dos cuerpos del mismo líquido. En reposo el botón está fundido
  * en el extremo de la barra; al entrar en el campo, al escribir o con una
  * respuesta en marcha se separa de ella. La barra no se mueve ni cambia de
- * ancho: solo se desplaza el botón (`transform`).
+ * ancho: solo se desplaza el botón (`transform`). Con «reducir movimiento» el
+ * botón está siempre separado y no se desplaza nunca.
  */
 export function AnalystForm({ value, onChange, onSubmit, onStop, busy, canSend }: AnalystFormProps) {
   const inputRef = useRefocusWhenIdle(busy);
   const formRef = useLiquidOutOfTabOrder<HTMLFormElement>();
   const [focused, setFocused] = useState(false);
-  const split = focused || busy || canSend;
+  const reduced = useReducedMotion() === true;
+  const split = reduced || focused || busy || canSend;
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -61,8 +56,10 @@ export function AnalystForm({ value, onChange, onSubmit, onStop, busy, canSend }
       data-split={split}
       className="border-t p-4"
     >
-      <Liquid blur={3} contrast={22} fill="hsl(var(--muted))" className="flex items-center gap-2">
-        <Liquid.Item className="block min-w-0 flex-1" transition={MORPH}>
+      <AnalystFormBar
+        split={split}
+        still={reduced}
+        field={
           <label
             htmlFor={INPUT_ID}
             // El contorno de foco lo dibuja la barra entera (píldora), no el campo de dentro.
@@ -87,11 +84,9 @@ export function AnalystForm({ value, onChange, onSubmit, onStop, busy, canSend }
               )}
             />
           </label>
-        </Liquid.Item>
-        <Liquid.Item className="block shrink-0" x={split ? 0 : -TUCK} transition={MORPH}>
-          <AnalystSendButton busy={busy} canSend={canSend} onStop={onStop} />
-        </Liquid.Item>
-      </Liquid>
+        }
+        button={<AnalystSendButton busy={busy} canSend={canSend} onStop={onStop} />}
+      />
     </form>
   );
 }

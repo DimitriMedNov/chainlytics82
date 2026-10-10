@@ -2,7 +2,7 @@ import { useId } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { ANALYST_TEXTS } from "@/application/analyst/presentation/texts";
 import { Button } from "@/ui/animate-ui/components/buttons/button";
-import { SUGGESTION_ITEM, SUGGESTION_LIST } from "@/ui/analyst/analystMotion";
+import { SUGGESTION_LIST, useAnalystMotion } from "@/ui/analyst/analystMotion";
 
 export interface AnalystSuggestionsProps {
   suggestions: readonly string[];
@@ -21,6 +21,7 @@ const TAP_SCALE = 0.97;
 export function AnalystSuggestions({ suggestions, onPick }: AnalystSuggestionsProps) {
   const labelId = useId();
   const reduced = useReducedMotion();
+  const m = useAnalystMotion();
 
   return (
     <section aria-labelledby={labelId} className="flex flex-col gap-2">
@@ -29,7 +30,7 @@ export function AnalystSuggestions({ suggestions, onPick }: AnalystSuggestionsPr
       </p>
       <motion.ul variants={SUGGESTION_LIST} initial="hidden" animate="visible" className="flex flex-col gap-2">
         {suggestions.map((question) => (
-          <motion.li key={question} variants={SUGGESTION_ITEM}>
+          <motion.li key={question} variants={m.suggestionItem}>
             <Button
               type="button"
               variant="outline"

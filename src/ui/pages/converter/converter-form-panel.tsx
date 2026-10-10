@@ -1,6 +1,7 @@
 import { CONVERTER_TEXTS } from "@/application/converter/presentation/texts";
 import type { Converter } from "@/hooks/converter/useConverter";
 import { motion } from "motion/react";
+import { ERROR_FILL, ReservedSlot } from "@/ui/pages/converter/block-states";
 import { ConverterFields } from "@/ui/pages/converter/converter-fields";
 import { FADE } from "@/ui/pages/converter/converter-motion";
 import { ConverterFormSkeleton } from "@/ui/pages/converter/converter-skeletons";
@@ -14,7 +15,10 @@ export interface ConverterFormPanelProps {
   className?: string;
 }
 
-/** Tarjeta «Convertidor». Error (manda) → cargando → formulario; el vacío es el del resultado. */
+/**
+ * Tarjeta «Convertidor». Error (manda) → cargando → formulario; el vacío es el del resultado.
+ * El error ocupa el hueco del formulario: la tarjeta mide lo mismo en los tres estados.
+ */
 export function ConverterFormPanel({ converter, onCopy, className }: ConverterFormPanelProps) {
   const texts = CONVERTER_TEXTS.form;
 
@@ -25,12 +29,15 @@ export function ConverterFormPanel({ converter, onCopy, className }: ConverterFo
       </Panel.Header>
       <Panel.Body>
         {converter.status === "error" ? (
-          <ErrorState
-            title={texts.errorTitle}
-            message={converter.errorMessage}
-            onRetry={converter.refetch}
-            isRetrying={converter.isRetrying}
-          />
+          <ReservedSlot sizer={<ConverterFormSkeleton />}>
+            <ErrorState
+              className={ERROR_FILL}
+              title={texts.errorTitle}
+              message={converter.errorMessage}
+              onRetry={converter.refetch}
+              isRetrying={converter.isRetrying}
+            />
+          </ReservedSlot>
         ) : converter.status === "loading" ? (
           <LoadingRegion label={texts.loading}>
             <ConverterFormSkeleton />

@@ -1,9 +1,9 @@
 import type { LucideIcon } from "lucide-react";
 import { Send, Square } from "lucide-react";
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { ANALYST_TEXTS } from "@/application/analyst/presentation/texts";
-import { FACE_HIDDEN, FACE_SHOWN, QUICK, SEND_TAP } from "@/ui/analyst/analystMotion";
+import { QUICK, useAnalystMotion } from "@/ui/analyst/analystMotion";
 
 export interface AnalystSendButtonProps {
   /** Hay una respuesta en marcha: el botón pasa a «detener». */
@@ -21,12 +21,14 @@ interface FaceProps {
 
 /** Una de las dos caras. Las dos están siempre montadas y se cruzan en el sitio. */
 function Face({ icon: Icon, shown }: FaceProps) {
+  const m = useAnalystMotion();
+
   return (
     <motion.span
       aria-hidden="true"
       className="absolute inset-0 flex items-center justify-center"
       initial={false}
-      animate={shown ? FACE_SHOWN : FACE_HIDDEN}
+      animate={shown ? m.faceShown : m.faceHidden}
       transition={QUICK}
     >
       <Icon className="size-4" />
@@ -42,7 +44,7 @@ function Face({ icon: Icon, shown }: FaceProps) {
  * Bencho no trae botón de parar: el relevo está hecho con Motion.
  */
 export function AnalystSendButton({ busy, canSend, onStop }: AnalystSendButtonProps) {
-  const reduced = useReducedMotion();
+  const m = useAnalystMotion();
   const armed = busy || canSend;
 
   return (
@@ -53,7 +55,7 @@ export function AnalystSendButton({ busy, canSend, onStop }: AnalystSendButtonPr
       aria-label={busy ? ANALYST_TEXTS.form.stopLabel : ANALYST_TEXTS.form.sendLabel}
       onClick={busy ? onStop : undefined}
       disabled={!armed}
-      whileTap={reduced ? undefined : SEND_TAP}
+      whileTap={m.sendTap}
       transition={QUICK}
       className={cn(
         "relative block size-11 rounded-full transition-colors duration-200 disabled:pointer-events-none",

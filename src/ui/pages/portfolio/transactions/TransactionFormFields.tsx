@@ -47,7 +47,8 @@ export function TransactionFormFields({ form, coins }: TransactionFormFieldsProp
           <SelectTrigger id={coinId} className="w-full data-[size=default]:h-11">
             <SelectValue placeholder={COIN_FIELD_PLACEHOLDER} />
           </SelectTrigger>
-          <SelectContent className="max-h-72">
+          {/* Con «reducir movimiento» la lista aparece sin el escalado de entrada y salida del `Select` base. */}
+          <SelectContent className="max-h-72 motion-reduce:data-[state=closed]:animate-none motion-reduce:data-[state=open]:animate-none">
             {coins.map((coin) => (
               <SelectItem key={coin.id} value={coin.id} className="min-h-11">
                 {coinOptionLabel(coin.name, coin.symbol)}

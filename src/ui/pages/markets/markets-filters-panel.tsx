@@ -18,6 +18,8 @@ export interface MarketsFiltersPanelProps {
 const TITLE_ID = "markets-filters-titulo";
 const FIELD = "flex min-w-0 flex-col gap-1.5";
 const TRIGGER = "min-h-11 w-full";
+/** El desplegable base se abre creciendo (escala): con «reducir movimiento» aparece sin animación. */
+const CONTENT = "motion-reduce:animate-none!";
 
 /** Tarjeta «Filtros y búsqueda» (funciones 2 a 5): buscador, «Mostrar» y «Ordenar por». */
 export function MarketsFiltersPanel({
@@ -55,7 +57,7 @@ export function MarketsFiltersPanel({
               <SelectTrigger id="markets-filter" className={TRIGGER}>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className={CONTENT}>
                 {MARKET_FILTERS.map((option) => (
                   <SelectItem key={option.value} value={option.value} className="min-h-11">
                     {option.label}
@@ -75,7 +77,7 @@ export function MarketsFiltersPanel({
               <SelectTrigger id="markets-sort" className={TRIGGER}>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className={CONTENT}>
                 {MARKET_SORTS.map((option) => (
                   <SelectItem key={option.value} value={option.value} className="min-h-11">
                     {option.label}

@@ -1,4 +1,4 @@
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import type { RankingEntry } from "@/domain/compare/charts";
 import { Skeleton } from "@/ui/shared";
 import { RankingRow } from "@/ui/pages/compare/ranking-row";
@@ -18,9 +18,10 @@ const ROW = "flex min-h-14 items-center gap-3 px-4 py-3 sm:px-5";
  * cuando cambian de puesto, no cuando la lista entera se mueve porque cambió algo de arriba.
  */
 export function RankingList({ entries, labelledBy }: RankingListProps) {
+  const reduced = useReducedMotion();
   return (
     <motion.ol
-      layoutRoot
+      layoutRoot={!reduced}
       aria-labelledby={labelledBy}
       data-slot="ranking-list"
       className="divide-y border-t"

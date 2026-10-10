@@ -25,7 +25,7 @@ export function QuickPanel({ quick }: QuickPanelProps) {
         <Panel.Title id={TITLE_ID}>{texts.title}</Panel.Title>
       </Panel.Header>
       <Panel.Body padding="flush">
-        <BlockStates block={quick} texts={texts} emptyIcon={Zap} skeleton={<QuickListSkeleton />}>
+        <BlockStates block={quick} texts={texts} emptyIcon={Zap} skeleton={<QuickListSkeleton />} compact>
           <motion.ul className="divide-y" variants={stagger.list} initial="hidden" animate="visible">
             {quick.rows.map((row) => (
               <motion.li

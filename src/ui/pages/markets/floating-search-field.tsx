@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/ui/base/input";
@@ -24,14 +24,22 @@ const LIFTED_X = -24;
 const HOP = { height: -3, duration: 0.46, step: 0.024 } as const;
 const LIFT = { duration: 0.42, ease: EASE_OUT } as const;
 
+/** Clases de la etiqueta en reposo y arriba cuando NO se usa `transform` («reducir movimiento»). */
+const LABEL_REST = "left-9 h-11 text-sm";
+/** Arriba: alto cero centrado en el borde superior, ya con su tamaño pequeño y alineada con el texto. */
+const LABEL_LIFTED = "left-3 h-0 text-2xs";
+
 /**
  * Buscador con etiqueta flotante, adaptado del bloque «Label input» de Bencho: la
  * etiqueta descansa dentro del campo y, al enfocar o escribir, sube al borde superior
  * con un saltito que recorre sus letras, mientras el borde se abre bajo ella desde el centro.
  *
  * Sigue siendo un `<label>` enlazado al `<input>`; todo se mueve con `transform` (la
- * etiqueta flota sobre un hueco ya reservado: no empuja nada) y con «reducir
- * movimiento» cambia de sitio sin recorrido.
+ * etiqueta flota sobre un hueco ya reservado: no empuja nada).
+ *
+ * Con «reducir movimiento» nada recibe `transform` (el `MotionConfig` de la app no los
+ * quita: los aplicaría de golpe): la etiqueta cambia de sitio y de tamaño por
+ * posición (está en `absolute`, no empuja nada) y el hueco del borde aparece por opacidad.
  */
 export function FloatingSearchField({
   id,
@@ -42,7 +50,9 @@ export function FloatingSearchField({
   className,
 }: FloatingSearchFieldProps) {
   const [focused, setFocused] = useState(false);
+  const reducedMotion = useReducedMotion() === true;
   const lifted = focused || value.length > 0;
+  const hop = focused && !reducedMotion;
 
   return (
     <div data-slot="markets-search-field" data-lifted={lifted} className={cn("relative", className)}>
@@ -66,7 +76,7 @@ export function FloatingSearchField({
         aria-hidden="true"
         className="pointer-events-none absolute -top-1.5 left-2 h-2 overflow-hidden bg-card px-1 text-2xs"
         initial={false}
-        animate={{ scaleX: lifted ? 1 : 0 }}
+        animate={reducedMotion ? { opacity: lifted ? 1 : 0 } : { scaleX: lifted ? 1 : 0 }}
         transition={{ duration: DURATION.item, ease: EASE_OUT }}
       >
         <span className="invisible whitespace-pre">{label}</span>
@@ -74,11 +84,18 @@ export function FloatingSearchField({
       <motion.label
         htmlFor={id}
         className={cn(
-          "pointer-events-none absolute left-9 top-0 flex h-11 origin-left items-center whitespace-pre text-sm",
+          "pointer-events-none absolute top-0 flex origin-left items-center whitespace-pre",
+          reducedMotion && lifted ? LABEL_LIFTED : LABEL_REST,
           focused ? "text-foreground" : "text-muted-foreground",
         )}
         initial={false}
-        animate={lifted ? { x: LIFTED_X, y: "-50%", scale: LIFTED_SCALE } : { x: 0, y: "0%", scale: 1 }}
+        animate={
+          reducedMotion
+            ? undefined
+            : lifted
+              ? { x: LIFTED_X, y: "-50%", scale: LIFTED_SCALE }
+              : { x: 0, y: "0%", scale: 1 }
+        }
         transition={LIFT}
       >
         <span className="sr-only">{label}</span>
@@ -88,8 +105,9 @@ export function FloatingSearchField({
               // Letras de un texto fijo: nunca se reordenan.
               key={`${position}-${char}`}
               className="inline-block"
-              animate={{ y: focused ? [0, HOP.height, 0] : 0 }}
-              transition={{ duration: HOP.duration, times: [0, 0.38, 1], delay: focused ? position * HOP.step : 0 }}
+              // Con «reducir movimiento» la letra no recibe ningún `transform`.
+              animate={reducedMotion ? undefined : { y: hop ? [0, HOP.height, 0] : 0 }}
+              transition={{ duration: HOP.duration, times: [0, 0.38, 1], delay: hop ? position * HOP.step : 0 }}
             >
               {char}
             </motion.span>

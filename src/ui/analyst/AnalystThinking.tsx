@@ -1,7 +1,7 @@
 import { motion, useReducedMotion } from "motion/react";
 import { ANALYST_TEXTS } from "@/application/analyst/presentation/texts";
 import { AnalystBubble } from "@/ui/analyst/AnalystBubble";
-import { DOT_PULSE, dotTransition, RISE_HIDDEN, RISE_VISIBLE_AFTER } from "@/ui/analyst/analystMotion";
+import { DOT_PULSE, dotTransition, useAnalystMotion } from "@/ui/analyst/analystMotion";
 
 const DOTS = [0, 1, 2] as const;
 
@@ -33,8 +33,10 @@ function ThinkingDots() {
  * mismo sitio y con su misma altura, así que nada salta.
  */
 export function AnalystThinking() {
+  const m = useAnalystMotion();
+
   return (
-    <motion.div data-slot="analyst-thinking" initial={RISE_HIDDEN} animate={RISE_VISIBLE_AFTER}>
+    <motion.div data-slot="analyst-thinking" initial={m.riseHidden} animate={m.riseVisibleAfter}>
       <AnalystBubble role="assistant" className="text-muted-foreground">
         <span role="status" className="flex items-center gap-2">
           <ThinkingDots />

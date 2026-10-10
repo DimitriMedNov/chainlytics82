@@ -1,16 +1,15 @@
 import { useId, useState, type ComponentProps } from "react";
 import type { LucideIcon } from "lucide-react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { Input } from "@/ui/base/input";
 import {
   ERROR_EXIT,
-  ERROR_HIDDEN,
-  ERROR_VISIBLE,
   FADE_TRANSITION,
   HOP,
   HOP_REST,
   hopTransition,
   SHIFT_TRANSITION,
+  useAuthMotion,
 } from "@/ui/pages/auth/auth-motion";
 
 export interface AuthFieldProps
@@ -30,6 +29,10 @@ export interface AuthFieldProps
  * asociado y siempre visible. Debajo queda reservado el hueco de un error de una
  * línea; si el error ocupa más (pantallas estrechas), el campo de debajo no salta:
  * se recoloca con `transform` (`layout="position"`).
+ *
+ * Con «reducir movimiento» nada usa `transform`: la etiqueta cambia de sitio y de
+ * tamaño por el flujo normal (mismo resultado, de una vez) y el hueco del borde
+ * aparece por opacidad.
  */
 export function AuthField({
   label,
@@ -44,14 +47,14 @@ export function AuthField({
   const id = useId();
   const errorId = `${id}-error`;
   const [focused, setFocused] = useState(false);
-  const reduceMotion = useReducedMotion();
+  const authMotion = useAuthMotion();
   const up = focused || value.length > 0 ? "" : undefined;
-  const hop = focused && reduceMotion !== true;
+  const hop = focused && !authMotion.reduced;
 
   return (
     <motion.div
       data-slot="auth-field"
-      layout="position"
+      layout={authMotion.layoutPosition}
       transition={SHIFT_TRANSITION}
       className="flex flex-col gap-1.5"
     >
@@ -82,7 +85,7 @@ export function AuthField({
           aria-hidden="true"
           data-up={up}
           data-slot="auth-field-notch"
-          className="pointer-events-none absolute top-0 left-8 h-2 origin-center -translate-y-1/2 scale-x-0 overflow-hidden bg-card px-1 text-2xs text-transparent transition-transform duration-250 ease-out select-none peer-autofill:scale-x-100 data-up:scale-x-100 motion-reduce:transition-none"
+          className="pointer-events-none absolute top-0 left-8 h-2 origin-center -translate-y-1/2 overflow-hidden bg-card px-1 text-2xs text-transparent transition-transform duration-250 ease-out select-none motion-safe:scale-x-0 motion-safe:peer-autofill:scale-x-100 motion-safe:data-up:scale-x-100 motion-reduce:opacity-0 motion-reduce:transition-none motion-reduce:peer-autofill:opacity-100 motion-reduce:data-up:opacity-100"
         >
           {label}
         </span>
@@ -90,22 +93,26 @@ export function AuthField({
           htmlFor={id}
           data-up={up}
           data-slot="auth-field-label"
-          className="pointer-events-none absolute inset-y-0 left-9 flex origin-left items-center text-sm text-muted-foreground transition duration-250 ease-out select-none peer-autofill:-translate-y-1/2 peer-autofill:scale-80 peer-focus:text-foreground data-up:-translate-y-1/2 data-up:scale-80 motion-reduce:transition-none"
+          className="pointer-events-none absolute inset-y-0 left-9 flex origin-left items-center text-sm text-muted-foreground transition duration-250 ease-out select-none peer-focus:text-foreground motion-safe:peer-autofill:-translate-y-1/2 motion-safe:peer-autofill:scale-80 motion-safe:data-up:-translate-y-1/2 motion-safe:data-up:scale-80 motion-reduce:transition-none motion-reduce:peer-autofill:bottom-auto motion-reduce:peer-autofill:h-0 motion-reduce:peer-autofill:text-2xs motion-reduce:data-up:bottom-auto motion-reduce:data-up:h-0 motion-reduce:data-up:text-2xs"
         >
-          {/* El nombre accesible es el texto entero; las letras sueltas solo se ven. */}
+          {/*
+            El único texto del `<label>` es este: su nombre es «Email», no «EmailEmail».
+            Las letras sueltas se pintan con `::before` (no son texto del documento) y solo se ven.
+          */}
           <span className="sr-only">{label}</span>
           <span aria-hidden="true" className="whitespace-pre">
             {Array.from(label).map((letter, index) => (
               <motion.span
                 // Las letras de una etiqueta fija no se reordenan.
                 key={index}
-                className="inline-block"
+                // Entre corchetes porque Tailwind no trae utilidad para `content: attr()`.
+                className="inline-block before:content-[attr(data-letter)]"
+                data-letter={letter}
                 initial={false}
-                animate={hop ? HOP : HOP_REST}
+                // Con «reducir movimiento» la letra no recibe ningún `transform`.
+                animate={authMotion.reduced ? undefined : hop ? HOP : HOP_REST}
                 transition={hop ? hopTransition(index) : { duration: 0 }}
-              >
-                {letter}
-              </motion.span>
+              />
             ))}
           </span>
         </label>
@@ -119,8 +126,8 @@ export function AuthField({
               id={errorId}
               role="alert"
               data-slot="auth-field-error"
-              initial={ERROR_HIDDEN}
-              animate={ERROR_VISIBLE}
+              initial={authMotion.errorHidden}
+              animate={authMotion.errorVisible}
               exit={ERROR_EXIT}
               transition={FADE_TRANSITION}
               className="text-xs text-destructive"

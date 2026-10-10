@@ -1,11 +1,12 @@
-import type { TargetAndTransition, Transition, Variants } from "motion/react";
+import { useReducedMotion, type TargetAndTransition, type Transition, type Variants } from "motion/react";
 
 /**
  * Movimiento del Analista IA. Un solo motor: Motion (el de Animate UI). Solo
- * `transform` y `opacity`. `AppRoot` ya aplica `MotionConfig reducedMotion="user"`:
- * con «reducir movimiento» Motion descarta los desplazamientos y escalados de
- * estas variantes y deja el fundido. Lo que responde al puntero (hover, pulsar)
- * y los bucles se apagan a mano con `useReducedMotion()` en cada componente.
+ * `transform` y `opacity`. `MotionConfig reducedMotion="user"` (en `AppRoot`) NO
+ * quita los desplazamientos, escalados ni giros: los aplica de golpe y deja un
+ * fotograma con `transform`. Por eso los componentes no usan estas constantes
+ * directamente: piden el juego a `useAnalystMotion()`, que con «reducir
+ * movimiento» devuelve solo fundidos (ningún `transform`, ni hover, ni pulsar).
  *
  * Duraciones en segundos: 150–250 ms en lo que responde a una acción y hasta
  * 500 ms, sumando retrasos, en lo que entra.
@@ -54,4 +55,55 @@ export const SEND_TAP: TargetAndTransition = { scale: 0.92 };
 export const DOT_PULSE: TargetAndTransition = { opacity: [0.35, 1, 0.35], y: [0, -2, 0] };
 export function dotTransition(index: number): Transition {
   return { duration: 0.9, ease: "easeInOut", repeat: Infinity, delay: index * 0.15 };
+}
+
+/** Todo lo que se mueve en el Analista, ya resuelto según la preferencia del sistema. */
+export interface AnalystMotion {
+  riseHidden: TargetAndTransition;
+  riseVisible: TargetAndTransition;
+  riseVisibleAfter: TargetAndTransition;
+  launcherHidden: TargetAndTransition;
+  launcherVisible: TargetAndTransition;
+  launcherHover: TargetAndTransition | undefined;
+  launcherTap: TargetAndTransition | undefined;
+  suggestionItem: Variants;
+  faceShown: TargetAndTransition;
+  faceHidden: TargetAndTransition;
+  sendTap: TargetAndTransition | undefined;
+}
+
+const FULL_MOTION: AnalystMotion = {
+  riseHidden: RISE_HIDDEN,
+  riseVisible: RISE_VISIBLE,
+  riseVisibleAfter: RISE_VISIBLE_AFTER,
+  launcherHidden: LAUNCHER_HIDDEN,
+  launcherVisible: LAUNCHER_VISIBLE,
+  launcherHover: LAUNCHER_HOVER,
+  launcherTap: LAUNCHER_TAP,
+  suggestionItem: SUGGESTION_ITEM,
+  faceShown: FACE_SHOWN,
+  faceHidden: FACE_HIDDEN,
+  sendTap: SEND_TAP,
+};
+
+/** Los mismos tiempos y retrasos, sin `y`, `scale` ni `rotate`: solo `opacity`. */
+const REDUCED_MOTION: AnalystMotion = {
+  riseHidden: FADE_HIDDEN,
+  riseVisible: { opacity: 1, transition: RISE_VISIBLE.transition },
+  riseVisibleAfter: { opacity: 1, transition: RISE_VISIBLE_AFTER.transition },
+  launcherHidden: FADE_HIDDEN,
+  launcherVisible: { opacity: 1 },
+  launcherHover: undefined,
+  launcherTap: undefined,
+  suggestionItem: {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 0.22, ease: EASE_OUT } },
+  },
+  faceShown: { opacity: 1 },
+  faceHidden: { opacity: 0 },
+  sendTap: undefined,
+};
+
+export function useAnalystMotion(): AnalystMotion {
+  return useReducedMotion() ? REDUCED_MOTION : FULL_MOTION;
 }

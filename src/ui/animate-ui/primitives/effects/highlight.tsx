@@ -1,7 +1,12 @@
 'use client';
 
 import * as React from 'react';
-import { AnimatePresence, motion, type Transition } from 'motion/react';
+import {
+  AnimatePresence,
+  motion,
+  useReducedMotion,
+  type Transition,
+} from 'motion/react';
 
 import { cn } from '@/lib/utils';
 
@@ -232,6 +237,13 @@ function Highlight<T extends React.ElementType = 'div'>({
   }, [value, defaultValue]);
 
   const id = React.useId();
+  // Adaptado al proyecto: en modo `parent` el fondo se mueve con
+  // `top`/`left`/`width`/`height`; con «reducir movimiento» salta a su sitio y
+  // solo funde la opacidad.
+  const reduceMotion = useReducedMotion() === true;
+  const parentTransition: Transition | undefined = reduceMotion
+    ? { duration: 0, opacity: { duration: 0.2, ease: 'easeInOut' } }
+    : transition;
 
   React.useEffect(() => {
     if (mode !== 'parent') return;
@@ -285,7 +297,7 @@ function Highlight<T extends React.ElementType = 'div'>({
                     delay: (transition?.delay ?? 0) + (exitDelay ?? 0) / 1000,
                   },
                 }}
-                transition={transition}
+                transition={parentTransition}
                 style={{ position: 'absolute', zIndex: 0, ...style }}
                 className={cn(className, activeClassNameState)}
               />
@@ -421,6 +433,14 @@ function HighlightItem<T extends React.ElementType>({
   const isActive = activeValue === childValue;
   const isDisabled = disabled === undefined ? contextDisabled : disabled;
   const itemTransition = transition ?? contextTransition;
+  // Adaptado al proyecto: con «reducir movimiento» el fondo no viaja de una
+  // opción a otra, solo funde. `MotionConfig reducedMotion="user"` no anula el
+  // `layoutId`: coloca el fondo nuevo con un `transform` durante un fotograma.
+  // Sin `layoutId` no hay animación compartida y no se escribe ningún transform.
+  const reduceMotion = useReducedMotion() === true;
+  const layoutId = reduceMotion
+    ? undefined
+    : `transition-background-${contextId}`;
 
   const localRef = React.useRef<HTMLDivElement>(null);
   React.useImperativeHandle(ref, () => localRef.current as HTMLDivElement);
@@ -529,7 +549,7 @@ function HighlightItem<T extends React.ElementType>({
           <AnimatePresence initial={false} mode="wait">
             {isActive && !isDisabled && (
               <motion.div
-                layoutId={`transition-background-${contextId}`}
+                layoutId={layoutId}
                 data-slot="motion-highlight"
                 style={{
                   position: 'absolute',
@@ -591,7 +611,7 @@ function HighlightItem<T extends React.ElementType>({
         <AnimatePresence initial={false} mode="wait">
           {isActive && !isDisabled && (
             <motion.div
-              layoutId={`transition-background-${contextId}`}
+              layoutId={layoutId}
               data-slot="motion-highlight"
               style={{
                 position: 'absolute',

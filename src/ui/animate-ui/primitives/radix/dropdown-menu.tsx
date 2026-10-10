@@ -2,7 +2,12 @@
 
 import * as React from 'react';
 import { DropdownMenu as DropdownMenuPrimitive } from 'radix-ui';
-import { AnimatePresence, motion, type HTMLMotionProps } from 'motion/react';
+import {
+  AnimatePresence,
+  motion,
+  useReducedMotion,
+  type HTMLMotionProps,
+} from 'motion/react';
 
 import {
   Highlight,
@@ -13,6 +18,14 @@ import {
 import { getStrictContext } from '@/lib/get-strict-context';
 import { useControlledState } from '@/hooks/use-controlled-state';
 import { useDataState } from '@/hooks/use-data-state';
+
+// Adaptado al proyecto: con «reducir movimiento» el menú solo funde.
+// `MotionConfig reducedMotion="user"` no quita el `scale`: lo aplica de golpe y
+// deja un fotograma con el menú encogido al abrir y al cerrar.
+const POP_OUT = { opacity: 0, scale: 0.95 };
+const POP_IN = { opacity: 1, scale: 1 };
+const FADE_OUT = { opacity: 0 };
+const FADE_IN = { opacity: 1 };
 
 type DropdownMenuContextType = {
   isOpen: boolean;
@@ -197,6 +210,7 @@ function DropdownMenuSubContent({
   ...props
 }: DropdownMenuSubContentProps) {
   const { isOpen } = useDropdownMenuSub();
+  const reduceMotion = useReducedMotion() === true;
 
   return (
     <AnimatePresence>
@@ -222,9 +236,9 @@ function DropdownMenuSubContent({
             <motion.div
               key="dropdown-menu-sub-content"
               data-slot="dropdown-menu-sub-content"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
+              initial={reduceMotion ? FADE_OUT : POP_OUT}
+              animate={reduceMotion ? FADE_IN : POP_IN}
+              exit={reduceMotion ? FADE_OUT : POP_OUT}
               transition={transition}
               style={{ willChange: 'opacity, transform', ...style }}
               {...props}
@@ -294,6 +308,7 @@ function DropdownMenuContent({
   ...props
 }: DropdownMenuContentProps) {
   const { isOpen } = useDropdownMenu();
+  const reduceMotion = useReducedMotion() === true;
 
   return (
     <AnimatePresence>
@@ -321,9 +336,9 @@ function DropdownMenuContent({
             <motion.div
               key="dropdown-menu-content"
               data-slot="dropdown-menu-content"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
+              initial={reduceMotion ? FADE_OUT : POP_OUT}
+              animate={reduceMotion ? FADE_IN : POP_IN}
+              exit={reduceMotion ? FADE_OUT : POP_OUT}
               transition={transition}
               style={{ willChange: 'opacity, transform', ...style }}
               {...props}
