@@ -6,9 +6,9 @@ puertos— y hay piezas intercambiables que las cumplen —los adaptadores—). 
 capa, el código va **por funcionalidad**.
 
 > Estado: las capas de abajo son la base del front nuevo (`src/ui/`). La interfaz anterior
-> (`src/components`, `src/pages`, `src/contexts`, `src/lib`, `src/types`, los hooks planos
-> de `src/hooks/*.ts`, `src/App.tsx`) sigue en su sitio, congelada, hasta que se retire.
-> Nada del front nuevo la importa.
+> (`src/components`, `src/pages`, `src/contexts`, `src/types`, los hooks planos de
+> `src/hooks/*.ts`, `src/App.tsx`) ya se retiró del repositorio; de `src/lib` solo quedan
+> `utils` y `get-strict-context`. Las reglas de abajo siguen vigiladas para que no vuelva.
 
 ## 1. Capas y regla de dependencias
 
@@ -50,7 +50,7 @@ Reglas duras:
 - Las reglas de negocio no viven en el JSX ni en un hook: van a `domain` o a un caso de uso.
 - Un caso de uso recibe sus puertos por parámetro; nunca importa un adaptador.
 
-"Lo viejo" es: `src/types`, `src/contexts`, `src/components`, `src/pages`, `src/App.tsx`,
+"Lo viejo" (ya retirado; las reglas siguen vigilando que no reaparezca) es: `src/types`, `src/contexts`, `src/components`, `src/pages`, `src/App.tsx`,
 `src/main.tsx`, de `src/lib` los archivos `analystStream`, `backendStatus`, `coingecko`,
 `compareMath`, `format` y `portfolioMath`, y de `src/hooks` los hooks planos de la interfaz
 anterior (`useMarketData`, `useWatchlist`, `usePortfolio`, `use-toast`, etc.). En `src/lib`
@@ -299,8 +299,8 @@ están en un solo sitio (`src/infrastructure/market/httpJson.ts`).
 - **Textos visibles**: cada pantalla tiene sus constantes de texto en
   `src/application/<pantalla>/`; la interfaz los importa de ahí y no escribe textos a mano.
   Son once archivos: `presentation/texts.ts` en `analyst`, `auth-screen`, `coin-detail`,
-  `compare`, `converter`, `markets`, `panel` y `shared` (`SHARED_TEXTS`, `noDataLabel`, para
-  las piezas compartidas); `texts.ts` en `watchlist-screen`; `messages.ts` en `search` y
+  `compare`, `converter`, `markets`, `panel` y `shared` (`SHARED_TEXTS` y `SHELL_TEXTS`, `noDataLabel`, para
+  las piezas compartidas y el armazón); `texts.ts` en `watchlist-screen`; `messages.ts` en `search` y
   `portfolio-screen`. Textos que se componen con datos: `converter/presentation/conversionText.ts`
   y `compare/presentation/labels.ts`.
 - **Formateadores** (`formatCurrency`, `formatCompact`, `formatPercent`...): están en

@@ -17,7 +17,7 @@ export default defineConfig({
         manualChunks(id: string) {
           // Ayudantes compartidos de Rollup/Vite (interop de CommonJS, precarga de
           // chunks dinámicos, módulos virtuales "\0"): al trozo base `react`, que la
-          // entrada ya carga siempre. Si caen en `graficas`/`recharts`, el trozo base
+          // entrada ya carga siempre. Si caen en `graficas`, el trozo base
           // los importa y arrastra las gráficas a todas las rutas.
           if (id.includes("commonjsHelpers") || id.includes("vite/preload-helper") || id.includes("vite/modulepreload-polyfill"))
             return "react";
@@ -31,7 +31,6 @@ export default defineConfig({
           if (id.includes("/node_modules/@radix-ui/") || en("radix-ui")) return "radix";
           if (id.includes("/node_modules/@visx/") || id.includes("/node_modules/d3-") || en("internmap", "delaunator"))
             return "graficas";
-          if (en("recharts", "recharts-scale", "victory-vendor", "lodash", "react-smooth")) return "recharts";
           if (id.includes("/node_modules/@supabase/")) return "supabase";
           if (en("@tanstack/react-query", "@tanstack/query-core")) return "query";
           if (
