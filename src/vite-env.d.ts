@@ -6,6 +6,7 @@ interface ImportMetaEnv {
   readonly VITE_SUPABASE_PROJECT_ID: string;
   /** Opcional: base alternativa de la API de precios (proxy o plan de pago). */
   readonly VITE_COINGECKO_BASE?: string;
+  readonly VITE_COINPAPRIKA_BASE?: string;
 }
 
 interface ImportMeta {

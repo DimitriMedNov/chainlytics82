@@ -41,6 +41,16 @@ function row(id: string, label: string, value: string, tone: DetailRow["tone"] =
 }
 
 /**
+ * Fila de un precio que el proveedor puede no dar (el de respaldo no trae
+ * máximo ni mínimo de 24 h ni mínimo histórico, y llegan en 0): sin dato se
+ * escribe "No disponible", sin color, en vez de un "$0" que parecería real.
+ */
+function priceRow(id: string, label: string, price: number, tone: DetailRow["tone"] = "neutral"): DetailRow {
+  const known = Number.isFinite(price) && price > 0;
+  return row(id, label, known ? formatCurrency(price) : T.unavailable, known ? tone : "neutral");
+}
+
+/**
  * Todo lo que el modal escribe de una moneda, ya formateado y con sus textos.
  * Sale de `CryptoHeader`, `CryptoPriceSection`, `CryptoMarketStats` y
  * `CryptoAdditionalInfo`; conserva qué se enseña cuando un dato falta.
@@ -61,10 +71,10 @@ export function presentCoinDetail(coin: Coin): CoinDetailView {
       change7d: coin.change7d === null ? null : `· ${formatPercent(coin.change7d)} en 7 d`,
     },
     priceRows: [
-      row("high24h", T.high24h, formatCurrency(coin.high24h), "success"),
-      row("low24h", T.low24h, formatCurrency(coin.low24h), "warning"),
+      priceRow("high24h", T.high24h, coin.high24h, "success"),
+      priceRow("low24h", T.low24h, coin.low24h, "warning"),
       row("ath", T.ath, formatCurrency(coin.ath)),
-      row("atl", T.atl, formatCurrency(coin.atl)),
+      priceRow("atl", T.atl, coin.atl),
     ],
     marketCap: {
       title: T.marketCapTitle,

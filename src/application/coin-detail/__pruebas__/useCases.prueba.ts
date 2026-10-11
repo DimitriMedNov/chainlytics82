@@ -69,6 +69,14 @@ check("convertir: ruta sin moneda preseleccionada y sin aviso", convertFromDetai
   check("oferta circulante 0", valor(vista.volume.rows, "circulatingSupply"), "No disponible");
   check("sin oferta total", valor(vista.volume.rows, "totalSupply"), "No disponible");
   check("ranking", [vista.header.rankLabel, valor(vista.marketCap.rows, "rank")], ["#1", "#1"]);
+  // El proveedor de respaldo no da máximo ni mínimo de 24 h ni mínimo histórico: llegan en 0.
+  const sinDatos = presentCoinDetail({ ...btc, high24h: 0, low24h: 0, atl: 0 });
+  check("sin máximo, mínimo ni mínimo histórico",
+    ["high24h", "low24h", "atl"].map((id) => valor(sinDatos.priceRows, id)),
+    ["No disponible", "No disponible", "No disponible"]);
+  check("sin dato no hay color de subida ni bajada", sinDatos.priceRows.map((fila) => fila.tone), [
+    "neutral", "neutral", "neutral", "neutral",
+  ]);
   check("cambio 24 h con signo", vista.price.change24h, "+2.00 %");
   check("distancia a su máximo", valor(vista.additional.rows, "athDistance"), "-62.50 %");
   check("máximo en verde, mínimo en naranja", vista.priceRows.map((fila) => fila.tone), [
